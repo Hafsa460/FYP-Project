@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import './Patients.css'; 
-import coverimage from '../images/cover.png';
-import SignUp from './SignUp';
-import ForgotPassword from './ForgotPassword';
+import React, { useState } from "react";
+import "./Patients.css";
+import coverimage from "../images/cover.png";
+import SignUp from "./SignUp";
+import ForgotPassword from "./ForgotPassword";
 
-function Login_patients() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+function LoginPatients() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showSignUp, setShowSignUp] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const validateLogin = () => {
-    if (username === 'hafsa13' && password === 'hafsa') {
-      window.location.href = '../main/main.html';
+    if (username === "hafsa13" && password === "hafsa") {
+      window.location.href = "../main/main.html";
     } else {
-      alert('Incorrect username or password!');
+      alert("Incorrect username or password!");
     }
   };
 
@@ -58,11 +58,8 @@ function Login_patients() {
       </div>
 
       <p className="signup-text">
-        Don’t have an account?{' '}
-        <button
-          className="link-button"
-          onClick={() => setShowSignUp(true)}
-        >
+        Don’t have an account?{" "}
+        <button className="link-button" onClick={() => setShowSignUp(true)}>
           Sign up
         </button>
       </p>
@@ -70,4 +67,4 @@ function Login_patients() {
   );
 }
 
-export default Login_patients;
+export default LoginPatients;
