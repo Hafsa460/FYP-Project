@@ -18,7 +18,7 @@ function Login() {
   return (
     <div className="container-fluid login-page d-flex align-items-center justify-content-center">
       <div className="row w-100 login-container shadow-lg">
-        {/* Left Section - Login Form */}
+        
         <div className="col-md-6 form-section p-5">
           <h2 className="text-center fw-bold text-teal">HOSPITAL</h2>
           <p className="text-center mb-4">Doctors Login Portal</p>
