@@ -1,53 +1,11 @@
-body {
-    background-color: #EAE7DC; 
-    font-family: Arial, sans-serif;
-    color: #6D6875; 
-    text-align: center;
+.text-teal {
+  color: #00a8b5;
 }
 
-.first {
-    padding-top: 5px;
-    display: flex;
-    flex-direction: column;  
-    justify-content: center;
-    align-items: center;
-    height: 700px;
+.bg-teal {
+  background-color: #00a8b5;
 }
-
-input {
-    width: 250px;
-    padding: 10px;
-    margin: 5px 0; 
-    font-size: 16px;
-    border: 2px solid #6D6875; 
-    border-radius: 5px;
-    background-color: #BFC0C0; 
-    color: #6D6875;
-}
-
-input::placeholder {
-    color: #525050; 
-}
-
-.btn {
-    height: 45px;
-    width: 100px;
-    font-size: 20px;
-    margin-top: 1cap;
-    border-radius: 5px;
-    border: none;
-    background-color: #635d7a ; 
-    color: #EAE7DC; 
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.btn:hover {
-    background-color: #6B705C; 
-}
-
-.new {
-    height: 205px;
-    width: 250px;
-    margin-bottom: 2cap;
+.signup-container {
+  max-width: 800px;
+  width: 90%;
 }
