@@ -18,7 +18,6 @@ function Login() {
   return (
     <div className="container-fluid login-page d-flex align-items-center justify-content-center">
       <div className="row w-100 login-container shadow-lg">
-        
         <div className="col-md-6 form-section p-5">
           <h2 className="text-center fw-bold text-teal">HOSPITAL</h2>
           <p className="text-center mb-4">Doctors Login Portal</p>
@@ -59,18 +58,10 @@ function Login() {
                 Remember me
               </label>
             </div>
-            <a href="#" className="text-muted small">
-              Forgot Password?
-            </a>
           </div>
           <button className="btn btn-teal w-100" onClick={validateLogin}>
             Login
           </button>
-          <p className="text-center mt-3">
-            <a href="#" className="text-muted">
-              Create Account
-            </a>
-          </p>
         </div>
 
         {/* Right Section - Cover Image */}

@@ -1,4 +1,3 @@
-// src/components/LoginDashboard.js
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import coverimage from "../images/cover.png";
@@ -11,7 +10,7 @@ function LoginDashboard() {
   return (
     <div
       className="container-fluid d-flex justify-content-center align-items-center min-vh-100"
-      style={{ backgroundColor: "#00b3b3" }}
+      style={{ backgroundColor: "#76ced4" }}
     >
       <div
         className="row login-container shadow-lg rounded-4 overflow-hidden"
@@ -44,7 +43,7 @@ function LoginDashboard() {
             className="btn w-100"
             style={{
               backgroundColor: "#e6f9ff",
-              border: "1px solid #00b3b3",
+              border: "1px solid #059da8;",
               color: "#008080",
             }}
             onClick={() => navigate("/signup")}

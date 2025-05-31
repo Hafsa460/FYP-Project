@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css"; // Reusing styles from Login
+import "./Login.css"; 
 import coverimage from "../images/cover.png";
 import SignUp from "./SignUp";
 import ForgotPassword from "./ForgotPassword";
@@ -24,15 +24,11 @@ function LoginPatients() {
   if (showForgotPassword) return <ForgotPassword />;
 
   return (
-    <div
-      className="container-fluid d-flex justify-content-center align-items-center min-vh-100"
-      style={{ backgroundColor: "#00b3b3" }}
-    >
+    <div className="container-fluid back d-flex justify-content-center align-items-center min-vh-100">
       <div
         className="row login-container shadow-lg rounded-4 overflow-hidden"
         style={{ maxWidth: "900px", width: "100%" }}
       >
-        {/* Left Section */}
         <div className="col-md-6 bg-white p-5">
           <h2 className="text-center fw-bold" style={{ color: "#008080" }}>
             HOSPITAL
@@ -98,8 +94,6 @@ function LoginPatients() {
             </p>
           </form>
         </div>
-
-        {/* Right Section */}
         <div
           className="col-md-6 d-flex justify-content-center align-items-center"
           style={{ backgroundColor: "#e6f9ff" }}
