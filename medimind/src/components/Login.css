@@ -1,8 +1,10 @@
 .login-page {
   height: 100vh;
-  background-color: #00a8b5;
+  background-color: #76ced4;
 }
-
+.back {
+  background-color: #76ced4;
+}
 .login-container {
   background-color: white;
   border-radius: 10px;
@@ -11,11 +13,11 @@
 }
 
 .text-teal {
-  color: #007a7a;
+  color: #059da8;
 }
 
 .btn-teal {
-  background-color: #00b3b3;
+  background-color: #059da8;
   color: white;
   border: none;
 }

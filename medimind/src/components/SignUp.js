@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css"; // Reuse same styles as Login
+import "./Login.css";
 import coverimage from "../images/cover.png";
 
 function SignUp() {
@@ -33,7 +33,7 @@ function SignUp() {
   return (
     <div
       className="container-fluid d-flex justify-content-center align-items-center min-vh-100"
-      style={{ backgroundColor: "#00b3b3" }}
+      style={{ backgroundColor: "#76ced4" }}
     >
       <div
         className="row login-container shadow-lg rounded-4 overflow-hidden"
