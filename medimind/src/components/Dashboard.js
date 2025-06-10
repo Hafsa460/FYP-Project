@@ -57,7 +57,13 @@ function LoginDashboard() {
           className="col-md-6 d-flex justify-content-center align-items-center"
           style={{ backgroundColor: "#e6f9ff" }}
         >
-          <img src={coverimage} alt="Hospital Cover" style={{ width: "70%" }} />
+          {
+            <img
+              src={coverimage}
+              alt="Hospital Cover"
+              style={{ width: "70%" }}
+            />
+          }
         </div>
       </div>
     </div>
