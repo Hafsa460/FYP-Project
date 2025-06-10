@@ -1,20 +1,22 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Login.css";
-import coverimage from "../images/cover.png"; // Use circular image for right side
+import coverimage from "../images/cover.png"; 
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const navigate = useNavigate(); 
+
   const validateLogin = () => {
     if (username === "hafsa13" && password === "hafsa") {
-      window.location.href = "../main/main.html";
+      navigate("/neuro-dashboard"); 
     } else {
       alert("Incorrect username or password!");
     }
-  };
-
+    }
   return (
     <div className="container-fluid login-page d-flex align-items-center justify-content-center">
       <div className="row w-100 login-container shadow-lg">
