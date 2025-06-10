@@ -5,8 +5,7 @@ function Logout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    alert("Logged out successfully!");
-    navigate("/");
+    navigate("/dash");
   }, [navigate]);
 
   return null;
