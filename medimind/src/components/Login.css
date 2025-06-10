@@ -1,0 +1,35 @@
+.login-page {
+  height: 100vh;
+  background-color: #76ced4;
+}
+.back {
+  background-color: #76ced4;
+}
+.login-container {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 900px;
+}
+
+.text-teal {
+  color: #059da8;
+}
+
+.btn-teal {
+  background-color: #059da8;
+  color: white;
+  border: none;
+}
+
+.btn-teal:hover {
+  background-color: #009999;
+}
+
+.image-section {
+  background-color: #e0f7fa;
+}
+
+.form-section {
+  background-color: #ffffff;
+}
