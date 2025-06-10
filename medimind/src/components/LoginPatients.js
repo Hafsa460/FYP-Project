@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css"; 
+import "./Login.css";
 import coverimage from "../images/cover.png";
 import SignUp from "./SignUp";
 import ForgotPassword from "./ForgotPassword";
@@ -98,7 +98,7 @@ function LoginPatients() {
           className="col-md-6 d-flex justify-content-center align-items-center"
           style={{ backgroundColor: "#e6f9ff" }}
         >
-          <img src={coverimage} alt="Hospital" style={{ width: "70%" }} />
+          {<img src={coverimage} alt="Hospital" style={{ width: "70%" }} />}
         </div>
       </div>
     </div>

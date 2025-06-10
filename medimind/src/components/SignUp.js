@@ -12,7 +12,7 @@ function SignUp() {
   const isValidCnic = (cnic) => /^[0-9]{5}-[0-9]{7}-[0-9]{1}$/.test(cnic);
 
   const handleSignUp = (e) => {
-    e.preventDefault(); // Prevent form reload
+    e.preventDefault();
     if (!cnic || !email || !password || !confirmPassword) {
       alert("Please fill all fields.");
       return;
@@ -25,8 +25,6 @@ function SignUp() {
       alert("Invalid CNIC format. Please use 12345-1234567-1");
       return;
     }
-
-    // Placeholder: You can now send data to backend or Firebase
     alert("Account created successfully!");
   };
 
@@ -121,7 +119,7 @@ function SignUp() {
           className="col-md-6 d-flex justify-content-center align-items-center"
           style={{ backgroundColor: "#e6f9ff" }}
         >
-          <img src={coverimage} alt="KRL Hospital" style={{ width: "70%" }} />
+          {<img src={coverimage} alt="KRL Hospital" style={{ width: "70%" }} />}
         </div>
       </div>
     </div>
