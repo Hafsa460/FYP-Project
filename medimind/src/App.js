@@ -10,6 +10,7 @@ import NeuroDashboard from "./components/Neurologist/NeuroDashboard";
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/dash" replace />} />
       <Route path="/dash" element={<LandingPage />} />
       <Route path="/Login-option" element={<LoginDashboard />} />
       <Route path="/login-doctor" element={<Login />} />
