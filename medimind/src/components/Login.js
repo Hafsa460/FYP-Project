@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Login.css";
-import coverimage from "../images/cover.png"; // Use circular image for right side
+import coverimage from "../images/cover.png"; 
 
 function Login() {
   const [username, setUsername] = useState("");

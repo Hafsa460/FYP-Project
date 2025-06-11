@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css"; 
+import "./Login.css";
 import coverimage from "../images/cover.png";
 import SignUp from "./SignUp";
 import ForgotPassword from "./ForgotPassword";
@@ -34,7 +34,6 @@ function LoginPatients() {
             HOSPITAL
           </h2>
           <p className="text-center text-muted">Patient Login</p>
-
           <form onSubmit={validateLogin}>
             <div className="mb-3">
               <label htmlFor="username" className="form-label">
@@ -49,7 +48,6 @@ function LoginPatients() {
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
-
             <div className="mb-3">
               <label htmlFor="password" className="form-label">
                 Password
@@ -63,7 +61,6 @@ function LoginPatients() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-
             <button
               type="submit"
               className="btn w-100"
@@ -71,7 +68,6 @@ function LoginPatients() {
             >
               Login
             </button>
-
             <div className="text-center mt-3">
               <button
                 type="button"
@@ -81,7 +77,6 @@ function LoginPatients() {
                 Forgot Password?
               </button>
             </div>
-
             <p className="text-center mt-4">
               Don’t have an account?{" "}
               <button
