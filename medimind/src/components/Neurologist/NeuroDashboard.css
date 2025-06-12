@@ -1,31 +1,163 @@
-/* src/NeuroDashboard.css */
 .neuro-dashboard {
+  display: flex;
   height: 100vh;
-  background-color: #76ced4;
+  background-color: #76ced4; /* Blue main background */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .sidebar {
   width: 250px;
-  background-color: #059da8;
+  background-color: #ffffff;
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.sidebar h2 {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  color: #555;
 }
 
 .sidebar .nav-link {
-  font-size: 1.1rem;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  transition: background 0.2s;
+  font-size: 1rem;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  color: #059da8; /* Stronger blue for better readability */
+  padding: 10px 15px;
+  width: 100%;
+  background-color: #f8f9fa;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.2s, color 0.2s;
+  font-weight: 500;
 }
+
 
 .sidebar .nav-link:hover {
-  background-color: #009999;
+  background-color: #76ced4;
+  color: #ffffff;
 }
 
-.content {
-  background-color: #ffffff;
-  border-radius: 10px;
-  margin: 20px;
-  padding: 20px;
+/* Main content */
+.main-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
 }
+
+.top-section {
+  background-color: #e6f4f5;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-grid {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background-color: #e6f4f5;
+  flex: 1;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.chart-section, .block-section {
+  background-color: #e6f4f5;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  margin-top: 20px;
+}
+
+/* Typography */
+.section-title {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+.doctor-profile {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profile-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%; /* Makes the image circular */
+  object-fit: cover;
+  border: 2px solid #059da8;
+}
+
+.doctor-name {
+  font-size: 1rem;
+  color: #059da8;
+}
+.notification-panel {
+  width: 250px;
+  background-color: #fff;
+  border-left: 2px solid #76ced4;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.05);
+  overflow-y: auto;
+}
+
+.notification-panel ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.notification-panel li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.show-btn {
+  position: absolute;
+  top: 20px;
+  right: 10px;
+  z-index: 1000;
+  color: #ffffff;
+  background-color: #1c99a0;
+  border-radius: 7%;
+}
+.bottom-grid {
+  display: flex;
+  gap: 20px;
+}
+
+.small-card {
+  flex: 0 0 250px;
+  background-color: #e0f3f5;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+#id3 {
+  background-color: #eaf4f5; /* Change this to any color you like */
+}
+
+#id3 th,
+#id3 td {
+  background-color: inherit; /* Makes sure the cells use the table's background */
+}
+
