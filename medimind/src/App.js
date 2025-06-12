@@ -6,6 +6,18 @@ import LoginPatients from "./components/LoginPatients";
 import SignUp from "./components/SignUp";
 import LandingPage from "./components/LandingPage";
 import NeuroDashboard from "./components/Neurologist/NeuroDashboard";
+import PatientDashboard from "./components/PatientDashboard";
+
+const ManageAppointment = () => (
+  <div className="p-10 text-xl">Manage Appointment Page</div>
+);
+const ViewPrescriptions = () => (
+  <div className="p-10 text-xl">View Prescriptions Page</div>
+);
+const TestHistory = () => <div className="p-10 text-xl">Test History Page</div>;
+const ProfileManagement = () => (
+  <div className="p-10 text-xl">Profile Management Page</div>
+);
 
 function App() {
   return (
@@ -17,12 +29,17 @@ function App() {
       <Route path="/login-patient" element={<LoginPatients />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/neuro-dashboard/*" element={<NeuroDashboard />} />
+      <Route path="/PatientDashboard" element={<PatientDashboard />} />
+
+      <Route path="/manage-appointment" element={<ManageAppointment />} />
+      <Route path="/view-prescriptions" element={<ViewPrescriptions />} />
+      <Route path="/test-history" element={<TestHistory />} />
+      <Route path="/profile-management" element={<ProfileManagement />} />
     </Routes>
   );
 }
 
 export default App;
-
 
 /*LOGIN RESTORED:
 import React, { useState, useEffect } from 'react';

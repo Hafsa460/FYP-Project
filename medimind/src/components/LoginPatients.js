@@ -4,18 +4,18 @@ import "./Login.css";
 import coverimage from "../images/cover.png";
 import SignUp from "./SignUp";
 import ForgotPassword from "./ForgotPassword";
-
+import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar.js";
 function LoginPatients() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showSignUp, setShowSignUp] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-
+  const navigate = useNavigate();
   const validateLogin = (e) => {
     e.preventDefault();
     if (username === "hafsa13" && password === "hafsa") {
-      window.location.href = "../main/main.html";
+      navigate("/PatientDashboard");
     } else {
       alert("Incorrect username or password!");
     }
