@@ -4,6 +4,7 @@ import "./Login.css";
 import coverimage from "../images/cover.png";
 import SignUp from "./SignUp";
 import ForgotPassword from "./ForgotPassword";
+
 import Navbar from "./Navbar.js";
 function LoginPatients() {
   const [username, setUsername] = useState("");
