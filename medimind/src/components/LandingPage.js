@@ -102,7 +102,6 @@ function App() {
             </p>
           </div>
 
-          {/* Analytics Box */}
           <div
             className="bg-white shadow p-4 rounded"
             style={{
@@ -128,7 +127,7 @@ function App() {
       </div>
 
       {/* Testimonials */}
-      <div style={{ padding: "3rem", backgroundColor: "#e8f5e9" }}>
+      <div style={{ padding: "3rem", backgroundColor: "#e0f7fa" }}>
         <h2 style={{ textAlign: "center", marginBottom: "2rem" }}>
           What Our Patients Say
         </h2>
