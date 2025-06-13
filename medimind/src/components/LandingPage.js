@@ -20,77 +20,47 @@ function App() {
       others: 4,
     },
   ];
+
   const [selectedDept, setSelectedDept] = useState(departments[0]);
 
   return (
-    <div style={{ fontFamily: "Arial, sans-serif" }}>
+    <div className="font-sans">
       <Navbar />
 
-      {/* Hero Section */}
-      <div
-        style={{
-          backgroundColor: "#e0f7fa",
-          padding: "3rem",
-          textAlign: "center",
-        }}
-      >
-        <h1 style={{ fontSize: "2.5rem", color: "#00695c" }}>
+      <div className="bg-[#e0f7fa] py-12 text-center">
+        <h1 className="text-4xl font-bold text-[#00695c]">
           Welcome to KRL Hospital
         </h1>
-        <p style={{ fontSize: "1.2rem", marginTop: "1rem" }}>
+        <p className="text-lg mt-4">
           Providing quality healthcare with compassion and excellence.
         </p>
       </div>
 
-      {/* Main Section */}
-      <div style={{ display: "flex", height: "auto" }}>
-        {/* Sidebar */}
-        <div
-          style={{
-            width: "250px",
-            backgroundColor: "#f0f0f0",
-            padding: "1rem",
-            borderRight: "1px solid #ccc",
-          }}
-        >
-          <h3>Departments</h3>
-          <ul style={{ listStyle: "none", padding: 0 }}>
+      <div className="flex flex-col md:flex-row">
+        <aside className="w-full md:w-[250px] bg-gray-100 p-6 border-r border-gray-300">
+          <h3 className="text-lg font-semibold mb-4">Departments</h3>
+          <ul className="space-y-2">
             {departments.map((dept) => (
               <li
                 key={dept.id}
                 onClick={() => setSelectedDept(dept)}
-                style={{
-                  padding: "10px",
-                  cursor: "pointer",
-                  backgroundColor:
-                    dept.id === selectedDept.id ? "#00b3b3" : "transparent",
-                  color: dept.id === selectedDept.id ? "white" : "black",
-                  fontWeight: dept.id === selectedDept.id ? "bold" : "normal",
-                }}
+                className={`p-2 rounded cursor-pointer ${
+                  dept.id === selectedDept.id
+                    ? "bg-teal-500 text-white font-bold"
+                    : "hover:bg-teal-100"
+                }`}
               >
                 {dept.name}
               </li>
             ))}
           </ul>
-        </div>
+        </aside>
 
-        {/* Content */}
-        <div
-          className="Background d-flex flex-column align-items-center"
-          style={{ flex: 1, padding: "2rem", gap: "2rem" }}
-        >
-          {/* Department Details Box */}
-          <div
-            className="bg-white shadow p-4 rounded"
-            style={{
-              width: "100%",
-              maxWidth: "600px",
-              minHeight: "200px",
-              border: "1px solid #ddd",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            }}
-          >
-            <h4 className="mb-4 text-teal">{selectedDept.name} Department</h4>
+        <main className="flex-1 p-6 space-y-12">
+          <div className="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto">
+            <h4 className="text-xl font-semibold text-teal-600 mb-4">
+              {selectedDept.name} Department
+            </h4>
             <p>
               <strong>Doctors:</strong> {selectedDept.doctors}
             </p>
@@ -102,78 +72,70 @@ function App() {
             </p>
           </div>
 
-          <div
-            className="bg-white shadow p-4 rounded"
-            style={{
-              width: "100%",
-              maxWidth: "600px",
-              minHeight: "200px",
-              border: "1px solid #ddd",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            }}
-          >
-            <h4 className="mb-4 text-teal">Analytics</h4>
-            <p>
-              <strong>Total Patients:</strong> 2000
-            </p>
-            <p>
-              <strong>Appointments This Week:</strong> 300
-            </p>
-            <p>
-              <strong>Emergency Cases:</strong> 45
-            </p>
-          </div>
-        </div>
-      </div>
+          <section className="bg-gray-50 py-12 px-4 md:px-12">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+                Hospital Analytics
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+                  <h4 className="text-lg font-semibold text-teal-600 mb-2">
+                    Total Patients
+                  </h4>
+                  <p className="text-3xl font-bold text-gray-900">2,000</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+                  <h4 className="text-lg font-semibold text-teal-600 mb-2">
+                    Appointments This Week
+                  </h4>
+                  <p className="text-3xl font-bold text-gray-900">300</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+                  <h4 className="text-lg font-semibold text-teal-600 mb-2">
+                    Emergency Cases
+                  </h4>
+                  <p className="text-3xl font-bold text-gray-900">45</p>
+                </div>
+              </div>
+            </div>
+          </section>
 
-      {/* Testimonials */}
-      <div style={{ padding: "3rem", backgroundColor: "#e0f7fa" }}>
-        <h2 style={{ textAlign: "center", marginBottom: "2rem" }}>
-          What Our Patients Say
-        </h2>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "1rem",
-            maxWidth: "800px",
-            margin: "0 auto",
-          }}
-        >
-          <p>
-            "Amazing care and quick response! Highly recommend." – Fatima S.
-          </p>
-          <p>
-            "The doctors are professional and kind. Great experience." – Ahmed
-            R.
-          </p>
-        </div>
-      </div>
+          <section className="bg-[#e0f7fa] py-12 px-4 md:px-12">
+            <div className="max-w-4xl mx-auto text-center">
+              <h2 className="text-3xl font-bold text-gray-800 mb-6">
+                What Our Patients Say
+              </h2>
+              <div className="space-y-6 text-lg text-gray-700">
+                <p className="bg-white rounded-lg shadow p-4 max-w-xl mx-auto">
+                  “Amazing care and quick response! Highly recommend.” –{" "}
+                  <strong>Fatima S.</strong>
+                </p>
+                <p className="bg-white rounded-lg shadow p-4 max-w-xl mx-auto">
+                  “The doctors are professional and kind. Great experience.” –{" "}
+                  <strong>Ahmed R.</strong>
+                </p>
+              </div>
+            </div>
+          </section>
 
-      {/* Contact Info */}
-      <div style={{ padding: "3rem", backgroundColor: "#fafafa" }}>
-        <h2>Contact Us</h2>
-        <p>
-          <strong>Address:</strong> KRL Road, Islamabad, Pakistan
-        </p>
-        <p>
-          <strong>Phone:</strong> +92 000 00000000
-        </p>
-        <p>
-          <strong>Email:</strong> contact@krlhospital.com
-        </p>
+          {/* Contact */}
+          <section className="bg-gray-100 py-12 px-6 text-center">
+            <h2 className="text-2xl font-bold mb-4">Contact Us</h2>
+            <p>
+              <strong>Address:</strong> KRL Road, Islamabad, Pakistan
+            </p>
+            <p>
+              <strong>Phone:</strong> +92 000 00000000
+            </p>
+            <p>
+              <strong>Email:</strong> contact@krlhospital.com
+            </p>
+          </section>
+        </main>
       </div>
 
       {/* Footer */}
-      <footer
-        style={{
-          padding: "1rem",
-          backgroundColor: "#00b3b3",
-          color: "white",
-          textAlign: "center",
-        }}
-      >
+      <footer className="bg-teal-500 text-white text-center py-4">
         © 2025 KRL Hospital. All rights reserved.
       </footer>
     </div>
