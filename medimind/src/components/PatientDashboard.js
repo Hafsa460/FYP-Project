@@ -33,7 +33,6 @@ function PatientDashboard({ onLogout }) {
     <>
       <Navbar />
       <div className="flex min-h-screen bg-[#76ced4] font-inter relative">
-        {/* Sidebar */}
         <aside className="w-64 bg-white shadow-lg  p-6 flex flex-col justify-between z-20">
           <div>
             <div className="flex items-center space-x-2 mb-8">
@@ -95,7 +94,7 @@ function PatientDashboard({ onLogout }) {
           </div>
         </aside>
 
-        {/* Main Content */}
+      
         <main className="flex-1 p-8">
           <header className="bg-white p-4 rounded-xl shadow-md mb-8 flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -125,7 +124,6 @@ function PatientDashboard({ onLogout }) {
             </div>
           </header>
 
-          {/* Dashboard Content */}
           <h2 className="text-2xl font-bold text-gray-800 mb-6 flex justify-between items-center">
             Dashboard
             <div className="flex items-center space-x-2 text-base font-normal text-gray-600">
@@ -185,7 +183,6 @@ function PatientDashboard({ onLogout }) {
           </div>
         </main>
 
-        {/* Notifications Sidebar */}
         <div
           className={`fixed right-0 top-0 h-full bg-white shadow-xl w-80 md:w-96 p-6 z-50 transform transition-transform duration-300 ease-in-out ${
             showNotificationsSidebar ? "translate-x-0" : "translate-x-full"
