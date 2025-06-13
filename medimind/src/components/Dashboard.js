@@ -11,7 +11,7 @@ function LoginDashboard() {
       <Navbar />
       <div
         className="container-fluid d-flex justify-content-center align-items-center min-vh-100"
-        style={{ backgroundColor: "#76ced4" }}
+        style={{ backgroundColor: "#e6f9ff" }}
       >
         <div
           className="row login-container shadow-lg rounded-4"
