@@ -10,14 +10,30 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const validateLogin = () => {
-    if (username === "hafsa13" && password === "hafsa") {
-      navigate("/neuro-dashboard");
-    } else {
-      alert("Incorrect username or password!");
+  const validateLogin = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Login successful");
+        navigate("/neuro-dashboard");
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred while logging in.");
     }
-    
   };
+
 
   return (
     <>
