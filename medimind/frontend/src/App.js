@@ -6,6 +6,10 @@ import LoginPatients from "../src/components/LoginPatients";
 import SignUp from "../src/components/SignUp";
 import LandingPage from "../src/components/LandingPage";
 import NeuroDashboard from "../src/components/Neurologist/NeuroDashboard";
+import PatientDashboard from "../src/components/PatientDashboard";
+import ManageAppointment from "../src/components/Neurologist/PrescriptionHistory";
+import ProfileManagement from "../src/components/Neurologist/ProfileManagement";
+import TestHistory from "../src/components/Neurologist/ProfileManagement";
 
 function App() {
   return (
@@ -20,7 +24,7 @@ function App() {
       <Route path="/PatientDashboard" element={<PatientDashboard />} />
 
       <Route path="/manage-appointment" element={<ManageAppointment />} />
-      <Route path="/view-prescriptions" element={<ViewPrescriptions />} />
+      <Route path="/view-prescriptions" element={<ManageAppointment />} />
       <Route path="/test-history" element={<TestHistory />} />
       <Route path="/profile-management" element={<ProfileManagement />} />
     </Routes>
