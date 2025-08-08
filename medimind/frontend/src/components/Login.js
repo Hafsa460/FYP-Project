@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Login.css";
-import coverimage from "../images/cover.png"; // Use circular image for right side
+import coverimage from "../images/cover.png";
 import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+function LoginDoctor() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const validateLogin = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch("http://localhost:5000/api/loginDoctor", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -23,6 +23,9 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("doctor", JSON.stringify(data.doctor));
+
         alert("Login successful");
         navigate("/neuro-dashboard");
       } else {
@@ -33,8 +36,6 @@ function Login() {
       alert("An error occurred while logging in.");
     }
   };
-
-
   return (
     <>
       <Navbar />
@@ -74,7 +75,6 @@ function Login() {
             </button>
           </div>
 
-          {/* Right Section - Cover Image */}
           <div className="col-md-6 d-none d-md-flex align-items-center justify-content-center image-section">
             <img
               src={coverimage}
@@ -88,4 +88,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default LoginDoctor;
