@@ -6,7 +6,12 @@ import LoginPatients from "../src/components/LoginPatients";
 import SignUp from "../src/components/SignUp";
 import LandingPage from "../src/components/LandingPage";
 import NeuroDashboard from "../src/components/Neurologist/NeuroDashboard";
-
+import ManageAppointment from '../src/components/Neurologist/ProfileManagement';
+import ViewPrescriptions from '../src/components/Neurologist/PrescriptionHistory';
+import TestHistory from '../src/components/Neurologist/VerifyReports';
+import ProfileManagement from "../src/components/Neurologist/ProfileManagement";
+import PatientDashboard from '../src/components/PatientDashboard';
+import Navbar  from "./components/Navbar";
 function App() {
   return (
     <Routes>
@@ -18,7 +23,6 @@ function App() {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/neuro-dashboard/*" element={<NeuroDashboard />} />
       <Route path="/PatientDashboard" element={<PatientDashboard />} />
-
       <Route path="/manage-appointment" element={<ManageAppointment />} />
       <Route path="/view-prescriptions" element={<ViewPrescriptions />} />
       <Route path="/test-history" element={<TestHistory />} />

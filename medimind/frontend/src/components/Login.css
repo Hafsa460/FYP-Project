@@ -36,3 +36,50 @@
 .Background {
   background-color: #76ced4;
 }
+.login-page {
+  height: 100vh;
+  background-color: #97dadf;
+}
+
+.back {
+  background-color: #7bbcc1;
+}
+
+.login-container {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 900px;
+  width: 100%;
+}
+
+.text-teal {
+  color: #059da8;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.btn-teal {
+  background-color: #059da8;
+  color: white;
+  border: none;
+}
+
+.btn-teal:hover {
+  background-color: #009999;
+}
+
+.image-section {
+  background-color: #e0f7fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-section {
+  background-color: #ffffff;
+}
+
+.Background {
+  background-color: #76ced4;
+}

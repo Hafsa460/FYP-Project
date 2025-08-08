@@ -2,14 +2,9 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Login.css";
 import coverimage from "../images/cover.png";
-<<<<<<< HEAD:medimind/src/components/LoginPatients.js
 import SignUp from "./SignUp";
 import ForgotPassword from "./ForgotPassword";
 import { useNavigate } from "react-router-dom";
-=======
-import SignUp from "./SignUp.js";
-import ForgotPassword from "./ForgotPassword.js";
->>>>>>> hafsa13:medimind/frontend/src/components/LoginPatients.js
 import Navbar from "./Navbar.js";
 function LoginPatients() {
   const [username, setUsername] = useState("");
