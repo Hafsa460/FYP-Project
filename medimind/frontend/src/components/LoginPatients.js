@@ -13,10 +13,8 @@ function LoginPatients() {
   const [showSignUp, setShowSignUp] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
-
   const validateLogin = async (e) => {
     e.preventDefault();
-
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
@@ -25,10 +23,10 @@ function LoginPatients() {
         },
         body: JSON.stringify({ username, password }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("patient", JSON.stringify(data.user));
         navigate("/PatientDashboard");
       } else {
         alert(data.message || "Login failed");
@@ -38,11 +36,8 @@ function LoginPatients() {
       console.error(error);
     }
   };
-
-  // Conditional renders for signup/forgot password
   if (showSignUp) return <SignUp />;
   if (showForgotPassword) return <ForgotPassword />;
-
   return (
     <>
       <Navbar />
