@@ -1,138 +1,159 @@
 import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css";
-import coverimage from "../images/cover.png";
-import Navbar from "./Navbar.js";
-function SignUp() {
-  const [cnic, setCnic] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+import axios from "axios";
+import "./Login.css"; // your provided CSS
 
-  const isValidCnic = (cnic) => /^[0-9]{5}-[0-9]{7}-[0-9]{1}$/.test(cnic);
+const SignupForm = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    name: "",
+    age: "",
+    mrNo: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-  const handleSignUp = (e) => {
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState("");
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.email.trim() || !/^\S+@\S+\.\S+$/.test(formData.email)) {
+      newErrors.email = "Valid email required.";
+    }
+    if (!formData.name.trim()) newErrors.name = "Name is required.";
+    if (!formData.age || isNaN(formData.age)) newErrors.age = "Valid age required.";
+    if (!/^\d+$/.test(formData.mrNo)) newErrors.mrNo = "MR No must be a number.";
+    if (formData.password.length < 6)
+      newErrors.password = "Password must be at least 6 characters.";
+    if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrors({});
+    setMessage("");
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!cnic || !email || !password || !confirmPassword) {
-      alert("Please fill all fields.");
-      return;
+    if (!validate()) return;
+
+    try {
+      const { email, name, age, mrNo, password } = formData;
+      const res = await axios.post("http://localhost:5000/api/users/register", {
+        email,
+        name,
+        age,
+        mrNo,
+        password,
+      });
+
+      setMessage(res.data.message);
+      setFormData({
+        email: "",
+        name: "",
+        age: "",
+        mrNo: "",
+        password: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      setMessage(error.response?.data?.error || "Registration failed.");
     }
-    if (password !== confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
-    if (!isValidCnic(cnic)) {
-      alert("Invalid CNIC format. Please use 12345-1234567-1");
-      return;
-    }
-    alert("Account created successfully!");
   };
 
   return (
-    <>
-      <Navbar />
-      <div
-        className="container-fluid d-flex justify-content-center align-items-center min-vh-100"
-        style={{ backgroundColor: "#76ced4" }}
-      >
-        <div
-          className="row login-container shadow-lg rounded-4 "
-          style={{ maxWidth: "900px", width: "100%" }}
-        >
-          {/* Left Side - Form */}
-          <div className="col-md-6 bg-white p-5">
-            <h2 className="text-center fw-bold" style={{ color: "#008080" }}>
-              HOSPITAL
-            </h2>
-            <p className="text-center text-muted">Create Your Account</p>
-
-            <form onSubmit={handleSignUp}>
-              <div className="mb-3">
-                <label htmlFor="cnic" className="form-label">
-                  CNIC (Pakistan)
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="cnic"
-                  placeholder="12345-1234567-1"
-                  value={cnic}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    const pattern = /^[0-9]{0,5}-?[0-9]{0,7}-?[0-9]{0,1}$/;
-                    if (pattern.test(value)) {
-                      setCnic(value);
-                    }
-                  }}
-                  maxLength={15}
-                />
-                <small className="text-muted">Format: 12345-1234567-1</small>
-              </div>
-
-              <div className="mb-3">
-                <label>Email</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-
-              <div className="mb-3">
-                <label>Password</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-
-              <div className="mb-3">
-                <label>Confirm Password</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="btn w-100"
-                style={{ backgroundColor: "#00b3b3", color: "white" }}
-              >
-                Create Account
-              </button>
-
-              <p className="text-center mt-3">
-                Already have an account? <a href="/login">Login</a>
-              </p>
-            </form>
-          </div>
-
-          {/* Right Side - Image */}
-          <div
-            className="col-md-6 d-flex justify-content-center align-items-center"
-            style={{ backgroundColor: "#e6f9ff" }}
-          >
-            {
-              <img
-                src={coverimage}
-                alt="KRL Hospital"
-                style={{ width: "70%" }}
+    <div className="login-page d-flex justify-content-center align-items-center">
+      <div className="login-container row shadow">
+        <div className="col-md-6 image-section p-4 d-flex align-items-center justify-content-center">
+          <h2 className="text-teal">Create Account</h2>
+        </div>
+        <div className="col-md-6 form-section p-4">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label>Email:</label>
+              <input
+                type="email"
+                name="email"
+                className="form-control"
+                value={formData.email}
+                onChange={handleChange}
               />
-            }
-          </div>
+              <div className="text-danger">{errors.email}</div>
+            </div>
+
+            <div className="mb-3">
+              <label>Name:</label>
+              <input
+                type="text"
+                name="name"
+                className="form-control"
+                value={formData.name}
+                onChange={handleChange}
+              />
+              <div className="text-danger">{errors.name}</div>
+            </div>
+
+            <div className="mb-3">
+              <label>Age:</label>
+              <input
+                type="text"
+                name="age"
+                className="form-control"
+                value={formData.age}
+                onChange={handleChange}
+              />
+              <div className="text-danger">{errors.age}</div>
+            </div>
+
+            <div className="mb-3">
+              <label>MR No:</label>
+              <input
+                type="text"
+                name="mrNo"
+                className="form-control"
+                value={formData.mrNo}
+                onChange={handleChange}
+              />
+              <div className="text-danger">{errors.mrNo}</div>
+            </div>
+
+            <div className="mb-3">
+              <label>Password:</label>
+              <input
+                type="password"
+                name="password"
+                className="form-control"
+                value={formData.password}
+                onChange={handleChange}
+              />
+              <div className="text-danger">{errors.password}</div>
+            </div>
+
+            <div className="mb-3">
+              <label>Re-type Password:</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                className="form-control"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+              />
+              <div className="text-danger">{errors.confirmPassword}</div>
+            </div>
+
+            <button type="submit" className="btn btn-teal w-100">Register</button>
+            {message && <div className="mt-3 text-center text-success">{message}</div>}
+          </form>
         </div>
       </div>
-    </>
+    </div>
   );
-}
+};
 
-export default SignUp;
+export default SignupForm;
