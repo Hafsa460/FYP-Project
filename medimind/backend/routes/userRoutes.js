@@ -1,21 +1,30 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const User = require('../models/User');
+const User = require("../models/User");
 
-// POST create user
-router.post('/', async (req, res) => {
+// Register new user
+router.post("/register", async (req, res) => {
   try {
-    const user = await User.create(req.body);
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+    const { email, name, age, mrNo, password } = req.body;
 
-// GET all users
-router.get('/', async (req, res) => {
-  const users = await User.find();
-  res.json(users);
+    // Check if MR No or Email already exists
+    const existingEmail = await User.findOne({ email });
+    const existingMrNo = await User.findOne({ mrNo });
+
+    if (existingEmail) {
+      return res.status(400).json({ error: "Email already registered." });
+    }
+    if (existingMrNo) {
+      return res.status(400).json({ error: "MR No already registered." });
+    }
+
+    const newUser = new User({ email, name, age, mrNo, password });
+    await newUser.save();
+
+    res.status(201).json({ message: "User registered successfully." });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error." });
+  }
 });
 
 module.exports = router;

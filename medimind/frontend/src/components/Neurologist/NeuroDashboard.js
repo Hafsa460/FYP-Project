@@ -6,7 +6,7 @@ import VerifyReports from "./VerifyReports";
 import PrescriptionHistory from "./PrescriptionHistory";
 import ProfileManagement from "./ProfileManagement";
 import Logout from "./Logout";
-
+import Navbar from "../Navbar";
 
 function NeuroDashboard() {
   const [showNotifications, setShowNotifications] = useState(true);
