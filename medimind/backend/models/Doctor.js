@@ -1,12 +1,17 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const doctorSchema = new mongoose.Schema({
-  _id: String,
   name: String,
-  username: String,
+  email: { type: String, unique: true },
   password: String,
-  designation: String,
-  availableDays: [String],
+});
+
+// Hash password before saving
+doctorSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
 module.exports = mongoose.model("Doctor", doctorSchema);
