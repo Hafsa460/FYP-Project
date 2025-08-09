@@ -1,121 +1,76 @@
-const mongoose = require("mongoose");
 require("dotenv").config();
-
-const uri = process.env.MONGO_URI;
-
-mongoose
-  .connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    dbName: "hospital", // ✅ Set the correct DB name here
-  })
-  .then(() => console.log("✅ MongoDB connected to 'hospital' database"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
-
-// Schemas
-const userSchema = new mongoose.Schema({
-  _id: String,
-  name: String,
-  age: Number,
-  username: Number,
-  password: String,
-  testReports: Array,
-});
-
-const doctorSchema = new mongoose.Schema({
-  _id: String,
-  name: String,
-  username: Number,
-  password: String,
-  designation: String,
-  availableDays: [String],
-});
-
-const feedbackSchema = new mongoose.Schema({
-  _id: String,
-  aiReportID: String,
-  result: String,
-  givenBy: String,
-});
+const mongoose = require("mongoose");
 
 // Models
-const User = mongoose.model("User", userSchema);
-const Doctor = mongoose.model("Doctor", doctorSchema);
-const Feedback = mongoose.model("Feedback", feedbackSchema);
+const Doctor = require("./models/Doctor");
+const FeedBack = require("./models/Feedback");
+const User = require("./models/User");
 
-// Seed function
 const seed = async () => {
   try {
-    // 🧹 Clear previous data
-    await User.deleteMany({});
+    await mongoose.connect(process.env.MONGO_URI, { dbName: "hospital" });
+    console.log("MongoDB connected for seeding");
+
+    // Clear existing data (optional, remove if you want to keep existing docs)
     await Doctor.deleteMany({});
-    await Feedback.deleteMany({});
-    console.log("🧹 Previous data deleted");
+    await FeedBack.deleteMany({});
+    await User.deleteMany({});
 
-    // 🔁 New data
-    const user = new User({
-      _id: "patient_001",
-      name: "John Doe",
-      age: 45,
-      username: 3456789098765,
-      password: "patient1",
-      testReports: [
-        {
-          testReportID: "tr_001",
-          doctorID: "doc_001",
-          testName: "CT Scan",
-          result: "Abnormal",
-          diagnosis: "Tumor detected",
-          followUp: "MRI recommended",
-          aiReport: {
-            aiReportID: "ai_001",
-            diagnosis: "Likely benign tumor",
-            feedback: [
-              {
-                feedbackID: "fb_001",
-                result: "Useful",
-                givenBy: "Doctor",
-              },
-            ],
-          },
-          prescription: {
-            prescriptionID: "pr_001",
-            test: "CT Scan",
-            recommendation: "Consult oncologist",
-            clinicalSummary: "Mass in left frontal lobe",
-            investigation: "MRI advised",
-            medication: "Ibuprofen",
-            followUp: "After MRI",
-          },
-        },
-      ],
-    });
+    // Seed Doctors
+    const doctors = [
+      {
+        name: "Dr. Alice",
+        email: "alice@example.com",
+        password: "password123",
+      },
+      { name: "Dr. Bob", email: "bob@example.com", password: "securePass456" },
+    ];
+    await Doctor.insertMany(doctors);
+    console.log("Doctors seeded");
 
-    const doctor = new Doctor({
-      _id: "doc_001",
-      name: "Dr. Sarah Khan",
-      username: 1234567890987,
-      password: "doctor1",
-      designation: "Neurologist",
-      availableDays: ["Monday", "Wednesday", "Friday"],
-    });
+    // Seed Feedbacks
+    const feedbacks = [
+      {
+        _id: "fb1",
+        aiReportID: "rep1",
+        result: "Positive",
+        givenBy: "patient1",
+      },
+      {
+        _id: "fb2",
+        aiReportID: "rep2",
+        result: "Negative",
+        givenBy: "patient2",
+      },
+    ];
+    await FeedBack.insertMany(feedbacks);
+    console.log("Feedbacks seeded");
 
-    const feedback = new Feedback({
-      _id: "fb_001",
-      aiReportID: "ai_001",
-      result: "Accurate",
-      givenBy: "Patient",
-    });
+    // Seed Users (Patients)
+    const users = [
+      {
+        email: "john@example.com",
+        name: "John Doe",
+        age: 30,
+        mrNo: 1001,
+        password: "patient123",
+      },
+      {
+        email: "jane@example.com",
+        name: "Jane Roe",
+        age: 25,
+        mrNo: 1002,
+        password: "mypassword",
+      },
+    ];
+    await User.insertMany(users);
+    console.log("Users seeded");
 
-    await user.save();
-    await doctor.save();
-    await feedback.save();
-
-    console.log("✅ Seeding done!");
+    console.log("✅ Seeding completed");
+    process.exit(0);
   } catch (err) {
-    console.error("❌ Seeding error:", err);
-  } finally {
-    mongoose.connection.close();
+    console.error("Seeding error:", err);
+    process.exit(1);
   }
 };
 

@@ -22,8 +22,10 @@ const SignupForm = () => {
       newErrors.email = "Valid email required.";
     }
     if (!formData.name.trim()) newErrors.name = "Name is required.";
-    if (!formData.age || isNaN(formData.age)) newErrors.age = "Valid age required.";
-    if (!/^\d+$/.test(formData.mrNo)) newErrors.mrNo = "MR No must be a number.";
+    if (!formData.age || isNaN(formData.age))
+      newErrors.age = "Valid age required.";
+    if (!/^\d+$/.test(formData.mrNo))
+      newErrors.mrNo = "MR No must be a number.";
     if (formData.password.length < 6)
       newErrors.password = "Password must be at least 6 characters.";
     if (formData.password !== formData.confirmPassword)
@@ -147,8 +149,12 @@ const SignupForm = () => {
               <div className="text-danger">{errors.confirmPassword}</div>
             </div>
 
-            <button type="submit" className="btn btn-teal w-100">Register</button>
-            {message && <div className="mt-3 text-center text-success">{message}</div>}
+            <button type="submit" className="btn btn-teal w-100">
+              Register
+            </button>
+            {message && (
+              <div className="mt-3 text-center text-success">{message}</div>
+            )}
           </form>
         </div>
       </div>
