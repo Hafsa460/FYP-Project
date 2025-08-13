@@ -85,7 +85,7 @@ function PatientDashboard({ onLogout }) {
           </div>
           <div>
             <Link
-              to="/logout"
+              to="/"
               className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#e6f9ff] hover:text-red-600 transition-colors duration-200 mt-8"
             >
               <LogOut className="w-5 h-5 mr-3" />

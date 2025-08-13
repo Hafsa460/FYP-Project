@@ -1,53 +1,60 @@
-// routes/auth.js
 const express = require("express");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs"); // Use bcryptjs consistently
 const jwt = require("jsonwebtoken");
-const User = require("../models/User"); // patients live here
+const User = require("../models/User");
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || "change_me";
 
 // POST /api/auth/login
-// Body: { username, password }  -> username can be MR No (number) or email
 router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body || {};
-    if (!username || !password) {
-      return res
-        .status(400)
-        .json({ message: "username and password are required" });
+    let { mrNo, password } = req.body;
+    console.log("[Login] Incoming data:", { mrNo, password: "[PROVIDED]" });
+
+    if (!mrNo || !password) {
+      return res.status(400).json({ message: "MR No and password are required" });
     }
 
-    // Decide whether username is MR No (all digits) or email
-    const isNumeric = /^\d+$/.test(String(username).trim());
-    const query = isNumeric
-      ? { mrNo: Number(username) }
-      : { email: String(username).trim().toLowerCase() };
+    // Trim extra spaces
+    password = password.trim();
 
-    const user = await User.findOne(query);
-    if (!user) return res.status(404).json({ message: "Patient not found" });
+    // Convert MR No to number
+    const parsedMrNo = Number(mrNo);
+    if (isNaN(parsedMrNo)) {
+      return res.status(400).json({ message: "Invalid MR No format" });
+    }
 
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) return res.status(401).json({ message: "Invalid credentials" });
+    const user = await User.findOne({ mrNo: parsedMrNo });
+    if (!user) {
+      console.log(`[Login] User not found for MR No: ${parsedMrNo}`);
+      return res.status(401).json({ message: "Invalid MR No or password" });
+    }
 
-    const token = jwt.sign({ id: user._id, role: "patient" }, JWT_SECRET, {
-      expiresIn: "1d",
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      console.log(`[Login] Incorrect password for MR No: ${parsedMrNo}`);
+      return res.status(401).json({ message: "Invalid MR No or password" });
+    }
+
+    // Create token
+    const token = jwt.sign({ id: user._id, mrNo: user.mrNo }, process.env.JWT_SECRET || "yoursecret", {
+      expiresIn: "1h",
     });
 
-    return res.json({
+    console.log(`[Login] Successful login for MR No: ${parsedMrNo}`);
+    res.json({
       message: "Login successful",
       token,
       user: {
-        id: user._id,
-        email: user.email ?? null,
-        mrNo: user.mrNo ?? null,
-        name: user.name ?? null,
-        role: "patient",
+        mrNo: user.mrNo,
+        name: user.name,
+        email: user.email,
+        age: user.age,
       },
     });
   } catch (err) {
-    console.error("[PATIENT LOGIN] error:", err);
-    return res.status(500).json({ message: "Server error, try again later" });
+    console.error("[Login] Error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

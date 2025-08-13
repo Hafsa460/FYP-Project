@@ -1,131 +1,114 @@
 import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css";
-import coverimage from "../images/cover.png";
-import SignUp from "./SignUp";
-import ForgotPassword from "./ForgotPassword";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar.js";
+import axios from "axios";
+import coverimage from "../images/cover.png";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-function LoginPatients() {
-  const [username, setUsername] = useState("");
+export default function Login() {
+  const [mrNo, setMrNo] = useState("");
   const [password, setPassword] = useState("");
-  const [showSignUp, setShowSignUp] = useState(false);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-  const validateLogin = async (e) => {
+
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+
+    console.log("[LoginPatients] Logging in with MR No:", mrNo, "Password:", password);
+
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
+      const res = await axios.post("http://localhost:5000/api/auth/login", { 
+        mrNo: Number(mrNo), // ✅ Convert to number before sending
+        password 
       });
-      const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("patient", JSON.stringify(data.user));
-        navigate("/PatientDashboard");
-      } else {
-        alert(data.message || "Login failed");
-      }
-    } catch (error) {
-      alert("Server error, try again later.");
-      console.error(error);
+      console.log("[LoginPatients] Login success:", res.data);
+      navigate("/PatientDashboard");
+    } catch (err) {
+      console.error("[LoginPatients] Login failed:", err.response);
+      setError(err.response?.data?.message || "Login failed");
     }
   };
-  if (showSignUp) return <SignUp />;
-  if (showForgotPassword) return <ForgotPassword />;
+
   return (
-    <>
-      <Navbar />
-      <div className="container-fluid back d-flex justify-content-center align-items-center min-vh-100">
-        <div
-          className="row login-container shadow-lg rounded-4 overflow-hidden"
-          style={{ maxWidth: "900px", width: "100%" }}
-        >
-          {/* Login Form */}
-          <div className="col-md-6 bg-white p-5">
-            <h2 className="text-center fw-bold" style={{ color: "#008080" }}>
-              HOSPITAL
-            </h2>
-            <p className="text-center text-muted">Patient Login</p>
+    <div className="login-page d-flex align-items-center justify-content-center">
+      <div className="login-container shadow-lg row w-100">
+        {/* Left Image Section */}
+        <div className="col-md-6 image-section">
+          <img src={coverimage} alt="Login" className="img-fluid" />
+        </div>
 
-            <form onSubmit={validateLogin}>
-              <div className="mb-3">
-                <label htmlFor="username" className="form-label">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="username"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
+        {/* Right Form Section */}
+        <div className="col-md-6 form-section p-5">
+          <h2 className="text-teal mb-4 text-center">Login</h2>
 
-              <div className="mb-3">
-                <label htmlFor="password" className="form-label">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
+          {error && <div className="alert alert-danger">{error}</div>}
 
-              <button
-                type="submit"
-                className="btn w-100"
-                style={{ backgroundColor: "#00b3b3", color: "white" }}
+          <form onSubmit={handleLogin}>
+            {/* MR No */}
+            <div className="mb-3">
+              <label className="form-label">MR No</label>
+              <input
+                type="text"
+                className="form-control"
+                value={mrNo}
+                onChange={(e) => setMrNo(e.target.value)}
+                placeholder="Enter MR No"
+                required
+              />
+            </div>
+
+{/* Password */}
+<div className="mb-3">
+  <label className="form-label">Password</label>
+  <div className="password-wrapper">
+    <input
+      type={showPassword ? "text" : "password"}
+      className="form-control"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      placeholder="Enter Password"
+      required
+    />
+    <button
+      type="button"
+      className="password-toggle"
+      onClick={() => setShowPassword(!showPassword)}
+      aria-label={showPassword ? "Hide password" : "Show password"}
+    >
+      {showPassword ? <FaEyeSlash /> : <FaEye />}
+    </button>
+  </div>
+</div>
+
+
+            {/* Submit */}
+            <button type="submit" className="btn btn-teal w-100 mt-3">
+              Login
+            </button>
+
+            <p>
+              Don't have an account?{" "}
+              <a
+                href="/signup"
+                style={{ color: "#059da8", textDecoration: "underline" }}
               >
-                Login
-              </button>
+                Sign up
+              </a>
+            </p>
 
-              <div className="text-center mt-3">
-                <button
-                  type="button"
-                  className="btn btn-link p-0"
-                  onClick={() => setShowForgotPassword(true)}
-                >
-                  Forgot Password?
-                </button>
-              </div>
-
-              <p className="text-center mt-4">
-                Don’t have an account?{" "}
-                <button
-                  type="button"
-                  className="btn btn-link p-0"
-                  onClick={() => setShowSignUp(true)}
-                >
-                  Sign up
-                </button>
-              </p>
-            </form>
-          </div>
-
-          {/* Right Side Image */}
-          <div
-            className="col-md-6 d-flex justify-content-center align-items-center"
-            style={{ backgroundColor: "#e6f9ff" }}
-          >
-            <img src={coverimage} alt="Hospital" style={{ width: "70%" }} />
-          </div>
+            {/* Added Forgot Password link */}
+            <p>
+              <a
+                href="/forgot-password"
+                style={{ color: "#059da8", textDecoration: "underline" }}
+              >
+                Forgot Password?
+              </a>
+            </p>
+          </form>
         </div>
       </div>
-    </>
+    </div>
   );
 }
-
-export default LoginPatients;

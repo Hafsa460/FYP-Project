@@ -83,3 +83,36 @@
 .Background {
   background-color: #76ced4;
 }
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  padding-right: 45px; /* space for eye icon */
+  height: 45px; /* keep consistent height */
+  box-sizing: border-box;
+}
+
+.password-wrapper .password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%; /* middle of wrapper */
+  transform: translateY(-50%); /* vertical centering */
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: #888;
+  line-height: 1;
+}
+
+.password-wrapper .password-toggle:hover {
+  color: #059da8;
+}
+
