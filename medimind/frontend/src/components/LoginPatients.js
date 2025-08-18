@@ -15,18 +15,27 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    console.log("[LoginPatients] Logging in with MR No:", mrNo, "Password:", password);
+    console.log("[LoginPatients] Attempting login:", { mrNo, password });
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", { 
-        mrNo: Number(mrNo), // ✅ Convert to number before sending
-        password 
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        mrNo: Number(mrNo), // Ensure MR No is sent as a number
+        password,
       });
+
       console.log("[LoginPatients] Login success:", res.data);
+
+      // ✅ Save token + patient data in localStorage
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("patient", JSON.stringify(res.data.patient));
+
+      // ✅ Navigate to Patient Dashboard
       navigate("/PatientDashboard");
     } catch (err) {
-      console.error("[LoginPatients] Login failed:", err.response);
-      setError(err.response?.data?.message || "Login failed");
+      console.error("[LoginPatients] Login failed:", err.response?.data || err);
+      setError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
     }
   };
 
@@ -58,29 +67,28 @@ export default function Login() {
               />
             </div>
 
-{/* Password */}
-<div className="mb-3">
-  <label className="form-label">Password</label>
-  <div className="password-wrapper">
-    <input
-      type={showPassword ? "text" : "password"}
-      className="form-control"
-      value={password}
-      onChange={(e) => setPassword(e.target.value)}
-      placeholder="Enter Password"
-      required
-    />
-    <button
-      type="button"
-      className="password-toggle"
-      onClick={() => setShowPassword(!showPassword)}
-      aria-label={showPassword ? "Hide password" : "Show password"}
-    >
-      {showPassword ? <FaEyeSlash /> : <FaEye />}
-    </button>
-  </div>
-</div>
-
+            {/* Password */}
+            <div className="mb-3">
+              <label className="form-label">Password</label>
+              <div className="password-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="form-control"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter Password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+            </div>
 
             {/* Submit */}
             <button type="submit" className="btn btn-teal w-100 mt-3">
