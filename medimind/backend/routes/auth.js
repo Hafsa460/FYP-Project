@@ -12,7 +12,9 @@ router.post("/login", async (req, res) => {
     console.log("[Login] Incoming data:", { mrNo, password: "[PROVIDED]" });
 
     if (!mrNo || !password) {
-      return res.status(400).json({ message: "MR No and password are required" });
+      return res
+        .status(400)
+        .json({ message: "MR No and password are required" });
     }
 
     // Trim extra spaces
@@ -37,15 +39,19 @@ router.post("/login", async (req, res) => {
     }
 
     // Create token
-    const token = jwt.sign({ id: user._id, mrNo: user.mrNo }, process.env.JWT_SECRET || "yoursecret", {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, mrNo: user.mrNo },
+      process.env.JWT_SECRET || "yoursecret",
+      {
+        expiresIn: "1h",
+      }
+    );
 
     console.log(`[Login] Successful login for MR No: ${parsedMrNo}`);
     res.json({
       message: "Login successful",
       token,
-      user: {
+      patient: {
         mrNo: user.mrNo,
         name: user.name,
         email: user.email,
