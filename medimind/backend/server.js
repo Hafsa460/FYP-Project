@@ -1,29 +1,3 @@
-<<<<<<< HEAD
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const userRoutes = require("./routes/userRoutes");
-const authRoutes = require("./routes/auth");
-const doctorAuthRoutes = require("./routes/doctorAuth");
-require("dotenv").config(); // Load environment variables
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-mongoose
-  .connect(process.env.MONGO_URI, { dbName: "hospital" })
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err));
-
-app.use("/api/users", userRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api", doctorAuthRoutes);
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-=======
 // Load environment variables
 require("dotenv").config();
 
@@ -86,5 +60,4 @@ console.log("Password routes mounted at /api/password");
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
->>>>>>> sirat
 });
