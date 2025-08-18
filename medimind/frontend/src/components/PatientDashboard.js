@@ -1,19 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
   Calendar,
   ClipboardList,
   FileText,
-  History,
-  Home,
+  LayoutGrid,
   LogOut,
   Search,
   Settings,
   User,
   Users,
   SunMoon,
-  LayoutGrid,
   ChevronDown,
   Star,
   X,
@@ -23,22 +21,39 @@ import Navbar from "./Navbar";
 function PatientDashboard({ onLogout }) {
   const [showNotificationsSidebar, setShowNotificationsSidebar] =
     useState(false);
+  const [patient, setPatient] = useState(null); // ✅ Store patient info
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // ✅ Load patient data from localStorage
+    const storedPatient = localStorage.getItem("patient");
+    if (storedPatient) {
+      setPatient(JSON.parse(storedPatient));
+    } else {
+      // If no patient is found, redirect to login
+      navigate("/");
+    }
+  }, [navigate]);
 
   const toggleNotificationsSidebar = () => {
     setShowNotificationsSidebar(!showNotificationsSidebar);
   };
 
+  if (!patient) {
+    return <div className="p-6">Loading patient data...</div>;
+  }
+
   return (
     <>
       <Navbar />
       <div className="flex min-h-screen bg-[#76ced4] font-inter relative">
-        <aside className="w-64 bg-white shadow-lg  p-6 flex flex-col justify-between z-20">
+        {/* Sidebar */}
+        <aside className="w-64 bg-white shadow-lg p-6 flex flex-col justify-between z-20">
           <div>
             <div className="flex items-center space-x-2 mb-8">
               <User className="w-8 h-8 text-[#059da8]" />
               <h1 className="text-xl font-semibold text-gray-800">
-                Patient's name
+                {patient.name}
               </h1>
             </div>
             <h2 className="text-lg font-bold text-gray-700 mb-4">Dashboard</h2>
@@ -85,7 +100,7 @@ function PatientDashboard({ onLogout }) {
           </div>
           <div>
             <Link
-              to="/logout"
+              to="/"
               className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#e6f9ff] hover:text-red-600 transition-colors duration-200 mt-8"
             >
               <LogOut className="w-5 h-5 mr-3" />
@@ -94,7 +109,7 @@ function PatientDashboard({ onLogout }) {
           </div>
         </aside>
 
-      
+        {/* Main Dashboard */}
         <main className="flex-1 p-8">
           <header className="bg-white p-4 rounded-xl shadow-md mb-8 flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -132,26 +147,29 @@ function PatientDashboard({ onLogout }) {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Patient Info */}
             <div className="md:col-span-2 bg-white rounded-xl shadow-md p-6 flex items-center">
               <div className="bg-[#e0f7fa] p-4 rounded-xl mr-6 flex-shrink-0">
                 <Users className="w-16 h-16 text-[#059da8]" />
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  patient's name
+                  {patient.name}
                 </h3>
                 <p className="text-gray-600 mb-1">
-                  Age: <span className="font-medium">25</span>
+                  Age: <span className="font-medium">{patient.age}</span>
                 </p>
                 <p className="text-gray-600 mb-1">
-                  Gender: <span className="font-medium">Female</span>
+                  Gender: <span className="font-medium">{patient.gender}</span>
                 </p>
                 <p className="text-gray-600">
-                  Blood Group: <span className="font-medium">O+</span>
+                  Blood Group:{" "}
+                  <span className="font-medium">{patient.bloodGroup}</span>
                 </p>
               </div>
             </div>
 
+            {/* Other widgets */}
             <div className="md:col-span-1"></div>
 
             <div
@@ -182,51 +200,6 @@ function PatientDashboard({ onLogout }) {
             </div>
           </div>
         </main>
-
-        <div
-          className={`fixed right-0 top-0 h-full bg-white shadow-xl w-80 md:w-96 p-6 z-50 transform transition-transform duration-300 ease-in-out ${
-            showNotificationsSidebar ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-semibold text-gray-800">
-              Notifications
-            </h3>
-            <button
-              onClick={toggleNotificationsSidebar}
-              className="text-gray-500 hover:text-gray-800"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-          <div className="space-y-4">
-            <div className="p-3 bg-gray-50 rounded-lg shadow-sm">
-              <p className="text-sm font-medium text-gray-800">
-                New appointment booked!
-              </p>
-              <p className="text-xs text-gray-500">2 hours ago</p>
-            </div>
-            <div className="p-3 bg-gray-50 rounded-lg shadow-sm">
-              <p className="text-sm font-medium text-gray-800">
-                Your lab results are ready.
-              </p>
-              <p className="text-xs text-gray-500">Yesterday</p>
-            </div>
-            <div className="p-3 bg-gray-50 rounded-lg shadow-sm">
-              <p className="text-sm font-medium text-gray-800">
-                Reminder: appointment tomorrow at 10 AM.
-              </p>
-              <p className="text-xs text-gray-500">1 day ago</p>
-            </div>
-          </div>
-        </div>
-
-        {showNotificationsSidebar && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={toggleNotificationsSidebar}
-          ></div>
-        )}
       </div>
     </>
   );
