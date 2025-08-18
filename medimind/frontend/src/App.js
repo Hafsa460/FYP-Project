@@ -12,6 +12,12 @@ import TestHistory from '../src/components/Neurologist/VerifyReports';
 import ProfileManagement from "../src/components/Neurologist/ProfileManagement";
 import PatientDashboard from '../src/components/PatientDashboard';
 import Navbar  from "./components/Navbar";
+<<<<<<< HEAD
+=======
+import VerifySuccess from "./components/VerifySuccess";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassowrd";
+>>>>>>> sirat
 function App() {
   return (
     <Routes>
@@ -27,12 +33,19 @@ function App() {
       <Route path="/view-prescriptions" element={<ManageAppointment />} />
       <Route path="/test-history" element={<TestHistory />} />
       <Route path="/profile-management" element={<ProfileManagement />} />
+<<<<<<< HEAD
+=======
+      <Route path="/verify-success" element={<VerifySuccess/>}/>
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
+>>>>>>> sirat
     </Routes>
   );
 }
 
 export default App;
 
+<<<<<<< HEAD
 /*LOGIN RESTORED:
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
@@ -95,3 +108,5 @@ function App() {
 
 export default App;
  */
+=======
+>>>>>>> sirat
