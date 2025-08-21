@@ -1,91 +1,102 @@
 import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css";
-import coverimage from "../images/cover.png";
-import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import coverimage from "../images/cover.png";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-function LoginDoctor() {
-  const [username, setUsername] = useState("");
+export default function DoctorLogin() {
+  const [pno, setPno] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const validateLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
     try {
-      const response = await fetch("http://localhost:5000/api/loginDoctor", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
+      const res = await axios.post("http://localhost:5000/api/doctors/login", {
+        pno: Number(pno),
+        password,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("doctor", JSON.stringify(data.doctor));
-
-        alert("Login successful");
-        navigate("/neuro-dashboard");
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("An error occurred while logging in.");
+      localStorage.setItem("doctorToken", res.data.token);
+      localStorage.setItem("doctor", JSON.stringify(res.data.doctor));
+      navigate("/doctor-dashboard");
+    } catch (err) {
+      console.error("Login failed:", err.response?.data || err);
+      setError(err.response?.data?.message || "Login failed. Please try again.");
     }
   };
+
   return (
-    <>
-      <Navbar />
-      <div className="container-fluid login-page d-flex align-items-center justify-content-center">
-        <div className="row w-100 login-container shadow-lg">
-          <div className="col-md-6 form-section p-5">
-            <h2 className="text-center fw-bold text-teal">HOSPITAL</h2>
-            <p className="text-center mb-4">Doctors Login Portal</p>
+    <div className="login-page d-flex align-items-center justify-content-center">
+      <div className="login-container shadow-lg row w-100">
+        {/* Left Image Section */}
+        <div className="col-md-6 image-section">
+          <img src={coverimage} alt="Login" className="img-fluid" />
+        </div>
+
+        {/* Right Form Section */}
+        <div className="col-md-6 form-section p-5">
+          <h2 className="text-teal mb-4 text-center">Doctor Login</h2>
+
+          {error && <div className="alert alert-danger">{error}</div>}
+
+          <form onSubmit={handleLogin}>
+            {/* PNo */}
             <div className="mb-3">
-              <label htmlFor="username" className="form-label">
-                Email
-              </label>
+              <label className="form-label">PNo (7-digit)</label>
               <input
-                type="text"
+                type="number"
                 className="form-control"
-                id="username"
-                placeholder="Enter Email here"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={pno}
+                onChange={(e) => setPno(e.target.value)}
+                placeholder="Enter PNo"
+                required
               />
             </div>
+
+            {/* Password */}
             <div className="mb-3">
-              <label htmlFor="password" className="form-label">
-                Password
-              </label>
-              <input
-                type="password"
-                className="form-control"
-                id="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <label className="form-label">Password</label>
+              <div className="password-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="form-control"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter Password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
             </div>
-            <button className="btn btn-teal w-100" onClick={validateLogin}>
+
+            {/* Submit */}
+            <button type="submit" className="btn btn-teal w-100 mt-3">
               Login
             </button>
-          </div>
 
-          <div className="col-md-6 d-none d-md-flex align-items-center justify-content-center image-section">
-            <img
-              src={coverimage}
-              alt="Cover"
-              className="img-fluid rounded-circle"
-            />
-          </div>
+            <p>
+              <a
+                href="/forgot-password"
+                style={{ color: "#059da8", textDecoration: "underline" }}
+              >
+                Forgot Password?
+              </a>
+            </p>
+          </form>
         </div>
       </div>
-    </>
+    </div>
   );
 }
-
-export default LoginDoctor;

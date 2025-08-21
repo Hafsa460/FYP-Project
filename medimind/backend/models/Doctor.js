@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const doctorSchema = new mongoose.Schema({
-  name: String,
-  email: { type: String, unique: true },
-  password: String,
+  name: { type: String, required: true },
+  email: { type: String, unique: true, required: true },
+  pno: { type: Number, unique: true, required: true }, 
+  password: { type: String, required: true },
 });
 
 // Hash password before saving
@@ -13,5 +14,10 @@ doctorSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
+
+// Compare password method
+doctorSchema.methods.comparePassword = function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 module.exports = mongoose.model("Doctor", doctorSchema);
