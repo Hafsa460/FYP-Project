@@ -43,7 +43,7 @@ function NeuroDashboard() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="logout" className="nav-link">
+              <Link to="/" className="nav-link">
                 Logout
               </Link>
             </li>
@@ -139,7 +139,7 @@ function NeuroDashboard() {
               element={<PrescriptionHistory />}
             />
             <Route path="profile-management" element={<ProfileManagement />} />
-            <Route path="logout" element={<Logout />} />
+            <Route path="/" element={<Logout />} />
           </Routes>
         </div>
 
