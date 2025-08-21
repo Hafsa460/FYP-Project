@@ -14,23 +14,20 @@ import {
   SunMoon,
   ChevronDown,
   Star,
-  X,
 } from "lucide-react";
 import Navbar from "./Navbar";
 
 function PatientDashboard({ onLogout }) {
   const [showNotificationsSidebar, setShowNotificationsSidebar] =
     useState(false);
-  const [patient, setPatient] = useState(null); // ✅ Store patient info
+  const [patient, setPatient] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // ✅ Load patient data from localStorage
     const storedPatient = localStorage.getItem("patient");
     if (storedPatient) {
       setPatient(JSON.parse(storedPatient));
     } else {
-      // If no patient is found, redirect to login
       navigate("/");
     }
   }, [navigate]);
@@ -40,58 +37,57 @@ function PatientDashboard({ onLogout }) {
   };
 
   if (!patient) {
-    return <div className="p-6">Loading patient data...</div>;
+    return <div className="p-4">Loading patient data...</div>;
   }
 
   return (
     <>
       <Navbar />
-      <div className="flex min-h-screen bg-[#76ced4] font-inter relative">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-lg p-6 flex flex-col justify-between z-20">
+      <div className="d-flex min-vh-100 bg-light">
+        <aside
+          className="bg-white border-end shadow-sm p-3 d-flex flex-column justify-content-between"
+          style={{ width: "250px" }}
+        >
           <div>
-            <div className="flex items-center space-x-2 mb-8">
-              <User className="w-8 h-8 text-[#059da8]" />
-              <h1 className="text-xl font-semibold text-gray-800">
-                {patient.name}
-              </h1>
+            <div>
+              <div className="d-flex align-items-center mb-4">
+                <User className="me-2 text-primary" size={32} />
+                <Link
+                  to="/PatientDashboard"
+                  className="d-flex align-items-center p-2 rounded text-dark text-decoration-none hover-shadow"
+                >
+                  {patient.name}
+                </Link>
+              </div>
             </div>
-            <h2 className="text-lg font-bold text-gray-700 mb-4">Dashboard</h2>
+
+            <h2 className="h6 text-muted mb-3">Dashboard</h2>
             <nav>
-              <ul>
-                <li className="mb-3">
-                  <Link
-                    to="/manage-appointment"
-                    className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#e6f9ff] hover:text-[#059da8] transition-colors duration-200"
-                  >
-                    <Calendar className="w-5 h-5 mr-3" />
-                    Manage Appointment
-                  </Link>
-                </li>
-                <li className="mb-3">
+              <ul className="list-unstyled">
+                <li className="mb-2">
                   <Link
                     to="/view-prescriptions"
-                    className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#e6f9ff] hover:text-[#059da8] transition-colors duration-200"
+                    className="d-flex align-items-center p-2 rounded text-dark text-decoration-none hover-shadow"
                   >
-                    <FileText className="w-5 h-5 mr-3" />
+                    <FileText className="me-2" size={18} />
                     View Prescriptions
                   </Link>
                 </li>
-                <li className="mb-3">
+                <li className="mb-2">
                   <Link
-                    to="/test-history"
-                    className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#e6f9ff] hover:text-[#059da8] transition-colors duration-200"
+                    to="/testreport"
+                    className="d-flex align-items-center p-2 rounded text-dark text-decoration-none hover-shadow"
                   >
-                    <ClipboardList className="w-5 h-5 mr-3" />
-                    Test History
+                    <ClipboardList className="me-2" size={18} />
+                    Test Reports
                   </Link>
                 </li>
-                <li className="mb-3">
+                <li className="mb-2">
                   <Link
                     to="/profile-management"
-                    className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#e6f9ff] hover:text-[#059da8] transition-colors duration-200"
+                    className="d-flex align-items-center p-2 rounded text-dark text-decoration-none hover-shadow"
                   >
-                    <User className="w-5 h-5 mr-3" />
+                    <User className="me-2" size={18} />
                     Profile Management
                   </Link>
                 </li>
@@ -101,102 +97,120 @@ function PatientDashboard({ onLogout }) {
           <div>
             <Link
               to="/"
-              className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-[#e6f9ff] hover:text-red-600 transition-colors duration-200 mt-8"
+              className="d-flex align-items-center p-2 rounded text-danger text-decoration-none"
             >
-              <LogOut className="w-5 h-5 mr-3" />
+              <LogOut className="me-2" size={18} />
               Logout
             </Link>
           </div>
         </aside>
 
-        {/* Main Dashboard */}
-        <main className="flex-1 p-8">
-          <header className="bg-white p-4 rounded-xl shadow-md mb-8 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <LayoutGrid className="w-5 h-5 text-gray-600" />
-              <Star className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-600">Dashboards / Default</span>
+        <main className="flex-grow-1 p-4">
+          <header className="bg-white p-3 rounded shadow-sm d-flex justify-content-between align-items-center mb-4">
+            <div className="d-flex align-items-center">
+              <LayoutGrid className="me-2 text-muted" size={20} />
+              <Star className="me-2 text-muted" size={20} />
+              <span className="text-muted">Dashboards / Default</span>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative flex items-center">
-                <Search className="absolute left-3 text-gray-400 w-5 h-5" />
+            <div className="d-flex align-items-center">
+              <div className="position-relative me-3">
+                <Search
+                  className="position-absolute top-50 translate-middle-y ms-2 text-muted"
+                  size={18}
+                />
                 <input
                   type="text"
                   placeholder="Search"
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#059da8]"
+                  className="form-control ps-5"
+                  style={{ width: "200px" }}
                 />
               </div>
-              <SunMoon className="w-6 h-6 text-gray-600 cursor-pointer hover:text-[#059da8]" />
-              <Settings className="w-6 h-6 text-gray-600 cursor-pointer hover:text-[#059da8]" />
-              <LayoutGrid className="w-6 h-6 text-gray-600 cursor-pointer hover:text-[#059da8]" />
+              <SunMoon className="me-3 text-muted" role="button" />
+              <Settings className="me-3 text-muted" role="button" />
+              <LayoutGrid className="me-3 text-muted" role="button" />
               <div
-                className="flex items-center space-x-1 cursor-pointer hover:text-[#059da8] border-l border-gray-200 pl-4"
+                className="d-flex align-items-center border-start ps-3 text-muted"
+                role="button"
                 onClick={toggleNotificationsSidebar}
               >
-                <Bell className="w-6 h-6 text-gray-600" />
-                <span className="text-gray-700">Notifications</span>
+                <Bell className="me-1" size={20} />
+                Notifications
               </div>
             </div>
           </header>
 
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex justify-between items-center">
+          {/* Dashboard Content */}
+          <h2 className="h4 mb-4 d-flex justify-content-between align-items-center">
             Dashboard
-            <div className="flex items-center space-x-2 text-base font-normal text-gray-600">
-              Today <ChevronDown className="w-4 h-4 ml-1" />
+            <div className="d-flex align-items-center text-muted small">
+              Today <ChevronDown className="ms-1" size={14} />
             </div>
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="row g-4">
             {/* Patient Info */}
-            <div className="md:col-span-2 bg-white rounded-xl shadow-md p-6 flex items-center">
-              <div className="bg-[#e0f7fa] p-4 rounded-xl mr-6 flex-shrink-0">
-                <Users className="w-16 h-16 text-[#059da8]" />
+            <div className="col-md-8">
+              <div className="card shadow-sm h-100 d-flex flex-row align-items-center p-3">
+                <div className="bg-info bg-opacity-25 p-3 rounded me-3">
+                  <Users className="text-primary" size={48} />
+                </div>
+                <div>
+                  <h3 className="h5">{patient.name}</h3>
+                  <p className="mb-1 text-muted">
+                    Age: <span className="fw-semibold">{patient.age}</span>
+                  </p>
+                  <p className="mb-1 text-muted">
+                    Gender:{" "}
+                    <span className="fw-semibold">{patient.gender}</span>
+                  </p>
+                  <p className="mb-0 text-muted">
+                    Blood Group:{" "}
+                    <span className="fw-semibold">{patient.bloodGroup}</span>
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  {patient.name}
-                </h3>
-                <p className="text-gray-600 mb-1">
-                  Age: <span className="font-medium">{patient.age}</span>
-                </p>
-                <p className="text-gray-600 mb-1">
-                  Gender: <span className="font-medium">{patient.gender}</span>
-                </p>
-                <p className="text-gray-600">
-                  Blood Group:{" "}
-                  <span className="font-medium">{patient.bloodGroup}</span>
-                </p>
+            </div>
+
+            {/* Placeholder for widget */}
+            <div className="col-md-4"></div>
+
+            {/* Appointment */}
+            <div className="col-md-4">
+              <div
+                onClick={() => navigate("/manage-appointment")}
+                className="card shadow-sm p-3 cursor-pointer h-100"
+                role="button"
+              >
+                <Users className="text-primary mb-2" size={24} />
+                <p className="text-muted mb-1">Appointment today</p>
+                <h4 className="fw-bold">1</h4>
               </div>
             </div>
 
-            {/* Other widgets */}
-            <div className="md:col-span-1"></div>
-
-            <div
-              onClick={() => navigate("/manage-appointment")}
-              className="cursor-pointer bg-white rounded-xl shadow-md p-6 flex flex-col items-start justify-center hover:bg-gray-100 transition"
-            >
-              <Users className="w-8 h-8 text-[#059da8] mb-3" />
-              <p className="text-gray-600 text-lg mb-2">Appointment today</p>
-              <span className="text-3xl font-bold text-gray-900">1</span>
+            {/* Test History */}
+            <div className="col-md-4">
+              <div
+                onClick={() => navigate("/test-history")}
+                className="card shadow-sm p-3 cursor-pointer h-100"
+                role="button"
+              >
+                <FileText className="text-primary mb-2" size={24} />
+                <p className="text-muted mb-1">Total Tests Done</p>
+                <h4 className="fw-bold">2,318</h4>
+              </div>
             </div>
 
-            <div
-              onClick={() => navigate("/test-history")}
-              className="cursor-pointer bg-white rounded-xl shadow-md p-6 flex flex-col items-start justify-center hover:bg-gray-100 transition"
-            >
-              <FileText className="w-8 h-8 text-[#059da8] mb-3" />
-              <p className="text-gray-600 text-lg mb-2">Total Tests Done</p>
-              <span className="text-3xl font-bold text-gray-900">2,318</span>
-            </div>
-
-            <div
-              onClick={() => navigate("/view-prescriptions")}
-              className="cursor-pointer bg-white rounded-xl shadow-md p-6 flex flex-col items-start justify-center hover:bg-gray-100 transition"
-            >
-              <ClipboardList className="w-8 h-8 text-[#059da8] mb-3" />
-              <p className="text-gray-600 text-lg mb-2">Pending Tests</p>
-              <span className="text-3xl font-bold text-gray-900">10</span>
+            {/* Prescriptions */}
+            <div className="col-md-4">
+              <div
+                onClick={() => navigate("/view-prescriptions")}
+                className="card shadow-sm p-3 cursor-pointer h-100"
+                role="button"
+              >
+                <ClipboardList className="text-primary mb-2" size={24} />
+                <p className="text-muted mb-1">Pending Tests</p>
+                <h4 className="fw-bold">10</h4>
+              </div>
             </div>
           </div>
         </main>
