@@ -1,51 +1,50 @@
-// routes/doctorAuth.js
 const express = require("express");
-const bcrypt = require("bcrypt"); // ensure this matches your Doctor model
-const jwt = require("jsonwebtoken");
 const Doctor = require("../models/Doctor");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || "change_me";
 
-/**
- * POST /api/loginDoctor
- * Body: { username, password }
- *  - username is the doctor's email
- */
-router.post("/loginDoctor", async (req, res) => {
+// Doctor login route
+router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body || {};
-    if (!username || !password) {
-      return res
-        .status(400)
-        .json({ message: "username and password are required" });
+    console.log("Login request body:", req.body); // Debug
+
+    let { pno, password } = req.body;
+
+    // Validate input
+    if (!pno || !password) {
+      return res.status(400).json({ message: "PNO and password are required" });
     }
 
-    const email = String(username).trim().toLowerCase();
-    const doctor = await Doctor.findOne({ email });
+    // Ensure PNO is a number
+    pno = Number(pno);
+    if (isNaN(pno)) {
+      return res.status(400).json({ message: "PNO must be a number" });
+    }
+
+    // Find doctor by PNO
+    const doctor = await Doctor.findOne({ pno });
     if (!doctor) return res.status(404).json({ message: "Doctor not found" });
 
-    const ok = await bcrypt.compare(password, doctor.password);
-    if (!ok) return res.status(401).json({ message: "Invalid credentials" });
+    // Compare password
+    const isMatch = await doctor.comparePassword(password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ id: doctor._id, role: "doctor" }, JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    // Create JWT token
+    const token = jwt.sign(
+      { id: doctor._id, pno: doctor.pno },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    // Shape matches your frontend: token + doctor
-    return res.json({
+    res.status(200).json({
       message: "Login successful",
       token,
-      doctor: {
-        id: doctor._id,
-        email: doctor.email,
-        name: doctor.name ?? null,
-        role: "doctor",
-      },
+      doctor: { name: doctor.name, email: doctor.email, pno: doctor.pno },
     });
-  } catch (err) {
-    console.error("[DOCTOR LOGIN] error:", err);
-    return res.status(500).json({ message: "Server error, try again later" });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
