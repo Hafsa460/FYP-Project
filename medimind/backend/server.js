@@ -5,10 +5,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-// Import routes
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/auth");
-const doctorAuthRoutes = require("./routes/doctorAuth");
+const doctorRoutes = require("./routes/doctorAuth");
 const passwordRoutes = require("./routes/password");
 const app = express();
 
@@ -49,14 +48,13 @@ console.log("User routes mounted at /api/users");
 app.use("/api/auth", authRoutes);
 console.log("Auth routes mounted at /api/auth");
 
-app.use("/api", doctorAuthRoutes);
-console.log("Doctor auth routes mounted at /api");
 
 app.use("/api/password", passwordRoutes);
 console.log("Password routes mounted at /api/password");
 
+app.use("/api/doctors", doctorRoutes);
+console.log("Password routes mounted at /api/doctorroutes");
 
-// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
