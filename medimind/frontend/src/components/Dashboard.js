@@ -39,7 +39,13 @@ function LoginDashboard() {
             >
               Login as Doctor
             </button>
-
+            <button
+              className="btn w-100 mb-3"
+              style={{ backgroundColor: "#00b3b3", color: "white" }}
+              onClick={() => navigate("/adminlogin")}
+            >
+              Login as Admin
+            </button>
             <button
               className="btn w-100"
               style={{

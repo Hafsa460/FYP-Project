@@ -12,10 +12,14 @@ import TestHistory from "../src/components/Neurologist/VerifyReports";
 import TestReport from "../src/components/TestReport";
 import ProfileManagement from "../src/components/Neurologist/ProfileManagement";
 import PatientDashboard from "../src/components/PatientDashboard";
-import Navbar from "./components/Navbar";
 import VerifySuccess from "./components/VerifySuccess";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassowrd";
+import AdminLogin from './components/AdminLogin';
+import Doctoradmin from './components/DoctorAdmin';
+import Dptadmin from "./components/DptAdmin";
+import Superadmin from "./components/SuperAdmin";
+import Patientadmin from "./components/PatientsAdmin";
 function App() {
   return (
     <Routes>
@@ -35,6 +39,11 @@ function App() {
       <Route path="/testreport" element={<TestReport />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/adminLogin" element={<AdminLogin />}/>
+      < Route path ="/dctr" element={<Doctoradmin/>}/>
+      < Route path ="/patient" element={<Patientadmin/>}/>
+      < Route path ="/super" element={<Superadmin/>}/>
+      < Route path ="/department" element={<Dptadmin/>}/>
     </Routes>
   );
 }
