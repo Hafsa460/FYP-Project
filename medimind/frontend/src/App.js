@@ -16,6 +16,7 @@ import Navbar from "./components/Navbar";
 import VerifySuccess from "./components/VerifySuccess";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassowrd";
+import AdminDashboard from "./components/PatientAdmin/AdminPage";
 function App() {
   return (
     <Routes>
@@ -35,6 +36,7 @@ function App() {
       <Route path="/testreport" element={<TestReport />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/PatientAdmin/*" element={<AdminDashboard />} />
     </Routes>
   );
 }
