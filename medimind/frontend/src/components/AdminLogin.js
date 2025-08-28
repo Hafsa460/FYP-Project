@@ -1,11 +1,12 @@
+// src/components/AdminLogin.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import coverimage from "../images/cover.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-export default function DoctorLogin() {
-  const [pno, setPno] = useState("");
+export default function AdminLogin() {
+  const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -16,16 +17,22 @@ export default function DoctorLogin() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/doctors/login", {
-        pno: Number(pno),
-        password,
+      const res = await axios.post("http://localhost:5000/api/admin/login", {
+        id: Number(id.trim()),
+        password: password.trim()
       });
 
-      localStorage.setItem("doctorToken", res.data.token);
-      localStorage.setItem("doctor", JSON.stringify(res.data.doctor));
-      navigate("/doctor-dashboard");
+      localStorage.setItem("adminToken", res.data.token);
+      localStorage.setItem("adminRole", res.data.role);
+      localStorage.setItem("adminName", res.data.name);
+
+      if (res.data.role === "doctorAdmin") navigate("/dctr");
+      else if (res.data.role === "patientAdmin") navigate("/patient");
+      else if (res.data.role === "departmentAdmin") navigate("/department");
+      else if (res.data.role === "superAdmin") navigate("/super");
+
     } catch (err) {
-      console.error("Login failed:", err.response?.data || err);
+      console.error("Login error:", err.response?.data);
       setError(err.response?.data?.message || "Login failed. Please try again.");
     }
   };
@@ -35,25 +42,25 @@ export default function DoctorLogin() {
       <div className="login-container shadow-lg row w-100">
         {/* Left Image Section */}
         <div className="col-md-6 image-section">
-          <img src={coverimage} alt="Login" className="img-fluid" />
+          <img src={coverimage} alt="Admin Login" className="img-fluid" />
         </div>
 
         {/* Right Form Section */}
         <div className="col-md-6 form-section p-5">
-          <h2 className="text-teal mb-4 text-center">Doctor Login</h2>
+          <h2 className="text-teal mb-4 text-center">Admin Login</h2>
 
           {error && <div className="alert alert-danger">{error}</div>}
 
           <form onSubmit={handleLogin}>
-            {/* PNo */}
+            {/* Admin ID */}
             <div className="mb-3">
-              <label className="form-label">PNo (7-digit)</label>
+              <label className="form-label">Admin ID</label>
               <input
                 type="number"
                 className="form-control"
-                value={pno}
-                onChange={(e) => setPno(e.target.value)}
-                placeholder="Enter PNo"
+                value={id}
+                onChange={(e) => setId(e.target.value)}
+                placeholder="Enter Admin ID"
                 required
               />
             </div>
@@ -85,15 +92,6 @@ export default function DoctorLogin() {
             <button type="submit" className="btn btn-teal w-100 mt-3">
               Login
             </button>
-
-            <p>
-              <a
-                href="/forgot-password"
-                style={{ color: "#059da8", textDecoration: "underline" }}
-              >
-                Forgot Password?
-              </a>
-            </p>
           </form>
         </div>
       </div>
