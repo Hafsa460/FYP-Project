@@ -1,4 +1,5 @@
 // server.js
+// server.js
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -6,10 +7,13 @@ const cors = require("cors");
 
 // Routes
 const adminRoutes = require("./routes/adminRoutes");
-
+const userRoutes = require("./models/User")
 const patientRoutes = require("./routes/adminpatient");
 const app = express();
 const adminPatientRoutes = require("./routes/adminpatient");
+const authRoutes = require("./routes/auth")
+const doctorAuthRoutes = require("./routes/doctorAuth")
+const passwordRoutes = require("./routes/password")
 
 
 // Middleware
@@ -56,6 +60,7 @@ app.use("/api/password", passwordRoutes);
 console.log("Password routes mounted at /api/password");
 
 app.use("/api/adminpatients", adminPatientRoutes);
+
 
 // Start server
 const PORT = process.env.PORT || 5000;

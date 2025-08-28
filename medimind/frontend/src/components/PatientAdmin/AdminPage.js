@@ -94,21 +94,8 @@ function AdminDashboard({ onLogout }) {
         >
           <div>
             <h5 className="mb-4 d-flex align-items-center text-primary">
-              <Users className="me-2" /> Admin
+              <Users className="me-2" /> Patient Admin
             </h5>
-            <nav>
-              <ul className="list-unstyled">
-                <li className="mb-2">
-                  <Link
-                    to="/admin-dashboard"
-                    className="d-flex align-items-center p-2 rounded text-dark text-decoration-none hover-shadow"
-                  >
-                    <LayoutGrid className="me-2" size={18} />
-                    Dashboard
-                  </Link>
-                </li>
-              </ul>
-            </nav>
           </div>
           <div>
             <Link
@@ -127,7 +114,7 @@ function AdminDashboard({ onLogout }) {
           <header className="bg-white p-3 rounded shadow-sm d-flex justify-content-between align-items-center mb-4">
             <div className="d-flex align-items-center">
               <LayoutGrid className="me-2 text-muted" size={20} />
-              <span className="text-muted">Admin / Dashboard</span>
+              <span className="text-muted">Patient Dashboard</span>
             </div>
             <div className="d-flex align-items-center">
               <div className="position-relative me-3">
@@ -153,9 +140,6 @@ function AdminDashboard({ onLogout }) {
           {/* Dashboard Title */}
           <h2 className="h4 mb-4 d-flex justify-content-between align-items-center">
             Dashboard
-            <div className="d-flex align-items-center text-muted small">
-              Today <ChevronDown className="ms-1" size={14} />
-            </div>
           </h2>
 
           {/* Summary Widgets */}
