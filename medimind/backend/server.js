@@ -1,27 +1,22 @@
-// Load environment variables
+// server.js
 require("dotenv").config();
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-// Import routes
-const userRoutes = require("./routes/userRoutes");
-const authRoutes = require("./routes/auth");
-const doctorAuthRoutes = require("./routes/doctorAuth");
-const passwordRoutes = require("./routes/password");
+// Routes
+const adminRoutes = require("./routes/adminRoutes");
+
 const patientRoutes = require("./routes/adminpatient");
 const app = express();
 const adminPatientRoutes = require("./routes/adminpatient");
 
 
-// Frontend URL from .env or default
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
-
 // Middleware
-app.use(cors({ origin: FRONTEND_URL }));
+app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:3000" }));
 app.use(express.json());
-// Log incoming requests for debugging
+
+// Log incoming requests
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
@@ -31,18 +26,20 @@ app.use((req, res, next) => {
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  dbName: "hospital" // Force database to "hospital"
+  dbName: "hospital"
 })
 .then(() => console.log("✅ MongoDB connected to 'hospital' database"))
-.catch((err) => {
+.catch(err => {
   console.error("❌ MongoDB connection error:", err);
-  process.exit(1); // Exit if DB connection fails
+  process.exit(1);
 });
 
-// Health check route
-app.get("/", (req, res) => {
-  res.send("✅ API is running");
-});
+// Health check
+app.get("/", (req, res) => res.send("✅ API is running"));
+
+// Routes
+app.use("/api/admin", adminRoutes);
+console.log("Admin routes mounted at /api/admin");
 
 // After importing routes
 
@@ -62,6 +59,4 @@ app.use("/api/adminpatients", adminPatientRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
