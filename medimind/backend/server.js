@@ -10,7 +10,10 @@ const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/auth");
 const doctorAuthRoutes = require("./routes/doctorAuth");
 const passwordRoutes = require("./routes/password");
+const patientRoutes = require("./routes/adminpatient");
 const app = express();
+const adminPatientRoutes = require("./routes/adminpatient");
+
 
 // Frontend URL from .env or default
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
@@ -55,6 +58,7 @@ console.log("Doctor auth routes mounted at /api");
 app.use("/api/password", passwordRoutes);
 console.log("Password routes mounted at /api/password");
 
+app.use("/api/adminpatients", adminPatientRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
