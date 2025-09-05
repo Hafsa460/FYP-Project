@@ -1,5 +1,4 @@
-// server.js
-// server.js
+// Load environment variables
 require("dotenv").config();
 
 const express = require("express");
@@ -13,14 +12,8 @@ const passwordRoutes = require("./routes/password");
 
 // ⬇️ Import your new admin routes
 const adminRoutes = require("./routes/adminRoutes");
-const userRoutes = require("./models/User")
-const patientRoutes = require("./routes/adminpatient");
-const app = express();
-const adminPatientRoutes = require("./routes/adminpatient");
-const authRoutes = require("./routes/auth")
-const doctorAuthRoutes = require("./routes/doctorAuth")
-const passwordRoutes = require("./routes/password")
 
+const app = express();
 
 // Frontend URL from .env or default
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
@@ -69,24 +62,6 @@ console.log("Doctor routes mounted at /api/doctors");
 app.use("/api/admins", adminRoutes);
 console.log("Admin routes mounted at /api/admins");
 
-// After importing routes
-
-app.use("/api/users", userRoutes);
-console.log("User routes mounted at /api/users");
-
-app.use("/api/auth", authRoutes);
-console.log("Auth routes mounted at /api/auth");
-
-app.use("/api", doctorAuthRoutes);
-console.log("Doctor auth routes mounted at /api");
-
-app.use("/api/password", passwordRoutes);
-console.log("Password routes mounted at /api/password");
-
-app.use("/api/adminpatients", adminPatientRoutes);
-
-
-// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
