@@ -17,24 +17,25 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/admins/login", {
-  id: Number(id.trim()),
-  password: password.trim()
-  });
-
+      const res = await axios.post("http://localhost:5000/api/admin/login", {
+        id: Number(id.trim()),
+        password: password.trim(),
+      });
 
       localStorage.setItem("adminToken", res.data.token);
       localStorage.setItem("adminRole", res.data.role);
       localStorage.setItem("adminName", res.data.name);
 
       if (res.data.role === "doctorAdmin") navigate("/dctr");
-      else if (res.data.role === "patientAdmin") navigate("/patient");
+      else if (res.data.role === "patientAdmin")
+        navigate("/PatientAdmin/AdminPage");
       else if (res.data.role === "departmentAdmin") navigate("/department");
       else if (res.data.role === "superAdmin") navigate("/super");
-
     } catch (err) {
       console.error("Login error:", err.response?.data);
-      setError(err.response?.data?.message || "Login failed. Please try again.");
+      setError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
     }
   };
 
