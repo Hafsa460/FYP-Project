@@ -26,7 +26,7 @@ function AdminDashboard({ onLogout }) {
 
   // Fetch patients from backend
   axios
-    .get("http://localhost:5000/api/adminpatients")
+    .get("http://localhost:5000/api/adminpatient")
     .then((res) => {
       console.log("Patients fetched:", res.data); // Debug
       setPatients(res.data);
