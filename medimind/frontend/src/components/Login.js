@@ -23,7 +23,7 @@ export default function DoctorLogin() {
 
       localStorage.setItem("doctorToken", res.data.token);
       localStorage.setItem("doctor", JSON.stringify(res.data.doctor));
-      navigate("/doctor-dashboard");
+      navigate("/neuro-dashboard/*");
     } catch (err) {
       console.error("Login failed:", err.response?.data || err);
       setError(err.response?.data?.message || "Login failed. Please try again.");

@@ -17,10 +17,11 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/admin/login", {
-        id: Number(id.trim()),
-        password: password.trim()
-      });
+      const res = await axios.post("http://localhost:5000/api/admins/login", {
+  id: Number(id.trim()),
+  password: password.trim()
+  });
+
 
       localStorage.setItem("adminToken", res.data.token);
       localStorage.setItem("adminRole", res.data.role);
