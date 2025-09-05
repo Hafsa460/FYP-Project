@@ -15,11 +15,12 @@ import PatientDashboard from "../src/components/PatientDashboard";
 import VerifySuccess from "./components/VerifySuccess";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassowrd";
-import AdminLogin from './components/AdminLogin';
-import Doctoradmin from './components/DoctorAdmin';
+import AdminDashboard from "./components/PatientAdmin/AdminPage";
+import AdminLogin from "./components/AdminLogin";
+import Doctoradmin from "./components/DoctorAdmin";
 import Dptadmin from "./components/DptAdmin";
 import Superadmin from "./components/SuperAdmin";
-import Patientadmin from "./components/PatientsAdmin";
+
 function App() {
   return (
     <Routes>
@@ -39,11 +40,11 @@ function App() {
       <Route path="/testreport" element={<TestReport />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
-      <Route path="/adminLogin" element={<AdminLogin />}/>
-      < Route path ="/dctr" element={<Doctoradmin/>}/>
-      < Route path ="/patient" element={<Patientadmin/>}/>
-      < Route path ="/super" element={<Superadmin/>}/>
-      < Route path ="/department" element={<Dptadmin/>}/>
+      <Route path="/PatientAdmin/*" element={<AdminDashboard />} />
+      <Route path="/adminLogin" element={<AdminLogin />} />
+      <Route path="/dctr" element={<Doctoradmin />} />
+      <Route path="/super" element={<Superadmin />} />
+      <Route path="/department" element={<Dptadmin />} />
     </Routes>
   );
 }
