@@ -13,7 +13,7 @@ const passwordRoutes = require("./routes/password");
 // ⬇️ Import your new admin routes
 const adminRoutes = require("./routes/adminRoutes");
 const patientRoutes = require("./routes/adminpatient");
-
+const appointmentRoutes = require("./routes/appointmentroutes");
 const app = express();
 
 // Frontend URL from .env or default
@@ -58,7 +58,7 @@ console.log("Password routes mounted at /api/password");
 
 app.use("/api/doctors", doctorRoutes);
 console.log("Doctor routes mounted at /api/doctors");
-
+app.use("/api/appointments", appointmentRoutes);
 // ⬇️ Mount the admin routes here
 app.use("/api/admins", adminRoutes);
 console.log("Admin routes mounted at /api/admins");
