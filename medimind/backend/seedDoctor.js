@@ -1,42 +1,83 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 const Doctor = require("./models/Doctor");
-require("dotenv").config(); // to load .env variables
+require("dotenv").config();
 
-// Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log("Connected to MongoDB Atlas"))
-.catch(err => console.error("Connection error:", err));
+.then(() => console.log("✅ Connected to MongoDB Atlas"))
+.catch(err => console.error("❌ Connection error:", err));
 
-// Manually specify unique 7-digit PNOs
 const doctors = [
-  { name: "Dr. John Smith", email: "john@example.com", pno: 1000001, password: "password123" },
-  { name: "Dr. Emily Davis", email: "emily@example.com", pno: 1000002, password: "securePass456" },
-  { name: "Dr. Mark Taylor", email: "mark@example.com", pno: 1000003, password: "docMark789" },
+  { 
+    name: "Dr. John Smith", 
+    email: "john@example.com", 
+    pno: 1000001, 
+    password: "password123", 
+    department: "Cardiology",
+    leaveDays: [
+      { date: "2025-09-12", reason: "Conference" },
+      { date: "2025-09-18", reason: "Personal Leave" }
+    ],
+    workingHours: { start: "08:00", end: "14:00" }
+  },
+  { 
+    name: "Dr. Emily Davis", 
+    email: "emily@example.com", 
+    pno: 1000002, 
+    password: "securePass456", 
+    department: "Neurology",
+    leaveDays: [
+      { date: "2025-09-14", reason: "Medical Camp" }
+    ],
+    workingHours: { start: "08:00", end: "14:00" }
+  },
+  { 
+    name: "Dr. Mark Taylor", 
+    email: "mark@example.com", 
+    pno: 1000003, 
+    password: "docMark789", 
+    department: "Orthopedics",
+    leaveDays: [],
+    workingHours: { start: "08:00", end: "14:00" }
+  },
+  { 
+    name: "Dr. Sarah Lee", 
+    email: "sarah@example.com", 
+    pno: 1000004, 
+    password: "sarahPass321", 
+    department: "Dermatology",
+    leaveDays: [
+      { date: "2025-09-20", reason: "Workshop" }
+    ],
+    workingHours: { start: "08:00", end: "14:00" }
+  },
+  { 
+    name: "Dr. Ahmed Khan", 
+    email: "ahmed@example.com", 
+    pno: 1000005, 
+    password: "ahmedStrong987", 
+    department: "Pediatrics",
+    leaveDays: [],
+    workingHours: { start: "08:00", end: "14:00" }
+  }
 ];
 
 async function seedDoctors() {
   try {
     await Doctor.deleteMany();
-    console.log("Old doctors removed.");
+    console.log("🗑 Old doctors removed.");
 
-    for (let doc of doctors) {
-      // Do NOT hash manually, let pre("save") do it
-      await Doctor.create({ 
-        name: doc.name, 
-        email: doc.email, 
-        pno: doc.pno, 
-        password: doc.password // raw password
-      });
+    for (const doc of doctors) {
+      const doctor = new Doctor(doc);
+      await doctor.save();
     }
 
-    console.log("Doctors seeded successfully.");
+    console.log("✅ Doctors seeded successfully.");
     mongoose.connection.close();
   } catch (error) {
-    console.error("Error seeding doctors:", error);
+    console.error("❌ Error seeding doctors:", error);
     mongoose.connection.close();
   }
 }
