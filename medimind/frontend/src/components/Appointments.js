@@ -8,7 +8,7 @@ import { format } from "date-fns";
 
 function Appointment() {
   const [doctors, setDoctors] = useState([]);
-  const [bookedSlots, setBookedSlots] = useState([]); // NEW: store appointments from backend
+  const [bookedSlots, setBookedSlots] = useState([]); 
   const [formData, setFormData] = useState({
     doctorId: "",
     date: null,
@@ -30,7 +30,7 @@ function Appointment() {
     fetchDoctors();
   }, []);
 
-  // 🔹 Fetch booked slots when doctor or date changes
+ 
   useEffect(() => {
     const fetchAppointments = async () => {
       if (!formData.doctorId || !formData.date) return;
@@ -42,7 +42,7 @@ function Appointment() {
           }&date=${format(formData.date, "yyyy-MM-dd")}`
         );
         const data = await res.json();
-        setBookedSlots(data.map((a) => a.time)); // store only booked times
+        setBookedSlots(data.map((a) => a.time)); 
       } catch (err) {
         console.error("Error fetching appointments:", err);
       }
@@ -54,7 +54,7 @@ function Appointment() {
     e.preventDefault();
 
     if (!formData.doctorId || !formData.date || !formData.time) {
-      setMessage("⚠️ Please fill all fields.");
+      setMessage("Please fill all fields.");
       return;
     }
 
