@@ -18,19 +18,18 @@ const doctorSchema = new mongoose.Schema({
   workingHours: {
     start: { type: String, default: "08:00" },
     end: { type: String, default: "14:00" }
-  }
+  },
+
+  // 🔹 New field
+  appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }]
 });
 
-module.exports = mongoose.model("Doctor", doctorSchema);
-
-// Hash password before saving
 doctorSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-// Compare password method
 doctorSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
