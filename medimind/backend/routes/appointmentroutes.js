@@ -1,16 +1,18 @@
 const express = require("express");
 const Appointment = require("../models/Appointment");
+const User = require("../models/User"); 
+const Doctor = require("../models/Doctor");
 const DoctorLeave = require("../models/DoctorLeave");
 const authMiddleware = require("../middleware/auth");
 
+
 const router = express.Router();
 
-// Check constraints
-router.post("/check", authMiddleware, async (req, res) => {
-  const { doctorId, date, time } = req.body;
-  const patientId = req.user.id; // ✅ from token
-
+router.post("/book", authMiddleware, async (req, res) => {
   try {
+    const { doctorId, date, time } = req.body;
+    const patientId = req.user.id; // from token
+
     // 1. Check doctor leave
     const leave = await DoctorLeave.findOne({ doctorId, date });
     if (leave) {
@@ -29,26 +31,27 @@ router.post("/check", authMiddleware, async (req, res) => {
       return res.status(400).json({ error: "You already have an appointment at this time." });
     }
 
-    return res.json({ success: true });
+    // 4. Create appointment
+    const appointment = await Appointment.create({ doctorId, patientId, date, time });
+
+    // 5. Save appointment ID in patient
+    await User.findByIdAndUpdate(patientId, {
+      $push: { appointments: appointment._id }
+    });
+
+    // 6. Save appointment ID in doctor
+    await Doctor.findByIdAndUpdate(doctorId, {
+      $push: { appointments: appointment._id }
+    });
+
+    res.status(201).json({
+      message: "✅ Appointment booked successfully",
+      appointment
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    console.error("Error booking appointment:", err);
+    res.status(500).json({ error: "Failed to book appointment" });
   }
 });
-
-// Book appointment
-router.post("/book", authMiddleware, async (req, res) => {
-  const { doctorId, date, time } = req.body;
-  const patientId = req.user.id; // ✅ from token
-
-  try {
-    const newAppointment = new Appointment({ doctorId, patientId, date, time });
-    await newAppointment.save();
-    res.json({ success: true, appointment: newAppointment });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to book appointment." });
-  }
-});
-
 module.exports = router;
