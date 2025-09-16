@@ -12,6 +12,7 @@ import TestHistory from "../src/components/Neurologist/VerifyReports";
 import TestReport from "../src/components/TestReport";
 import ProfileManagement from "../src/components/Neurologist/ProfileManagement";
 import PatientDashboard from "../src/components/PatientDashboard";
+import Appointment from "../src/components/Appointments";
 import VerifySuccess from "./components/VerifySuccess";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassowrd";
@@ -32,6 +33,7 @@ function App() {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/neuro-dashboard/*" element={<NeuroDashboard />} />
       <Route path="/PatientDashboard" element={<PatientDashboard />} />
+      <Route path="/appointment" element={<Appointment />} />
       <Route path="/manage-appointment" element={<ManageAppointment />} />
       <Route path="/view-prescriptions" element={<Prescription />} />
       <Route path="/test-history" element={<TestHistory />} />

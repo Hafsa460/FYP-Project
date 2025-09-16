@@ -13,6 +13,7 @@ import Navbar from "./Navbar";
 // Import your patient pages
 import ViewPrescriptions from "./Prescription";
 import TestReports from "./TestReport";
+import Appointment from "./Appointments";
 
 function PatientDashboard() {
   const [showNotifications, setShowNotifications] = useState(true);
@@ -59,6 +60,11 @@ function PatientDashboard() {
                 <User className="me-2" size={16} /> Profile Management
               </Link>
             </li>
+            <li>
+              <Link to="/appointment" className="nav-link">
+                <User className="me-2" size={16} /> Make an Appointment
+              </Link>
+            </li>
             <li className="nav-item">
               <Link to="/" className="nav-link text-danger">
                 <LogOut className="me-2" size={16} /> Logout
@@ -67,10 +73,10 @@ function PatientDashboard() {
           </ul>
         </div>
 
-        {/* Main Content */}
+        
         <div className="content p-4 flex-grow-1">
           <div className="main-content">
-            {/* Top Section */}
+           
             <div className="top-section mb-4">
               <div className="d-flex align-items-center">
                 <User className="me-3 text-primary" size={40} />
