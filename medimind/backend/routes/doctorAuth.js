@@ -48,4 +48,13 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.get("/", async (req, res) => {
+  try {
+    const doctors = await Doctor.find();
+    res.json(doctors);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;
