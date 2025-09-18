@@ -54,4 +54,20 @@ router.post("/book", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Failed to book appointment" });
   }
 });
+
+// Get appointments for a patient
+router.get("/patient/:patientId", async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    const appointments = await Appointment.find({ patientId })
+      .populate("doctorId", "name role"); // populate doctor name + role
+
+    res.json(appointments);
+  } catch (err) {
+    console.error("Error fetching appointments:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
