@@ -1,29 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { Link, Routes, Route, useNavigate } from "react-router-dom";
-import {
-  ClipboardList,
-  FileText,
-  LogOut,
-  User,
-  Calendar,
-  Bell,
-} from "lucide-react";
+import { ClipboardList, FileText, LogOut, User, Bell } from "lucide-react";
 import Navbar from "./Navbar";
-
-// Import your patient pages
+import "./PatientDashboard.css";
+// Import patient pages
 import ViewPrescriptions from "./Prescription";
 import TestReports from "./TestReport";
-import Appointment from "./Appointments";
 
 function PatientDashboard() {
   const [showNotifications, setShowNotifications] = useState(true);
   const [patient, setPatient] = useState(null);
+  const [appointments, setAppointments] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedPatient = localStorage.getItem("patient");
     if (storedPatient) {
-      setPatient(JSON.parse(storedPatient));
+      const parsed = JSON.parse(storedPatient);
+      console.log("Parsed patient:", parsed); // 👀 see what fields you have
+      setPatient(parsed);
+
+      // ✅ pick the right field for ID (_id, id, or mrNo)
+      const patientId = parsed._id || parsed.id || parsed.mrNo;
+
+      if (!patientId) {
+        console.error("No patient ID found in stored patient object");
+        return;
+      }
+
+      // Fetch appointments from backend
+      fetch(`http://localhost:5000/api/appointments/patient/${patientId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // if JWT auth
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => setAppointments(data))
+        .catch((err) => console.error("Error fetching appointments:", err));
     } else {
       navigate("/");
     }
@@ -56,11 +69,6 @@ function PatientDashboard() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="profile-management" className="nav-link">
-                <User className="me-2" size={16} /> Profile Management
-              </Link>
-            </li>
-            <li>
               <Link to="/appointment" className="nav-link">
                 <User className="me-2" size={16} /> Make an Appointment
               </Link>
@@ -73,10 +81,10 @@ function PatientDashboard() {
           </ul>
         </div>
 
-        
+        {/* Content */}
         <div className="content p-4 flex-grow-1">
           <div className="main-content">
-           
+            {/* Top Section */}
             <div className="top-section mb-4">
               <div className="d-flex align-items-center">
                 <User className="me-3 text-primary" size={40} />
@@ -84,17 +92,16 @@ function PatientDashboard() {
                   <div className="fw-bold">{patient.name}</div>
                   <div className="text-muted">Age: {patient.age}</div>
                   <div className="text-secondary">
-                    You have 2 appointments scheduled
+                    You have {appointments.length} appointments scheduled
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Summary Cards */}
             <div className="card-grid mb-4">
               <div className="card">
                 <div className="fw-bold">Appointments</div>
-                <div className="fs-4">3</div>
+                <div className="fs-4">{appointments.length}</div>
               </div>
               <div className="card">
                 <div className="fw-bold">Prescriptions</div>
@@ -111,10 +118,22 @@ function PatientDashboard() {
               {/* Appointment History */}
               <div className="chart-section small-card">
                 <div className="section-title">Upcoming Appointments</div>
-                <p>
-                  • Neurologist – 12th Sept
-                  <br />• Cardiologist – 20th Sept
-                </p>
+                {appointments.length > 0 ? (
+                  <ul>
+                    {appointments.map((appt) => (
+                      <li key={appt._id}>
+                        {appt.doctorId?.name || "Doctor"}
+                        {" – "}
+                        {appt.doctorId?.department || "Specialist"}
+                        {" – "}
+                        {new Date(appt.date).toLocaleDateString()} at{" "}
+                        {appt.time}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No upcoming appointments</p>
+                )}
               </div>
 
               {/* Health Summary */}
@@ -162,7 +181,11 @@ function PatientDashboard() {
             </h5>
             <ul>
               <li>New test result uploaded.</li>
-              <li>Appointment reminder: 12th Sept.</li>
+              <li>
+                Appointment reminder:{" "}
+                {appointments[0] &&
+                  new Date(appointments[0].date).toLocaleDateString()}
+              </li>
               <li>Profile updated successfully.</li>
             </ul>
             <button
