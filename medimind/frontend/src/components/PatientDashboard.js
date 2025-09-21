@@ -4,7 +4,7 @@ import { ClipboardList, FileText, LogOut, User, Bell } from "lucide-react";
 import Navbar from "./Navbar";
 import "./PatientDashboard.css";
 // Import patient pages
-import ViewPrescriptions from "./Prescription";
+import ViewPrescriptions from "./Neurologist/PrescriptionHistory";
 import TestReports from "./TestReport";
 
 function PatientDashboard() {
