@@ -11,7 +11,7 @@ import {
 import Navbar from "./Navbar";
 
 // Import your patient pages
-import ViewPrescriptions from "./Prescription";
+import ViewPrescriptions from "./Neurologist/PrescriptionHistory";
 import TestReports from "./TestReport";
 import Appointment from "./Appointments";
 
