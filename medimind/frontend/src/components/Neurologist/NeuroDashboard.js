@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, Routes, Route, useNavigate } from "react-router-dom";
 import "./NeuroDashboard.css";
 import femaleProfile from "../../images/female.png";
 import VerifyReports from "./VerifyReports";
@@ -10,6 +10,94 @@ import Navbar from "../Navbar";
 
 function NeuroDashboard() {
   const [showNotifications, setShowNotifications] = useState(true);
+  const [doctor, setDoctor] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [nearestAppointments, setNearestAppointments] = useState([]);
+  const navigate = useNavigate();
+
+  // ✅ Load doctor from localStorage FIRST
+  useEffect(() => {
+    const storedDoctor = localStorage.getItem("doctor");
+    if (storedDoctor) {
+      const parsed = JSON.parse(storedDoctor);
+      setDoctor(parsed);
+    } else {
+      navigate("/"); // redirect if not logged in
+    }
+  }, [navigate]);
+
+  // ✅ Fetch doctor’s appointments when doctor is loaded
+  useEffect(() => {
+    if (!doctor?._id) return; // wait until _id is ready
+
+    const fetchAppointments = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/appointments/doctor/${doctor._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const data = await res.json();
+        setAppointments(data);
+      } catch (err) {
+        console.error("Error fetching doctor appointments:", err);
+      }
+    };
+
+    fetchAppointments();
+  }, [doctor]);
+
+  // ✅ Fetch nearest 5 appointments for this doctor
+  useEffect(() => {
+    if (!doctor?._id) return;
+
+    const fetchNearestAppointments = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/appointments/doctor/${doctor._id}/nearest5`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setNearestAppointments(data);
+        } else {
+          setNearestAppointments([]);
+        }
+      } catch (err) {
+        console.error("Error fetching nearest doctor appointments:", err);
+      }
+    };
+
+    fetchNearestAppointments();
+  }, [doctor]);
+
+  if (!doctor) {
+    return <div className="p-4">Loading doctor data...</div>;
+  }
+
+  // ✅ Calculate today’s appointments from doctor’s full appointments
+  // ✅ Calculate today’s appointments from doctor’s full appointments
+  const todaysAppointments = appointments.filter((appt) => {
+    const apptDate = new Date(appt.date); // convert MongoDB date
+    const today = new Date();
+
+    return (
+      apptDate.getFullYear() === today.getFullYear() &&
+      apptDate.getMonth() === today.getMonth() &&
+      apptDate.getDate() === today.getDate()
+    );
+  });
+
+  // ✅ Count unique patients for stats
+  const uniquePatients = new Set(appointments.map((a) => a.patientId?._id))
+    .size;
 
   return (
     <>
@@ -20,10 +108,10 @@ function NeuroDashboard() {
           <div className="doctor-profile d-flex align-items-center mb-4">
             <img
               src={femaleProfile}
-              alt="Female Doctor"
+              alt="Doctor"
               className="profile-icon me-3"
             />
-            <div className="doctor-name fw-semibold">Dr. Sara</div>
+            <div className="doctor-name fw-semibold">{doctor.name}</div>
           </div>
 
           <ul className="nav flex-column">
@@ -43,7 +131,7 @@ function NeuroDashboard() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/" className="nav-link">
+              <Link to="/" className="nav-link text-danger">
                 Logout
               </Link>
             </li>
@@ -62,10 +150,10 @@ function NeuroDashboard() {
                   className="profile-icon me-3"
                 />
                 <div>
-                  <div className="fw-bold">Dr. Sara</div>
-                  <div className="text-muted">Qualifications</div>
+                  <div className="fw-bold">{doctor.name}</div>
+                  <div className="text-muted">{doctor.department}</div>
                   <div className="text-secondary">
-                    You have 19 appointments today
+                    You have {todaysAppointments.length} appointments today
                   </div>
                 </div>
               </div>
@@ -74,28 +162,33 @@ function NeuroDashboard() {
             {/* Summary Cards */}
             <div className="card-grid">
               <div className="card">
-                <div className="fw-bold">Patients</div>
-                <div className="fs-4">156</div>
+                <div className="fw-bold">Total Appointments</div>
+                <div className="fs-4">{appointments.length}</div>
               </div>
               <div className="card">
-                <div className="fw-bold">Appointments</div>
-                <div className="fs-4">2,318</div>
-              </div>
-              <div className="card">
-                <div className="fw-bold">Reports</div>
-                <div className="fs-4">156</div>
+                <div className="fw-bold">Today’s Appointments</div>
+                <div className="fs-4">{todaysAppointments.length}</div>
               </div>
             </div>
 
-            {/* Bottom Grid (Patient Type + Achievements) */}
             <div className="bottom-grid mt-4">
-              {/* Patient Type */}
+              {/* All Appointments */}
               <div className="chart-section small-card">
-                <div className="section-title">Patient Type</div>
-                <p>
-                  • Male – 50%
-                  <br />• Female – 50%
-                </p>
+                <div className="section-title">All Appointments</div>
+                {appointments.length > 0 ? (
+                  <ul>
+                    {appointments.map((appt, idx) => (
+                      <li key={appt._id}>
+                        - {appt.patientId?.name || "Patient"} with{" "}
+                        {appt.doctorId?.name} ({appt.doctorId?.department}) on{" "}
+                        {new Date(appt.date).toLocaleDateString()} at{" "}
+                        {appt.time}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No appointments found</p>
+                )}
               </div>
 
               {/* Achievements */}
@@ -110,20 +203,16 @@ function NeuroDashboard() {
                   </thead>
                   <tbody>
                     <tr>
-                      <td>award1</td>
+                      <td>Best Cardiologist</td>
                       <td>2021</td>
                     </tr>
                     <tr>
-                      <td>award2</td>
+                      <td>Top Neuro Specialist</td>
                       <td>2022</td>
                     </tr>
                     <tr>
-                      <td>award3</td>
-                      <td>2019</td>
-                    </tr>
-                    <tr>
-                      <td>award4</td>
-                      <td>2019</td>
+                      <td>Medical Excellence Award</td>
+                      <td>2023</td>
                     </tr>
                   </tbody>
                 </table>
@@ -147,11 +236,21 @@ function NeuroDashboard() {
         {showNotifications ? (
           <div className="notification-panel p-3">
             <h5>Notifications</h5>
-            <ul>
-              <li>Patient A report is pending.</li>
-              <li>New appointment booked.</li>
-              <li>Profile updated.</li>
-            </ul>
+
+            {appointments.length > 0 ? (
+              <ul>
+                {appointments.map((appt, idx) => (
+                  <li key={appt._id}>
+                    - {appt.patientId?.name || "Patient"} with{" "}
+                    {appt.doctorId?.name} ({appt.doctorId?.department}) on{" "}
+                    {new Date(appt.date).toLocaleDateString()} at {appt.time}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No appointments found</p>
+            )}
+
             <button
               className="btn btn-sm btn-outline-secondary mt-2"
               onClick={() => setShowNotifications(false)}
@@ -168,7 +267,6 @@ function NeuroDashboard() {
           </button>
         )}
       </div>
-      
     </>
   );
 }
