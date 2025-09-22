@@ -51,33 +51,7 @@ function NeuroDashboard() {
   }, [doctor]);
 
   // ✅ Fetch nearest 5 appointments for this doctor
-  useEffect(() => {
-    if (!doctor?._id) return;
-
-    const fetchNearestAppointments = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:5000/api/appointments/doctor/${doctor._id}/nearest5`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setNearestAppointments(data);
-        } else {
-          setNearestAppointments([]);
-        }
-      } catch (err) {
-        console.error("Error fetching nearest doctor appointments:", err);
-      }
-    };
-
-    fetchNearestAppointments();
-  }, [doctor]);
-
+  
   if (!doctor) {
     return <div className="p-4">Loading doctor data...</div>;
   }
@@ -95,9 +69,7 @@ function NeuroDashboard() {
     );
   });
 
-  // ✅ Count unique patients for stats
-  const uniquePatients = new Set(appointments.map((a) => a.patientId?._id))
-    .size;
+
 
   return (
     <>
