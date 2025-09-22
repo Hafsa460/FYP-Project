@@ -3,6 +3,7 @@ import { Link, Routes, Route, useNavigate } from "react-router-dom";
 import { ClipboardList, FileText, LogOut, User, Bell } from "lucide-react";
 import Navbar from "./Navbar";
 import "./PatientDashboard.css";
+
 // Import patient pages
 import ViewPrescriptions from "./Prescription";
 import TestReports from "./TestReport";
@@ -11,32 +12,37 @@ function PatientDashboard() {
   const [showNotifications, setShowNotifications] = useState(true);
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
+  const [nearestAppointments, setNearestAppointments] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedPatient = localStorage.getItem("patient");
     if (storedPatient) {
       const parsed = JSON.parse(storedPatient);
-      console.log("Parsed patient:", parsed); // 👀 see what fields you have
       setPatient(parsed);
 
-      // ✅ pick the right field for ID (_id, id, or mrNo)
       const patientId = parsed._id || parsed.id || parsed.mrNo;
+      if (!patientId) return;
 
-      if (!patientId) {
-        console.error("No patient ID found in stored patient object");
-        return;
-      }
-
-      // Fetch appointments from backend
+      // Fetch ALL appointments for patient
       fetch(`http://localhost:5000/api/appointments/patient/${patientId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // if JWT auth
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       })
         .then((res) => res.json())
         .then((data) => setAppointments(data))
         .catch((err) => console.error("Error fetching appointments:", err));
+
+      // Fetch nearest 5 appointments
+      fetch(`http://localhost:5000/api/appointments/nearest5`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => setNearestAppointments(data))
+        .catch((err) => console.error("Error fetching nearest 5:", err));
     } else {
       navigate("/");
     }
@@ -45,6 +51,9 @@ function PatientDashboard() {
   if (!patient) {
     return <div className="p-4">Loading patient data...</div>;
   }
+
+  const nearestAppointment =
+    nearestAppointments.length > 0 ? nearestAppointments[0] : null;
 
   return (
     <>
@@ -98,6 +107,7 @@ function PatientDashboard() {
               </div>
             </div>
 
+            {/* Cards */}
             <div className="card-grid mb-4">
               <div className="card">
                 <div className="fw-bold">Appointments</div>
@@ -122,10 +132,7 @@ function PatientDashboard() {
                   <ul>
                     {appointments.map((appt) => (
                       <li key={appt._id}>
-                        {appt.doctorId?.name || "Doctor"}
-                        {" – "}
-                        {appt.doctorId?.department || "Specialist"}
-                        {" – "}
+                        {appt.doctorId?.name} – {appt.doctorId?.department} –{" "}
                         {new Date(appt.date).toLocaleDateString()} at{" "}
                         {appt.time}
                       </li>
@@ -165,14 +172,13 @@ function PatientDashboard() {
             </div>
           </div>
 
-          {/* Route Content */}
           <Routes>
             <Route path="view-prescriptions" element={<ViewPrescriptions />} />
             <Route path="test-reports" element={<TestReports />} />
           </Routes>
         </div>
 
-        {/* Notification Panel */}
+        {/* Notifications */}
         {showNotifications ? (
           <div className="notification-panel p-3">
             <h5>
@@ -180,14 +186,19 @@ function PatientDashboard() {
               Notifications
             </h5>
             <ul>
-              <li>New test result uploaded.</li>
-              <li>
-                Appointment reminder:{" "}
-                {appointments[0] &&
-                  new Date(appointments[0].date).toLocaleDateString()}
-              </li>
-              <li>Profile updated successfully.</li>
+              {appointments.length > 0 ? (
+                appointments.slice(0, 5).map((appt, index) => (
+                  <li key={appt._id}>
+                    Appointment {index + 1}:{" "}
+                    {new Date(appt.date).toLocaleDateString()} at {appt.time}{" "}
+                    with {appt.doctorId?.name} ({appt.doctorId?.department})
+                  </li>
+                ))
+              ) : (
+                <li>No upcoming appointments</li>
+              )}
             </ul>
+
             <button
               className="btn btn-sm btn-outline-secondary mt-2"
               onClick={() => setShowNotifications(false)}
