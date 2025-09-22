@@ -37,10 +37,17 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
+    // ✅ Return _id and department too
     res.status(200).json({
       message: "Login successful",
       token,
-      doctor: { name: doctor.name, email: doctor.email, pno: doctor.pno },
+      doctor: {
+        _id: doctor._id,
+        name: doctor.name,
+        email: doctor.email,
+        pno: doctor.pno,
+        department: doctor.department,
+      },
     });
   } catch (error) {
     console.error("Login error:", error);
