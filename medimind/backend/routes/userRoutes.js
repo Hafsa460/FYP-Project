@@ -175,4 +175,16 @@ router.post("/resend-verification", async (req, res) => {
   }
 });
 
+
+router.get("/search/:mrNo", async (req, res) => {
+  try {
+    const { mrNo } = req.params;
+    const patient = await User.findOne({ mrNo });
+    if (!patient) return res.status(404).json({ message: "Patient not found" });
+    res.json(patient);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
