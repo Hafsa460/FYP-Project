@@ -28,41 +28,53 @@ async function generateUniqueMrNo() {
 // REGISTER
 router.post("/register", async (req, res) => {
   try {
-    const { email, name, age, password } = req.body;
+    const { email, name, dob, gender, password } = req.body;
 
     // 1. Validate input
-    if (!email || !name || !age || !password) {
+    if (!email || !name || !dob || !gender || !password) {
       return res.status(400).json({ error: "All fields are required." });
     }
     if (!/^[^\s@]+@gmail\.com$/.test(email)) {
       return res.status(400).json({ error: "Only Gmail addresses allowed." });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters." });
+    if (!["Male", "Female"].includes(gender)) {
+      return res.status(400).json({ error: "Invalid gender selection." });
     }
 
-    // 2. Check existing email
+    // Age validation (>=18 years old)
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+    if (age < 18) {
+      return res.status(400).json({ error: "You must be at least 18 years old." });
+    }
+
+    // Check existing email
     if (await User.exists({ email })) {
       return res.status(400).json({ error: "Email is already registered." });
     }
 
-    // 3. Generate MR No & token
+    // Generate MR No & token
     const mrNo = await generateUniqueMrNo();
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
 
-    // 4. Save user (password will be hashed automatically by model hook)
-    const user = new User({
-      email,
-      name,
-      age,
-      mrNo,
-      password, // plain password
-      isVerified: false,
-      verificationToken,
-      verificationTokenExpires
-    });
-    await user.save();
+    // Save user
+  const user = new User({
+  email,
+  name,
+  dob,  // ✅ save DOB
+  age,  // ✅ calculated above
+  gender,
+  mrNo,
+  password,
+  isVerified: false,
+  verificationToken,
+  verificationTokenExpires
+});
+await user.save();
 
     // 5. Send verification email
     const verifyLink = `${BACKEND_URL}/api/users/verify/${verificationToken}`;
@@ -78,8 +90,6 @@ router.post("/register", async (req, res) => {
             Confirm Registration
           </a>
         </p>
-        <p>If the button doesn't work, copy and paste this link in your browser:</p>
-        <p>${verifyLink}</p>
         <p>This link expires in 24 hours.</p>
       `
     });
