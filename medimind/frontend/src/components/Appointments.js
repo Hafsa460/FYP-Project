@@ -5,10 +5,10 @@ import { Calendar } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
-
+import "./Appointment.css";
 function Appointment() {
   const [doctors, setDoctors] = useState([]);
-  const [bookedSlots, setBookedSlots] = useState([]); 
+  const [bookedSlots, setBookedSlots] = useState([]);
   const [formData, setFormData] = useState({
     doctorId: "",
     date: null,
@@ -17,12 +17,19 @@ function Appointment() {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
+  // 🔹 Fetch doctors list
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/doctors");
         const data = await res.json();
-        setDoctors(data);
+        console.log("Doctors API response:", data);
+
+        if (data.success && Array.isArray(data.doctors)) {
+          setDoctors(data.doctors); // ✅ FIXED
+        } else {
+          setDoctors([]);
+        }
       } catch (err) {
         console.error("Error fetching doctors:", err);
       }
@@ -30,7 +37,7 @@ function Appointment() {
     fetchDoctors();
   }, []);
 
- 
+  // 🔹 Fetch booked slots for selected doctor & date
   useEffect(() => {
     const fetchAppointments = async () => {
       if (!formData.doctorId || !formData.date) return;
@@ -42,7 +49,9 @@ function Appointment() {
           }&date=${format(formData.date, "yyyy-MM-dd")}`
         );
         const data = await res.json();
-        setBookedSlots(data.map((a) => a.time)); 
+        console.log("Appointments API response:", data);
+
+        setBookedSlots(Array.isArray(data) ? data.map((a) => a.time) : []);
       } catch (err) {
         console.error("Error fetching appointments:", err);
       }
@@ -50,6 +59,7 @@ function Appointment() {
     fetchAppointments();
   }, [formData.doctorId, formData.date]);
 
+  // 🔹 Submit appointment
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -106,8 +116,8 @@ function Appointment() {
   // 🔹 Generate slots (from working hours or default 8–2)
   const generateTimeSlots = (start = "08:00", end = "14:00") => {
     const slots = [];
-    let [sh, sm] = start.split(":").map(Number);
-    let [eh, em] = end.split(":").map(Number);
+    let [sh] = start.split(":").map(Number);
+    let [eh] = end.split(":").map(Number);
 
     for (let h = sh; h < eh; h++) {
       slots.push(`${String(h).padStart(2, "0")}:00`);
@@ -116,22 +126,10 @@ function Appointment() {
     return slots;
   };
 
-  // 🔹 Available times = working hours – booked slots
-  const availableTimes = () => {
-    if (!selectedDoctor || !formData.date) return [];
-
-    const { workingHours } = selectedDoctor;
-    let slots = generateTimeSlots(
-      workingHours?.start || "08:00",
-      workingHours?.end || "14:00"
-    );
-
-    return slots.filter((slot) => !bookedSlots.includes(slot));
-  };
-
   return (
     <>
       <Navbar />
+
       <div className="neuro-dashboard d-flex">
         <div className="content p-4 flex-grow-1">
           <div className="main-content">
@@ -184,6 +182,18 @@ function Appointment() {
                   placeholderText="Pick a date"
                   className="form-control"
                   dateFormat="yyyy-MM-dd"
+                  dayClassName={(date) => {
+                    if (
+                      selectedDoctor &&
+                      Array.isArray(selectedDoctor.leaveDays) &&
+                      selectedDoctor.leaveDays.some(
+                        (leave) => leave.date === format(date, "yyyy-MM-dd")
+                      )
+                    ) {
+                      return "leave-day";
+                    }
+                    return undefined;
+                  }}
                 />
               </div>
 
@@ -200,11 +210,22 @@ function Appointment() {
                   disabled={!formData.date}
                 >
                   <option value="">-- Choose Time --</option>
-                  {availableTimes().map((t, idx) => (
-                    <option key={idx} value={t}>
-                      {t}
-                    </option>
-                  ))}
+                  {generateTimeSlots(
+                    selectedDoctor?.workingHours?.start || "08:00",
+                    selectedDoctor?.workingHours?.end || "14:00"
+                  ).map((t, idx) => {
+                    const isBooked = bookedSlots.includes(t);
+                    return (
+                      <option
+                        key={idx}
+                        value={isBooked ? "" : t}
+                        disabled={isBooked}
+                        style={{ color: isBooked ? "red" : "black" }}
+                      >
+                        {isBooked ? `${t} (Booked)` : t}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
