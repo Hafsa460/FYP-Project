@@ -1,13 +1,15 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const Appointment = require("../models/Appointment");
-const User = require("../models/User"); 
+const User = require("../models/User");
 const Doctor = require("../models/Doctor");
 const DoctorLeave = require("../models/DoctorLeave");
 const authMiddleware = require("../middleware/auth");
 
-
 const router = express.Router();
 
+
+// 📌 Book an appointment
 router.post("/book", authMiddleware, async (req, res) => {
   try {
     let { doctorId, date, time } = req.body;
@@ -52,13 +54,13 @@ router.post("/book", authMiddleware, async (req, res) => {
 });
 
 
-
+// 📌 Get patient’s appointments
 router.get("/patient/:patientId", async (req, res) => {
   try {
     const { patientId } = req.params;
 
     const appointments = await Appointment.find({ patientId })
-      .populate("doctorId", "name department"); 
+      .populate("doctorId", "name department");
 
     res.json(appointments);
   } catch (err) {
@@ -68,8 +70,7 @@ router.get("/patient/:patientId", async (req, res) => {
 });
 
 
-
-// Get ALL appointments for a doctor
+// 📌 Get ALL appointments for a doctor
 router.get("/doctor/:doctorId", async (req, res) => {
   try {
     const { doctorId } = req.params;
@@ -86,6 +87,8 @@ router.get("/doctor/:doctorId", async (req, res) => {
   }
 });
 
+
+// 📌 Get today's appointments for a doctor
 router.get("/doctor/:doctorId/today", async (req, res) => {
   try {
     const { doctorId } = req.params;
@@ -110,6 +113,34 @@ router.get("/doctor/:doctorId/today", async (req, res) => {
   }
 });
 
+
+// 📌 Get appointments for doctor + specific date (for availability check)
+router.get("/", async (req, res) => {
+  try {
+    const { doctorId, date } = req.query;
+
+    if (!doctorId || !date) {
+      return res.status(400).json({ error: "doctorId and date are required" });
+    }
+
+    // Parse the date range
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const appointments = await Appointment.find({
+      doctorId,
+      date: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    res.json(appointments);
+  } catch (err) {
+    console.error("Error fetching availability:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 
 module.exports = router;
