@@ -1,0 +1,61 @@
+.appt-container {
+  background-color: #e0f7fa;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 700px;
+  margin: 32px auto;
+  box-shadow: 0 2px 12px rgba(5, 157, 168, 0.08);
+}
+
+.appt-title {
+  color: #059da8;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.appt-summary {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(5, 157, 168, 0.06);
+}
+
+.appt-section {
+  color: #059da8;
+  margin-top: 24px;
+  font-weight: 600;
+}
+
+.appt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.appt-item {
+  background: #fff;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(5, 157, 168, 0.04);
+}
+
+.appt-patient {
+  font-weight: 500;
+  color: #059da8;
+}
+
+.appt-date {
+  color: #333;
+  font-size: 1rem;
+}
+
+.appt-message {
+  color: #888;
+  margin: 16px 0;
+  font-size: 1.1rem;
+}
