@@ -9,8 +9,14 @@ const userSchema = new mongoose.Schema({
     match: /^[^\s@]+@gmail\.com$/ 
   },
   name: { type: String, required: true },
-  age: { type: Number, required: true },
+  dob: { type: Date, required: true },   // ✅ store full DOB
+  age: { type: Number, required: true }, // ✅ still store age
   mrNo: { type: Number, unique: true }, 
+  gender: { 
+    type: String, 
+    enum: ["Male", "Female"], 
+    required: true 
+  },
   password: { type: String, required: true },
   testReports: { type: [String], default: [] },
   isVerified: { type: Boolean, default: false },
