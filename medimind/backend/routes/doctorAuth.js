@@ -6,10 +6,10 @@ const Doctor = require("../models/Doctor");
 // Doctor login route
 router.post("/login", async (req, res) => {
   try {
-    console.log("Login request body:", req.body);
+    
 
     let { pno, password } = req.body;
-
+    console.log("Incoming data:", { pno, password: "[PROVIDED]" });
     if (!pno || !password) {
       return res.status(400).json({ message: "PNO and password are required" });
     }

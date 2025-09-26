@@ -31,19 +31,13 @@ function NeuroLayout() {
       📅 Appointment Schedule
     </Link>
   </li>
-
-  <li className="nav-item">
-    <Link to="/neuro-dashboard/verify-reports" className="nav-link">
-      Verify Test Reports
-    </Link>
-  </li>
             <li className="nav-item">
               <Link to="/neuro-dashboard/verify-reports" className="nav-link">
                 Verify Test Reports
               </Link>
             </li>
 
-            {/* Prescription Dropdown */}
+            {}
             <li className="nav-item">
               <button
                 className="btn btn-link nav-link d-flex justify-content-between align-items-center"

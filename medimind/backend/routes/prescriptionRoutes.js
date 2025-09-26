@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const Prescription = require("../models/Prescription");
 const User = require("../models/User");
+const Doctor = require("../models/Doctor");
 
 // 🔹 Generate unique 8-digit PR No
 async function generatePRNo() {
@@ -51,14 +53,21 @@ router.post("/add", async (req, res) => {
 
     if (!doctorId) return res.status(400).json({ message: "Doctor ID is required" });
 
+    // 🔍 Check patient
     const patient = await User.findOne({ mrNo });
     if (!patient) return res.status(404).json({ message: "Patient not found" });
 
+    // 🔍 Check doctor
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+
+    // ✅ Generate unique PR No
     const prNo = await generatePRNo();
 
+    // ✅ Create new prescription
     const newPrescription = new Prescription({
       ...form,
-      doctor: doctorId,
+      doctor: doctor._id, // ensure ObjectId
       patient: patient._id,
       mrNo,
       prNo,
@@ -67,11 +76,13 @@ router.post("/add", async (req, res) => {
 
     await newPrescription.save();
 
+    // ✅ Populate doctor + patient before sending back
     const populated = await Prescription.findById(newPrescription._id)
       .populate("doctor", "name email")
       .populate("patient", "name mrNo");
 
     res.status(201).json(populated);
+
   } catch (err) {
     console.error("❌ Error adding prescription:", err);
     res.status(500).json({ message: "Server error", error: err.message });

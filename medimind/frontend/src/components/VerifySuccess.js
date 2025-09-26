@@ -17,7 +17,7 @@ export default function VerifySuccess() {
       ) : (
         <p>Your account is verified. (MR No not provided in URL)</p>
       )}
-      <p><a href="/login">Proceed to login</a></p>
+      <p><a href="/login-patient">Proceed to login</a></p>
     </div>
   );
 }
