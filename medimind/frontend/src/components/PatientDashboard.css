@@ -1,0 +1,14 @@
+.chart-section {
+  background: #eaf7f8; /* keep your style */
+  padding: 1rem;
+  border-radius: 15px;
+  max-height: 250px; /* limit height */
+  overflow-y: auto; /* enable vertical scroll */
+}
+
+.bottom-grid {
+  display: flex;
+  gap: 1rem;
+  max-height: 300px; /* adjust to your design */
+  overflow-y: auto; /* vertical scroll */
+}

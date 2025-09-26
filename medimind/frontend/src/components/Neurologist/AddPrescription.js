@@ -23,7 +23,11 @@ function AddPrescription() {
       const res = await fetch(`${API_URL}/api/prescriptions/patient/${mrNo}`);
       const data = await res.json();
 
-      if (!res.ok) return alert(data.message || "Patient not found");
+      if (!res.ok) {
+        alert(data.message || "Patient not found");
+        setPatient(null);
+        return;
+      }
       setPatient(data);
     } catch (err) {
       console.error("❌ Search error:", err);
@@ -58,7 +62,12 @@ function AddPrescription() {
       const data = await res.json();
 
       if (res.ok) {
-        alert(`✅ Prescription Added!\nPR No: ${data.prNo}\nDate: ${new Date(data.date).toLocaleDateString()}`);
+        alert(
+          `✅ Prescription Added!\nPR No: ${data.prNo}\nDate: ${new Date(
+            data.date
+          ).toLocaleDateString()}`
+        );
+        // Reset form + UI
         setForm({
           testRecommendation: "",
           clinicalSummary: "",
@@ -129,8 +138,8 @@ function AddPrescription() {
 
           {Object.keys(form).map((field) => (
             <div key={field} className="mb-4">
-              <label className="block mb-1 font-medium">
-                {field.charAt(0).toUpperCase() + field.slice(1)}
+              <label className="block mb-1 font-medium capitalize">
+                {field.replace(/([A-Z])/g, " $1")}
               </label>
               <input
                 type="text"

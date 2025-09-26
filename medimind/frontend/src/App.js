@@ -13,7 +13,6 @@ import TestHistory from "./components/Neurologist/VerifyReports";
 import TestReport from "./components/TestReport";
 import ProfileManagement from "./components/Neurologist/ProfileManagement";
 import PatientDashboard from "./components/PatientDashboard";
-import Appointment from "./components/Appointments";
 import VerifySuccess from "./components/VerifySuccess";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassowrd";
@@ -24,13 +23,7 @@ import Dptadmin from "./components/DptAdmin";
 import Superadmin from "./components/SuperAdmin";
 import ViewPrescription from "./components/Neurologist/ViewPrescription";
 import AddPrescription from "./components/Neurologist/AddPrescription";
-
-// ✅ Protect doctor dashboard
-function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("doctorToken");
-  return token ? children : <Navigate to="/login-doctor" replace />;
-}
-
+import AppointmentSchedule from "./components/Neurologist/AppointmentSchedule";
 function App() {
   return (
     <Routes>
@@ -46,23 +39,19 @@ function App() {
 
       {/* Doctor dashboard with nested routes (protected) */}
       <Route
-        path="/neuro-dashboard"
-        element={
-          <ProtectedRoute>
-            <NeuroLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<NeuroDashboard />} /> {/* dashboard home */}
+              path="/neuro-dashboard"
+              element={<NeuroLayout />}
+            >
+        <Route index element={<NeuroDashboard />} />
         <Route path="verify-reports" element={<TestHistory />} />
         <Route path="add" element={<AddPrescription />} />
         <Route path="view" element={<ViewPrescription />} />
         <Route path="profile-management" element={<ProfileManagement />} />
+        <Route path="appointment-schedule" element={<AppointmentSchedule />} />
       </Route>
 
       {/* Patient & Admin */}
       <Route path="/PatientDashboard" element={<PatientDashboard />} />
-      <Route path="/appointment" element={<Appointment />} />
       <Route path="/manage-appointment" element={<ManageAppointment />} />
       <Route path="/view-prescriptions" element={<PrescriptionHistory />} />
       <Route path="/test-history" element={<TestHistory />} />
