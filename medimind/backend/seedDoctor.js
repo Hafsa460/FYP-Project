@@ -17,7 +17,7 @@ const doctors = [
     password: "password123",
     department: "Cardiology",
     leaveDays: [
-      { date: "2025-09-12", reason: "Conference" },
+      { date: "2025-09-27", reason: "Conference" },
       { date: "2025-09-18", reason: "Personal Leave" }
     ],
     workingHours: { start: "08:00", end: "14:00" }
