@@ -9,7 +9,7 @@ const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/auth");
 const doctorRoutes = require("./routes/doctorAuth");
 const passwordRoutes = require("./routes/password");
-
+const prescriptionRoutes = require("./routes/prescriptionRoutes");
 // ⬇️ Import your new admin routes
 const adminRoutes = require("./routes/adminRoutes");
 const patientRoutes = require("./routes/adminpatient");
@@ -59,11 +59,12 @@ console.log("Password routes mounted at /api/password");
 app.use("/api/doctors", doctorRoutes);
 console.log("Doctor routes mounted at /api/doctors");
 app.use("/api/appointments", appointmentRoutes);
-// ⬇️ Mount the admin routes here
 app.use("/api/admins", adminRoutes);
 console.log("Admin routes mounted at /api/admins");
 app.use("/api/adminpatient", patientRoutes);
 console.log("Patient routes mounted at /api/adminpatient");
+app.use("/api/prescriptions", prescriptionRoutes);
+console.log("Prescription routes mounted at /api/prescriptions");
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

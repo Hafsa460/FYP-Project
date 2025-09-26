@@ -1,41 +1,17 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose"); 
 
-const prescriptionSchema = new mongoose.Schema({
-  prid: {
-    type: String,
-    required: true,
-  },
-  MRid: {
-    type: String,
-    required: true,
-  },
-  testRecommendation: {
-    type: String,
-  },
-  labReport: {
-    type: String,
-  },
-  summary: {
-    type: String,
-  },
-  investigation: {
-    type: String,
-  },
-  followUp: {
-    type: String,
-  },
-  prescription: {
-    type: String,
-  },
-  diagnosis: {
-    type: String,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+const prescriptionSchema = new mongoose.Schema({ 
+  testRecommendation: { type: String, default: "" }, 
+  clinicalSummary: { type: String, default: "" }, 
+  investigation: { type: String, default: "" }, 
+  prescription: { type: String, default: "" }, 
+  diagnosis: { type: String, default: "" }, 
+  followUp: { type: String, default: "" }, 
+  date: { type: Date, default: Date.now }, 
+  prNo: { type: String, required: true, unique: true }, // ✅ unique 8-digit PR No 
+  doctor: { type: mongoose.Schema.Types.ObjectId, ref: "Doctor", required: true }, 
+  patient: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, 
+  mrNo: { type: String, required: true }, // ✅ store MR No for quick search
+}); 
 
-const Prescription = mongoose.model("Prescription", prescriptionSchema);
-
-export default Prescription;
+module.exports = mongoose.model("Prescription", prescriptionSchema);

@@ -1,4 +1,3 @@
-// models/User.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
@@ -7,11 +6,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    match: /^[^\s@]+@gmail\.com$/ // only gmail.com
+    match: /^[^\s@]+@gmail\.com$/
   },
   name: { type: String, required: true },
-  age: { type: Number, required: true },
-  mrNo: { type: Number, unique: true }, // auto-generated username
+  age: { type: Number, required: true, min: 18 }, // Age must be 18+
+  gender: { type: String, enum: ["Male", "Female", "Other"], required: true }, // Added gender
+  mrNo: { type: Number, unique: true },
   password: { type: String, required: true },
   testReports: { type: [String], default: [] },
   isVerified: { type: Boolean, default: false },
@@ -21,7 +21,6 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: Date
 }, { timestamps: true });
 
-// Hash password before saving if modified
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   try {
