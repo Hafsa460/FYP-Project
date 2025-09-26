@@ -16,10 +16,13 @@ export default function DoctorLogin() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/doctors/login", {
-        pno: Number(pno),
-        password,
-      });
+      const res = await axios.post(
+        "http://localhost:5000/api/doctor-auth/login",
+        {
+          pno: Number(pno),
+          password,
+        }
+      );
 
       localStorage.setItem("doctorToken", res.data.token);
       localStorage.setItem("doctor", JSON.stringify(res.data.doctor));
@@ -28,7 +31,9 @@ export default function DoctorLogin() {
       navigate("/neuro-dashboard");
     } catch (err) {
       console.error("Login failed:", err.response?.data || err);
-      setError(err.response?.data?.message || "Login failed. Please try again.");
+      setError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
     }
   };
 
