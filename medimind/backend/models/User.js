@@ -6,12 +6,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    match: /^[^\s@]+@gmail\.com$/
+    match: /^[^\s@]+@gmail\.com$/ 
   },
   name: { type: String, required: true },
-  age: { type: Number, required: true, min: 18 }, // Age must be 18+
-  gender: { type: String, enum: ["Male", "Female", "Other"], required: true }, // Added gender
-  mrNo: { type: Number, unique: true },
+  age: { type: Number, required: true },
+  mrNo: { type: Number, unique: true }, 
   password: { type: String, required: true },
   testReports: { type: [String], default: [] },
   isVerified: { type: Boolean, default: false },
