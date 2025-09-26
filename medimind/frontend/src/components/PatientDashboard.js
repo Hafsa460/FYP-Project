@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link, Routes, Route, useNavigate } from "react-router-dom";
 import { ClipboardList, FileText, LogOut, User, Bell } from "lucide-react";
 import Navbar from "./Navbar";
-import './PatientDashboard.css'
+import "./PatientDashboard.css";
+
 // Import patient pages
-import ViewPrescriptions from "./Neurologist/ViewPrescription";
+import ViewPrescriptions from "./Neurologist/PrescriptionHistory";
 import TestReports from "./TestReport";
 
 function PatientDashboard() {
