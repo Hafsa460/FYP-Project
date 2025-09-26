@@ -66,34 +66,11 @@ router.get("/patient/:patientId", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-// Get nearest 5 appointments for a doctor
-router.get("/doctor/:doctorId/nearest5", async (req, res) => {
-  console.log("GET /doctor/:doctorId/nearest5", req.params.doctorId);
-  try {
-    const { doctorId } = req.params;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // normalize to midnight
 
-    const appointments = await Appointment.find({
-      doctorId: new mongoose.Types.ObjectId(doctorId),
-      date: { $gte: today }
-    })
-      .sort({ date: 1, time: 1 })
-      .limit(5)
-      .populate("patientId", "name")
-      .populate("doctorId", "name department");
-
-    res.json(appointments);
-  } catch (err) {
-    console.error("Error fetching nearest 5 appointments:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
 
 
 // Get ALL appointments for a doctor
 router.get("/doctor/:doctorId", async (req, res) => {
-  console.log("GET /doctor/:doctorId", req.params.doctorId);
   try {
     const { doctorId } = req.params;
 
