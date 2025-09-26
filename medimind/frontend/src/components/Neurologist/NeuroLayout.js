@@ -26,6 +26,13 @@ function NeuroLayout() {
             <div className="doctor-name fw-semibold">Dr. Sara</div>
           </div>
           <ul className="nav flex-column">
+            {/* ✅ New Appointment Schedule Link */}
+            <li className="nav-item">
+              <Link to="/neuro-dashboard/appointment-schedule" className="nav-link">
+                📅 Appointment Schedule
+              </Link>
+            </li>
+
             <li className="nav-item">
               <Link to="/neuro-dashboard/verify-reports" className="nav-link">
                 Verify Test Reports

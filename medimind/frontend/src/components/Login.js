@@ -9,7 +9,7 @@ export default function DoctorLogin() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
+ const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -21,13 +21,11 @@ export default function DoctorLogin() {
         password,
       });
 
-      localStorage.setItem("doctorToken", res.data.token);
+      // Only store doctor info, no token
       localStorage.setItem("doctor", JSON.stringify(res.data.doctor));
 
-      // ✅ FIXED: do NOT use /* here
       navigate("/neuro-dashboard");
     } catch (err) {
-      console.error("Login failed:", err.response?.data || err);
       setError(err.response?.data?.message || "Login failed. Please try again.");
     }
   };
