@@ -32,6 +32,7 @@ router.post("/login", async (req, res) => {
     );
 
     // ✅ Include _id in response
+    // ✅ Return _id and department too
     res.status(200).json({
       message: "Login successful",
       token,
