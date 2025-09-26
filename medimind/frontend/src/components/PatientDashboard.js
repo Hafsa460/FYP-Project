@@ -12,7 +12,7 @@ function PatientDashboard() {
   const [showNotifications, setShowNotifications] = useState(true);
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [nearestAppointments, setNearestAppointments] = useState([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,15 +34,6 @@ function PatientDashboard() {
         .then((data) => setAppointments(data))
         .catch((err) => console.error("Error fetching appointments:", err));
 
-      // Fetch nearest 5 appointments
-      fetch(`http://localhost:5000/api/appointments/nearest5`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => setNearestAppointments(data))
-        .catch((err) => console.error("Error fetching nearest 5:", err));
     } else {
       navigate("/");
     }
@@ -51,9 +42,6 @@ function PatientDashboard() {
   if (!patient) {
     return <div className="p-4">Loading patient data...</div>;
   }
-
-  const nearestAppointment =
-    nearestAppointments.length > 0 ? nearestAppointments[0] : null;
 
   return (
     <>

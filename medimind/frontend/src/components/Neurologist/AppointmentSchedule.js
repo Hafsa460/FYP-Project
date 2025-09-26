@@ -4,7 +4,6 @@ import "./AppointmentSchedule.css";
 function AppointmentSchedule() {
   const [doctor, setDoctor] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [nearestAppointments, setNearestAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -35,22 +34,17 @@ function AppointmentSchedule() {
       }
     };
 
-    const fetchNearestAppointments = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:5000/api/appointments/doctor/${doctor._id}/nearest5`
-        );
-        if (!res.ok) throw new Error("Failed to fetch nearest appointments");
-        const data = await res.json();
-        setNearestAppointments(Array.isArray(data) ? data : []);
-      } catch (err) {
-        // Optionally handle error
-      }
-    };
-
     fetchAppointments();
-    fetchNearestAppointments();
   }, [doctor]);
+  const upcomingAppointments = appointments.filter((appt) => {
+    const apptDate = new Date(appt.date);
+    const today = new Date();
+
+    apptDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    return apptDate >= today;
+  });
 
   if (!doctor) return <p className="appt-message">Loading doctor data...</p>;
   if (loading) return <p className="appt-message">Loading appointments...</p>;
@@ -72,32 +66,21 @@ function AppointmentSchedule() {
       <h3 className="appt-title mb-3">Appointment Schedule</h3>
 
       <div className="appt-summary mb-4">
-        <strong>Total Appointments:</strong> {appointments.length} <br />
+        <strong>Total Appointments:</strong> {upcomingAppointments.length}{" "}
+        <br />
         <strong>Today’s Appointments:</strong> {todaysAppointments.length}
       </div>
 
       <h5 className="appt-section">All Appointments</h5>
-      {appointments.length > 0 ? (
+      <h5 className="appt-section">Upcoming Appointments</h5>
+      {upcomingAppointments.length > 0 ? (
         <ul className="appt-list">
-          {appointments.map((appt) => (
+          {upcomingAppointments.map((appt) => (
             <li key={appt._id} className="appt-item">
-              <span className="appt-patient">{appt.patientId?.name || "Patient"}</span>
-              <span className="appt-date">
-                {new Date(appt.date).toLocaleDateString()} at {appt.time}
+              <span className="appt-patient">
+                {appt.patientId?.name || "Patient"}
               </span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="appt-message">No appointments found</p>
-      )}
 
-      <h5 className="appt-section mt-4">Nearest 5 Appointments</h5>
-      {nearestAppointments.length > 0 ? (
-        <ul className="appt-list">
-          {nearestAppointments.map((appt) => (
-            <li key={appt._id} className="appt-item">
-              <span className="appt-patient">{appt.patientId?.name || "Patient"}</span>
               <span className="appt-date">
                 {new Date(appt.date).toLocaleDateString()} at {appt.time}
               </span>

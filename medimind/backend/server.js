@@ -7,13 +7,13 @@ const cors = require("cors");
 
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/auth");
-const doctorRoutes = require("./routes/doctorAuth");
+const doctorAuthRoutes = require("./routes/doctorAuth");
+const doctorRoutes = require("./routes/doctorRoutes");
 const passwordRoutes = require("./routes/password");
 const adminRoutes = require("./routes/adminRoutes");
 const patientRoutes = require("./routes/adminpatient");
 const appointmentRoutes = require("./routes/appointmentroutes");
 const prescriptionRoutes = require("./routes/prescriptionRoutes");
-
 const app = express();
 
 // Frontend URL from .env or default
@@ -65,8 +65,10 @@ app.use("/api/password", passwordRoutes);
 console.log("Password routes mounted at /api/password");
 
 // Doctors
-app.use("/api/doctors", doctorRoutes);
+app.use("/api/doctors", doctorRoutes); // for doctor data (GET /api/doctors)
 console.log("Doctor routes mounted at /api/doctors");
+app.use("/api/doctor-auth", doctorAuthRoutes); // for doctor authentication
+console.log("Doctor auth routes mounted at /api/doctor-auth");
 
 // Appointments
 app.use("/api/appointments", appointmentRoutes);
@@ -79,7 +81,7 @@ console.log("Admin routes mounted at /api/admins");
 // Admin - Patients
 app.use("/api/adminpatient", patientRoutes);
 console.log("Patient routes mounted at /api/adminpatient");
-
+const doctorroutes = require("./routes/doctorRoutes");
 // ===================== START SERVER =====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
