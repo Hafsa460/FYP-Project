@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 function ViewPrescription() {
   const [mrNo, setMrNo] = useState("");
   const [prescriptions, setPrescriptions] = useState([]);
@@ -24,7 +26,7 @@ function ViewPrescription() {
 
   return (
     <div className="container mt-4">
-      <h4 className="mb-3">View Prescription</h4>
+      <h4 className="mb-3">View Prescriptions</h4>
 
       <div className="d-flex gap-2 mb-3">
         <input
@@ -55,7 +57,7 @@ function ViewPrescription() {
           <tbody>
             {prescriptions.map((p) => (
               <tr key={p._id}>
-                <td>{p.prNo}</td> {/* ✅ use prNo */}
+                <td>{p.prNo}</td>
                 <td>{p.doctor?.name}</td>
                 <td>
                   {p.patient?.name} (MR No: {p.patient?.mrNo})
@@ -63,7 +65,7 @@ function ViewPrescription() {
                 <td>{p.diagnosis}</td>
                 <td>{p.prescription}</td>
                 <td>{p.followUp}</td>
-                <td>{new Date(p.date).toLocaleDateString()}</td> {/* ✅ use date */}
+                <td>{new Date(p.date).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>
