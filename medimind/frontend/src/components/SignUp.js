@@ -75,12 +75,12 @@ function SignUpPatients() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-  email,
-  name,
-  dob,      // ✅ send date of birth
-  gender,
-  password,
-}),
+          email,
+          name,
+          dob,      
+          gender,
+          password,
+        }),
 
         }
       );
