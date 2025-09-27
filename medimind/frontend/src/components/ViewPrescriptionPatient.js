@@ -1,129 +1,139 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FileText, LogOut, User } from "lucide-react";
 import Navbar from "./Navbar";
-import "./PatientDashboard.css";
+import "./Prescription.css";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 function ViewPrescriptionPatient() {
-  const [patient, setPatient] = useState(null);
   const [prescriptions, setPrescriptions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const navigate = useNavigate();
+  const [selectedPrescription, setSelectedPrescription] = useState(null);
 
   useEffect(() => {
-    const storedPatient = localStorage.getItem("patient");
-    if (!storedPatient) {
-      navigate("/");
-      return;
-    }
+    const fetchPrescriptions = async () => {
+      try {
+        const token = localStorage.getItem("token");
 
-    try {
-      const parsed = JSON.parse(storedPatient);
-      setPatient(parsed);
+        const res = await fetch(`${API_URL}/api/prescriptions/my`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      const patientId = parsed._id || parsed.id || parsed.mrNo;
-      if (!patientId) return;
+        const data = await res.json();
 
-      fetch(`http://localhost:5000/api/prescriptions/patient/${patientId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-        .then((res) => res.json()) // ✅ parse JSON
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setPrescriptions(data);
-          } else if (data.success) {
-            setPrescriptions(data.prescriptions || []);
-          } else {
-            setError(data.message || "No prescriptions found");
-          }
-        })
-        .catch((err) => {
-          console.error("❌ Error fetching prescriptions:", err);
-          setError("Failed to load prescriptions");
-        })
-        .finally(() => setLoading(false));
-    } catch (err) {
-      console.error("Invalid patient data in localStorage", err);
-      setError("Invalid patient data");
-      setLoading(false);
-    }
-  }, [navigate]);
+        if (res.ok) {
+          setPrescriptions(data);
+        } else {
+          alert(data.message || "Error fetching prescriptions");
+        }
+      } catch (err) {
+        console.error("❌ Fetch error:", err);
+        alert("Failed to fetch prescriptions");
+      }
+    };
 
-  if (!patient) {
-    return <div className="p-4">Loading patient data...</div>;
-  }
+    fetchPrescriptions();
+  }, []);
+
+  const handleViewDetails = (prescription) => {
+    setSelectedPrescription(prescription);
+  };
+
+  const handleGoBack = () => {
+    setSelectedPrescription(null);
+  };
 
   return (
     <>
       <Navbar />
-      <div className="neuro-dashboard d-flex">
-        {/* Sidebar */}
-        <div className="sidebar p-3">
-          <div className="doctor-profile d-flex align-items-center mb-4">
-            <User className="me-3 text-primary" size={32} />
-            <div className="doctor-name fw-semibold">{patient.name}</div>
+      <div className="vp-container p-4">
+        <h4 className="vp-title mb-4">My Prescriptions</h4>
+
+        {selectedPrescription ? (
+          <div className="card mt-4 shadow-sm">
+            <div className="card-body">
+              <h5 className="card-title mb-3">Prescription Details</h5>
+
+              <div className="vp-row-between mb-2">
+                <strong>PR No: {selectedPrescription.prNo}</strong>
+                <span>
+                  Date:{" "}
+                  {new Date(selectedPrescription.date).toLocaleDateString()}
+                </span>
+              </div>
+
+              <div className="vp-detail">
+                <strong>Doctor:</strong> {selectedPrescription.doctor?.name}
+              </div>
+
+              <hr />
+
+              <div className="vp-detail">
+                <strong>Diagnosis:</strong>{" "}
+                {selectedPrescription.diagnosis || "N/A"}
+              </div>
+              <div className="vp-detail">
+                <strong>Prescription:</strong>{" "}
+                {selectedPrescription.prescription || "N/A"}
+              </div>
+              <div className="vp-detail">
+                <strong>Follow Up:</strong>{" "}
+                {selectedPrescription.followUp || "N/A"}
+              </div>
+              <div className="vp-detail">
+                <strong>Test Recommendation:</strong>{" "}
+                {selectedPrescription.testRecommendation || "N/A"}
+              </div>
+              <div className="vp-detail">
+                <strong>Clinical Summary:</strong>{" "}
+                {selectedPrescription.clinicalSummary || "N/A"}
+              </div>
+              <div className="vp-detail">
+                <strong>Investigation:</strong>{" "}
+                {selectedPrescription.investigation || "N/A"}
+              </div>
+
+              <button onClick={handleGoBack} className="vp-btn-back mt-3">
+                ← Go Back
+              </button>
+            </div>
           </div>
-
-          <ul className="nav flex-column">
-            <li className="nav-item">
-              <Link to="/view-prescriptionspatient" className="nav-link active">
-                <FileText className="me-2" size={16} /> View Prescriptions
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/appointment" className="nav-link">
-                <User className="me-2" size={16} /> Make an Appointment
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/" className="nav-link text-danger">
-                <LogOut className="me-2" size={16} /> Logout
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Main Content */}
-        <div className="content p-4 flex-grow-1">
-          <h3>My Prescriptions</h3>
-
-          {loading && <p>Loading prescriptions...</p>}
-          {error && <p className="text-danger">{error}</p>}
-
-          {!loading && !error && prescriptions.length > 0 ? (
-            <table className="table table-bordered mt-3">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Doctor</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {prescriptions.map((p) => (
-                  <tr key={p._id}>
-                    <td>{new Date(p.date).toLocaleDateString()}</td>
-                    <td>{p.doctor?.name || "Unknown"}</td>
-                    <td>
-                      <Link
-                        to={`/prescription/${p._id}`}
-                        className="btn btn-sm btn-primary"
-                      >
-                        View Prescription
-                      </Link>
-                    </td>
+        ) : (
+          <div className="vp-card">
+            <div className="vp-card-body p-0">
+              <table className="vp-table">
+                <thead>
+                  <tr>
+                    <th>PR No</th>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            !loading && <p>No prescriptions found</p>
-          )}
-        </div>
+                </thead>
+                <tbody>
+                  {prescriptions.map((p) => (
+                    <tr key={p._id}>
+                      <td>{p.prNo}</td>
+                      <td>{p.doctor?.name}</td>
+                      <td>{new Date(p.date).toLocaleDateString()}</td>
+                      <td>
+                        <button
+                          onClick={() => handleViewDetails(p)}
+                          className="vp-btn-details"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {prescriptions.length === 0 && (
+                    <tr>
+                      <td colSpan={4}>No prescriptions found</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
