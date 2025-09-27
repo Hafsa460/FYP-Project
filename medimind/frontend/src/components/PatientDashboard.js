@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 import "./PatientDashboard.css";
 
 // Import patient pages
-import ViewPrescriptions from "./Neurologist/PrescriptionHistory";
+import ViewPrescriptionsPatient from "./ViewPrescriptionPatient";
 import TestReports from "./TestReport";
 
 function PatientDashboard() {
@@ -33,7 +33,6 @@ function PatientDashboard() {
         .then((res) => res.json())
         .then((data) => setAppointments(data))
         .catch((err) => console.error("Error fetching appointments:", err));
-
     } else {
       navigate("/");
     }
@@ -56,15 +55,11 @@ function PatientDashboard() {
 
           <ul className="nav flex-column">
             <li className="nav-item">
-              <Link to="view-prescriptions" className="nav-link">
+              <Link to="/view-prescriptionspatient" className="nav-link">
                 <FileText className="me-2" size={16} /> View Prescriptions
               </Link>
             </li>
-            <li className="nav-item">
-              <Link to="test-reports" className="nav-link">
-                <ClipboardList className="me-2" size={16} /> Test Reports
-              </Link>
-            </li>
+
             <li className="nav-item">
               <Link to="/appointment" className="nav-link">
                 <User className="me-2" size={16} /> Make an Appointment
@@ -159,11 +154,6 @@ function PatientDashboard() {
               </div>
             </div>
           </div>
-
-          <Routes>
-            <Route path="view-prescriptions" element={<ViewPrescriptions />} />
-            <Route path="test-reports" element={<TestReports />} />
-          </Routes>
         </div>
 
         {/* Notifications */}
