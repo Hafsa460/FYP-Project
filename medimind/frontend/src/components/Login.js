@@ -11,30 +11,32 @@ export default function DoctorLogin() {
   const [error, setError] = useState("");
  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/api/doctor-auth/login",
-        {
-          pno: Number(pno),
-          password,
-        }
-      );
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/doctor-auth/login",
+      {
+        pno: Number(pno),
+        password,
+      }
+    );
 
-      // Only store doctor info, no token
-      localStorage.setItem("doctor", JSON.stringify(res.data.doctor));
+    // ✅ Store token + doctor info
+    localStorage.setItem("doctorToken", res.data.token);
+    localStorage.setItem("doctor", JSON.stringify(res.data.doctor));
 
-      navigate("/neuro-dashboard");
-    } catch (err) {
-      console.error("Login failed:", err.response?.data || err);
-      setError(
-        err.response?.data?.message || "Login failed. Please try again."
-      );
-    }
-  };
+    navigate("/neuro-dashboard");
+  } catch (err) {
+    console.error("Login failed:", err.response?.data || err);
+    setError(
+      err.response?.data?.message || "Login failed. Please try again."
+    );
+  }
+};
+
 
   return (
     <div className="login-page d-flex align-items-center justify-content-center">

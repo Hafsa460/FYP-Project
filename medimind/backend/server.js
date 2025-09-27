@@ -84,10 +84,7 @@ console.log("Admin routes mounted at /api/admins");
 // Admin - Patients
 app.use("/api/adminpatient", patientRoutes);
 console.log("Patient routes mounted at /api/adminpatient");
-app.use("/api/prescriptions", prescriptionRoutes);
-console.log("Prescription routes mounted at /api/prescriptions");
 
-const doctorroutes = require("./routes/doctorRoutes");
 // ===================== START SERVER =====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
