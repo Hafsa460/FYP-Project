@@ -13,7 +13,7 @@ const handleSubmit = async (e) => {
   console.log("[ForgotPassword] Sending reset email request for:", email);
 
   try {
-    const res = await axios.post("http://localhost:5000/api/password/forgot-password", { email });
+    const res = await axios.post("http://localhost:4000/api/password/forgot-password", { email });
     console.log("[ForgotPassword] Response:", res.data);
     setMessage(res.data.message);
   } catch (err) {
