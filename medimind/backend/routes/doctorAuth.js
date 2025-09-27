@@ -48,4 +48,45 @@ router.post("/login", async (req, res) => {
   }
 });
 
+/**
+ * Get All Doctors (Public)
+ */
+router.get("/", async (req, res) => {
+  try {
+    // Return only safe fields
+    const doctors = await Doctor.find({}, "name designation department");
+    res.status(200).json(doctors);
+  } catch (error) {
+    console.error("Fetch doctors error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+/**
+ * Get Doctors grouped by Department (Public)
+ */
+router.get("/by-department", async (req, res) => {
+  try {
+    const doctors = await Doctor.aggregate([
+      {
+        $group: {
+          _id: "$department",
+          doctors: {
+            $push: {
+              name: "$name",
+              designation: "$designation",
+              id: "$_id",
+            },
+          },
+        },
+      },
+    ]);
+
+    res.status(200).json(doctors);
+  } catch (error) {
+    console.error("Fetch doctors by department error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 module.exports = router;

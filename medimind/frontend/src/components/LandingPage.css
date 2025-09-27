@@ -1,3 +1,53 @@
 .text-teal {
   color: #059da8;
 }
+
+/* Make landing page text larger and add line spacing */
+.landing-large-text, .landing-large-text * {
+  font-size: 1.35rem;
+  line-height: 2.1;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #059da8;
+  color: white;
+  padding: 16px 32px;
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 1.25rem;
+  line-height: 2;
+  transition: all 0.3s ease;
+}
+.btn-primary:hover {
+  background-color: #007d87;
+  transform: translateY(-2px);
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-secondary {
+  background-color: white;
+  color: #059da8;
+  padding: 16px 32px;
+  border: 2px solid #059da8;
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 1.25rem;
+  line-height: 2;
+  transition: all 0.3s ease;
+}
+.btn-secondary:hover {
+  background-color: #e0f7fa;
+  transform: translateY(-2px);
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Testimonials and contact cards use hero section background */
+.testimonial-card, .contact-card {
+  background-color: #e0f7fa;
+  color: #00695c;
+  border-radius: 16px;
+  box-shadow: 0px 4px 16px rgba(0,0,0,0.08);
+  font-size: 1.15rem;
+  line-height: 2;
+}

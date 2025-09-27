@@ -15,7 +15,12 @@ const app = express();
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
 // Middleware
-app.use(cors({ origin: FRONTEND_URL }));
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+  })
+);
 app.use(express.json());
 // Log incoming requests for debugging
 app.use((req, res, next) => {
@@ -54,6 +59,9 @@ console.log("Password routes mounted at /api/password");
 
 app.use("/api/doctors", doctorRoutes);
 console.log("Password routes mounted at /api/doctorroutes");
+
+const departmentRoutes = require("./routes/departmentRoutes");
+app.use("/api/departments", departmentRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
