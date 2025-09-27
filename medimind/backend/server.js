@@ -14,6 +14,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const patientRoutes = require("./routes/adminpatient");
 const appointmentRoutes = require("./routes/appointmentroutes");
 const prescriptionRoutes = require("./routes/prescriptionRoutes");
+const prescriptionPatientRoutes = require("./routes/prescriptionPatient");
 const app = express();
 
 // Frontend URL from .env or default
@@ -50,6 +51,8 @@ app.get("/", (req, res) => {
 
 // Prescriptions
 app.use("/api/prescriptions", prescriptionRoutes);
+console.log("Prescription routes mounted at /api/prescriptions");
+app.use("/api/prescriptions", prescriptionPatientRoutes);
 console.log("Prescription routes mounted at /api/prescriptions");
 
 // Users
