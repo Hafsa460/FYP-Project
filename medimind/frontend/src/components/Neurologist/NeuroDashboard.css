@@ -158,3 +158,11 @@
 #id3 td {
   background-color: inherit; /* Makes sure the cells use the table's background */
 }
+.chart-section {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
