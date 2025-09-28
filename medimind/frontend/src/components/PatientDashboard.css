@@ -1,14 +1,206 @@
-.chart-section {
-  background: #eaf7f8; /* keep your style */
-  padding: 1rem;
-  border-radius: 15px;
-  max-height: 250px; /* limit height */
-  overflow-y: auto; /* enable vertical scroll */
+/* GENERAL LAYOUT */
+.neuro-dashboard {
+  display: flex;
+  height: 100vh;
+  background-color: #97dadf; /* soft teal background */
+  font-family: "Segoe UI", sans-serif;
 }
 
-.bottom-grid {
+/* SIDEBAR */
+.sidebar {
+  color: white;
+  min-width: 250px;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+  padding: 1rem;
+}
+
+.sidebar .nav-link {
+  padding: 0.5rem 0;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar .nav-link:hover {
+  background-color: #7bbcc1;
+}
+
+.sidebar .text-danger {
+  background-color: #fbfbfb;
+}
+
+/* PROFILE */
+.doctor-profile {
+  margin-bottom: 2rem;
+}
+
+.doctor-name {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* CONTENT */
+.content {
+  padding: 2rem;
+  background-color: #e0f7fa; /* soft blue section */
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+/* TOP SECTION */
+.top-section {
+  margin-bottom: 2rem;
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.top-section .text-muted {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.top-section .fw-bold {
+  font-size: 1.3rem;
+  color: #059da8;
+}
+
+/* CARDS */
+.card-grid {
   display: flex;
   gap: 1rem;
-  max-height: 300px; /* adjust to your design */
-  overflow-y: auto; /* vertical scroll */
+  flex-wrap: wrap;
+}
+
+.card {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.card .fw-bold {
+  color: #059da8;
+  font-size: 1rem;
+}
+
+.card .fs-4 {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* BOTTOM GRID */
+.bottom-grid {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* APPOINTMENTS SECTION */
+.chart-section {
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  min-width: 300px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #059da8;
+  margin-bottom: 0.75rem;
+}
+
+.appointment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.appointment-card {
+  background: #e0f7fa;
+  border-left: 5px solid #059da8;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  transition: 0.2s ease;
+}
+
+.appointment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.appt-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  color: #059da8;
+}
+
+.department {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.appt-details {
+  font-size: 0.9rem;
+  color: #444;
+  margin-top: 0.3rem;
+}
+
+/* NOTIFICATIONS */
+.notification-panel {
+  width: 300px;
+  background: #ffffff;
+  padding: 1rem;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  box-shadow: -2px 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.notification-panel h5 {
+  font-size: 1.1rem;
+  color: #059da8;
+  margin-bottom: 1rem;
+}
+
+.notification-panel ul {
+  padding-left: 1rem;
+}
+
+.notification-panel li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* TOGGLE BUTTON */
+.show-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: #059da8;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+}
+
+.show-btn:hover {
+  background-color: #009999;
 }

@@ -125,33 +125,6 @@ function PatientDashboard() {
                   <p>No upcoming appointments</p>
                 )}
               </div>
-
-              {/* Health Summary */}
-              <div className="block-section flex-grow-1 ms-3">
-                <div className="section-title">Health Summary</div>
-                <table className="table table-bordered mb-0">
-                  <thead>
-                    <tr>
-                      <th>Category</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Blood Pressure</td>
-                      <td>Normal</td>
-                    </tr>
-                    <tr>
-                      <td>Cholesterol</td>
-                      <td>Borderline</td>
-                    </tr>
-                    <tr>
-                      <td>Diabetes</td>
-                      <td>Controlled</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
             </div>
           </div>
         </div>
