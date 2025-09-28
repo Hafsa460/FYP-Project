@@ -18,24 +18,29 @@ function Appointment() {
   const navigate = useNavigate();
 
   // 🔹 Fetch doctors list
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/doctors");
-        const data = await res.json();
-        console.log("Doctors API response:", data);
+  // 🔹 Fetch doctors list
+useEffect(() => {
+  const fetchDoctors = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/doctors");
+      const data = await res.json();
+      console.log("Doctors API response:", data);
 
-        if (data.success && Array.isArray(data.doctors)) {
-          setDoctors(data.doctors); // ✅ FIXED
-        } else {
-          setDoctors([]);
-        }
-      } catch (err) {
-        console.error("Error fetching doctors:", err);
+      // handle both cases: array OR {success, doctors}
+      if (Array.isArray(data)) {
+        setDoctors(data);
+      } else if (data.success && Array.isArray(data.doctors)) {
+        setDoctors(data.doctors);
+      } else {
+        setDoctors([]);
       }
-    };
-    fetchDoctors();
-  }, []);
+    } catch (err) {
+      console.error("Error fetching doctors:", err);
+    }
+  };
+  fetchDoctors();
+}, []);
+
 
   // 🔹 Fetch booked slots for selected doctor & date
   useEffect(() => {
