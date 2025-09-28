@@ -29,7 +29,7 @@ function Navbar() {
       <div className="ms-auto d-flex">
         <Link
           to="/Login-option"
-          className="btn  me-2  btn-teal text-teal btn-teal:hover"
+          className="btn-teal me-2"
         >
           Login / Sign Up
         </Link>

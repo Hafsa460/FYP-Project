@@ -188,8 +188,12 @@ function LandingPage() {
             <strong>Email:</strong> contact@krlhospital.com
           </p>
           <div className="mt-6 flex justify-center gap-4">
-            <button className="btn-primary">Call Now</button>
-            <button className="btn-secondary">Send Email</button>
+            <a href="tel:+920000000000" className="btn-primary">
+              Call Now
+            </a>
+            <a href="mailto:contact@krlhospital.com" className="btn-secondary">
+              Send Email
+            </a>
           </div>
         </div>
 
