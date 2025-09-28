@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { User, ClipboardList, FileText, Users, CheckCircle } from "lucide-react";
+import { ClipboardList, FileText, Users, CheckCircle } from "lucide-react";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import "./NeuroDashboard.css";
+import maleProfile from "../../images/male.png";
+import femaleProfile from "../../images/female.png";
 
 function NeuroDashboard() {
   const [doctor, setDoctor] = useState(null);
@@ -11,7 +13,7 @@ function NeuroDashboard() {
     totalPatients: 0,
     totalPrescriptions: 0,
     verifiedReports: 0,
-    genderStats: { male: 0, female: 0 }, // ✅ only Male/Female
+    genderStats: { male: 0, female: 0 },
   });
 
   useEffect(() => {
@@ -25,16 +27,17 @@ function NeuroDashboard() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const doctorData = await doctorRes.json();
-        if (doctorData.success) setDoctor(doctorData.doctor);
+        if (doctorData.success) {
+          setDoctor(doctorData.doctor);
 
-        // ✅ fetch doctor stats
-        const statsRes = await fetch(
-          `http://localhost:5000/api/doctor-auth/${doctorData.doctor._id}/stats`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        const statsData = await statsRes.json();
-        if (statsData.success) setStats(statsData.stats);
+          // ✅ fetch doctor stats only after doctor is known
+          const statsRes = await fetch(
+            `http://localhost:5000/api/doctor-auth/${doctorData.doctor._id}/stats`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          const statsData = await statsRes.json();
+          if (statsData.success) setStats(statsData.stats);
+        }
       } catch (err) {
         console.error("Error fetching doctor stats:", err);
       }
@@ -47,24 +50,29 @@ function NeuroDashboard() {
     return <div className="p-4">Loading doctor dashboard...</div>;
   }
 
-  // ✅ Gender data for Pie chart (explicit version)
+  // ✅ Gender distribution chart data
   const genderData = [
     { name: "Male", value: stats.genderStats?.male || 0 },
     { name: "Female", value: stats.genderStats?.female || 0 },
-  ].filter(item => item.value > 0); // remove zero values
+  ].filter((item) => item.value > 0);
 
   const COLORS = ["#3b82f6", "#ec4899"]; // blue = Male, pink = Female
 
   return (
     <div className="main-content">
-      {/* Top Section */}
-      <div className="top-section mb-4 d-flex align-items-center">
-        <User className="me-3 text-primary" size={40} />
+      {/* Doctor Profile Section */}
+      <div className="doctor-card d-flex align-items-center mb-4 p-3 shadow-sm rounded">
+        <img
+          src={doctor.gender === "male" ? maleProfile : femaleProfile}
+          alt="Doctor"
+          className="profile-icon me-3"
+        />
         <div>
-          <div className="fw-bold">{doctor.name}</div>
+          <div className="fw-bold fs-5">{doctor.name}</div>
+          <div className="text-muted">{doctor.designation}</div>
           <div className="text-muted">{doctor.department}</div>
-          <div className="text-secondary">
-            You have {stats.upcomingAppointments} upcoming appointments
+          <div className="text-secondary mt-1">
+            {stats.upcomingAppointments} upcoming appointments
           </div>
         </div>
       </div>

@@ -40,6 +40,8 @@ const doctors = [
     pno: 1000001,
     password: "password123",
     department: "Cardiology",
+    designation: "Consultant Cardiologist",
+    gender: "male",
     leaveDays: [
       { date: "2025-09-27", reason: "Conference" },
       { date: "2025-09-18", reason: "Personal Leave" }
@@ -52,12 +54,14 @@ const doctors = [
     pno: 1000002,
     password: "securePass456",
     department: "Neurology",
+    designation: "Assistant Professor of Neurology",
+    gender: "female",
     leaveDays: [
       { date: "2025-09-14", reason: "Medical Camp" }
     ],
     workingHours: { start: "08:00", end: "14:00" }
   }
-  // add more doctors as you like...
+
 ];
 
 async function seedDoctors() {

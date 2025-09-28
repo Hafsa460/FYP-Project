@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./ViewPrescription.css"; // 🔹 Import CSS file
+import "./ViewPrescription.css"; 
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -7,33 +7,37 @@ function ViewPrescription() {
   const [mrNo, setMrNo] = useState("");
   const [prescriptions, setPrescriptions] = useState([]);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(""); // 🔹 new state for errors
 
   // 🔹 Fetch prescriptions by MR No
   const fetchPrescriptions = async () => {
-    if (!mrNo) return alert("Enter MR No");
+    if (!mrNo) {
+      setErrorMessage("Enter MR No");
+      return;
+    }
+
     try {
       const res = await fetch(`${API_URL}/api/prescriptions/search/${mrNo}`);
       const data = await res.json();
 
       if (res.ok) {
         setPrescriptions(data);
-        setSelectedPrescription(null); // reset any open detail view
+        setSelectedPrescription(null);
+        setErrorMessage(""); // clear errors on success
       } else {
-        alert(data.message || "Error fetching prescriptions");
+        setErrorMessage(data.message || "Error fetching prescriptions");
         setPrescriptions([]);
       }
     } catch (err) {
       console.error("❌ Fetch error:", err);
-      alert("Failed to fetch prescriptions");
+      setErrorMessage("Failed to fetch prescriptions");
     }
   };
 
-  // 🔹 Handle view details
   const handleViewDetails = (prescription) => {
     setSelectedPrescription(prescription);
   };
 
-  // 🔹 Go back to table
   const handleGoBack = () => {
     setSelectedPrescription(null);
   };
@@ -58,13 +62,17 @@ function ViewPrescription() {
         </div>
       )}
 
+      {/* 🔹 Show error message below search bar */}
+      {errorMessage && (
+        <p style={{ color: "red", marginTop: "8px" }}>{errorMessage}</p>
+      )}
+
       {/* 🔹 If a prescription is selected → Show details only */}
       {selectedPrescription ? (
-       <div className="card mt-4 shadow-sm"> <div className="card-body"> 
-       <h5 className="card-title mb-3">
-        Prescription Details</h5>
+        <div className="card mt-4 shadow-sm">
+          <div className="card-body">
+            <h5 className="card-title mb-3">Prescription Details</h5>
 
-            {/* PR No + Date */}
             <div className="vp-row-between">
               <strong>PR No: {selectedPrescription.prNo}</strong>
               <span>
@@ -113,7 +121,6 @@ function ViewPrescription() {
           </div>
         </div>
       ) : (
-        // 🔹 Otherwise show prescriptions table
         <>
           {prescriptions.length > 0 ? (
             <div className="vp-card">
@@ -149,9 +156,7 @@ function ViewPrescription() {
                 </table>
               </div>
             </div>
-          ) : (
-            <p>No prescriptions found</p>
-          )}
+          ) :(<p></p>)}
         </>
       )}
     </div>

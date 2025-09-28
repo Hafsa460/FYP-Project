@@ -9,20 +9,23 @@ const doctorSchema = new mongoose.Schema({
   department: { type: String, required: true },
     designation: { type: String, required:true},
 
+  // 🔹 Add these new fields
+  designation: { type: String, default: "Doctor" }, // e.g. "Consultant", "Professor"
+  gender: { type: String, enum: ["male", "female"], required: true },
+
   leaveDays: [
     {
       date: { type: String, required: true },
-      reason: { type: String }
-    }
+      reason: { type: String },
+    },
   ],
 
   workingHours: {
     start: { type: String, default: "08:00" },
-    end: { type: String, default: "14:00" }
+    end: { type: String, default: "14:00" },
   },
 
-  // 🔹 New field
-  appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }]
+  appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }],
 });
 
 doctorSchema.pre("save", async function (next) {
