@@ -1,0 +1,106 @@
+/* CONTAINER */
+.vp-container {
+  background-color: #e0f7fa; /* same as dashboard content */
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 900px;
+  margin: 32px auto;
+  box-shadow: 0 2px 12px rgba(5, 157, 168, 0.08);
+}
+
+/* TITLE */
+.vp-title {
+  color: #059da8; /* dashboard accent teal */
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* TABLE */
+.vp-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.vp-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vp-table th {
+  background: #4ba8b8; /* matches sidebar gradient start */
+  color: white;
+  font-weight: 600;
+  padding: 12px;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.vp-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e0f7fa;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.vp-table tr:hover {
+  background-color: rgba(91, 192, 222, 0.1);
+}
+
+/* BUTTONS */
+.vp-btn-details {
+  background: #059da8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.vp-btn-details:hover {
+  background: #007f89;
+}
+
+/* PRESCRIPTION DETAILS CARD */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
+  color: #059da8;
+  font-weight: 600;
+}
+
+.vp-detail {
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.vp-row-between {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+/* BACK BUTTON */
+.vp-btn-back {
+  background: transparent;
+  border: 2px solid #059da8;
+  color: #059da8;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vp-btn-back:hover {
+  background: #059da8;
+  color: white;
+}
