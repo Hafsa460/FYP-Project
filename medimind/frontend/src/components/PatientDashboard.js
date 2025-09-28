@@ -4,14 +4,11 @@ import { ClipboardList, FileText, LogOut, User, Bell } from "lucide-react";
 import Navbar from "./Navbar";
 import "./PatientDashboard.css";
 
-// Import patient pages
-import ViewPrescriptionsPatient from "./ViewPrescriptionPatient";
-import TestReports from "./TestReport";
-
 function PatientDashboard() {
   const [showNotifications, setShowNotifications] = useState(true);
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
 
   const navigate = useNavigate();
 
@@ -33,6 +30,22 @@ function PatientDashboard() {
         .then((res) => res.json())
         .then((data) => setAppointments(data))
         .catch((err) => console.error("Error fetching appointments:", err));
+
+      // Fetch ALL prescriptions for patient
+      fetch(`http://localhost:5000/api/prescriptions/my`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setPrescriptions(data);
+          } else {
+            setPrescriptions([]);
+          }
+        })
+        .catch((err) => console.error("Error fetching prescriptions:", err));
     } else {
       navigate("/");
     }
@@ -41,7 +54,10 @@ function PatientDashboard() {
   if (!patient) {
     return <div className="p-4">Loading patient data...</div>;
   }
-
+  const handleLogout = () => {
+    localStorage.removeItem("patient");
+    navigate("/login-patient");
+  };
   return (
     <>
       <Navbar />
@@ -66,9 +82,12 @@ function PatientDashboard() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/" className="nav-link text-danger">
-                <LogOut className="me-2" size={16} /> Logout
-              </Link>
+              <button
+                className="btn btn-link nav-link text-danger"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
             </li>
           </ul>
         </div>
@@ -98,11 +117,7 @@ function PatientDashboard() {
               </div>
               <div className="card">
                 <div className="fw-bold">Prescriptions</div>
-                <div className="fs-4">12</div>
-              </div>
-              <div className="card">
-                <div className="fw-bold">Reports</div>
-                <div className="fs-4">8</div>
+                <div className="fs-4">{prescriptions.length}</div>
               </div>
             </div>
 

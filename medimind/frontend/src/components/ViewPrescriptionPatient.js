@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import "./Prescription.css";
-
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 function ViewPrescriptionPatient() {
+  const [error, setError] = useState(null);
   const [prescriptions, setPrescriptions] = useState([]);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
 
@@ -22,11 +22,11 @@ function ViewPrescriptionPatient() {
         if (res.ok) {
           setPrescriptions(data);
         } else {
-          alert(data.message || "Error fetching prescriptions");
+          setError(data.message || "Error fetching prescriptions");
         }
       } catch (err) {
         console.error("❌ Fetch error:", err);
-        alert("Failed to fetch prescriptions");
+        setError("Failed to fetch prescriptions");
       }
     };
 
@@ -46,7 +46,7 @@ function ViewPrescriptionPatient() {
       <Navbar />
       <div className="vp-container p-4">
         <h4 className="vp-title mb-4">My Prescriptions</h4>
-
+        {error && <div className="alert alert-danger mb-3">{error}</div>}
         {selectedPrescription ? (
           <div className="card mt-4 shadow-sm">
             <div className="card-body">
