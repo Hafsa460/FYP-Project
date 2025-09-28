@@ -5,7 +5,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const doctors = await Doctor.find();
-    res.json({ success: true, doctors });
+    res.json(doctors); // Return array, not object
   } catch (err) {
     res.status(500).json({ success: false, error: "Server error" });
   }

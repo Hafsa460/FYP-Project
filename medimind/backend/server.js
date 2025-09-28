@@ -57,8 +57,11 @@ app.get("/", (req, res) => {
 // Prescriptions
 app.use("/api/prescriptions", prescriptionRoutes);
 console.log("Prescription routes mounted at /api/prescriptions");
-app.use("/api/prescriptions", prescriptionPatientRoutes);
-console.log("Prescription routes mounted at /api/prescriptions");
+
+// Prescriptions (Patient-specific)
+app.use("/api/patient-prescriptions", prescriptionPatientRoutes);
+console.log("Prescription (patient) routes mounted at /api/patient-prescriptions");
+
 
 // Users
 app.use("/api/users", userRoutes);

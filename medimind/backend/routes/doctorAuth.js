@@ -88,6 +88,9 @@ router.get("/by-department", async (req, res) => {
   } catch (error) {
     console.error("Fetch doctors by department error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 // ======================= GET ALL DOCTORS =======================
 router.get("/", async (req, res) => {
   try {
@@ -209,5 +212,3 @@ router.get("/:id/prescriptions", async (req, res) => {
 });
 
 module.exports = router;
-  }
-});
