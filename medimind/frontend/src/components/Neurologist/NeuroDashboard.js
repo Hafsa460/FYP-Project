@@ -1,175 +1,149 @@
-import { useState } from "react";
-import { Link, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { User, ClipboardList, FileText, Users, CheckCircle } from "lucide-react";
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import "./NeuroDashboard.css";
-import femaleProfile from "../../images/female.png";
-import VerifyReports from "./VerifyReports";
-import PrescriptionHistory from "./PrescriptionHistory";
-import ProfileManagement from "./ProfileManagement";
-import Logout from "./Logout";
-import Navbar from "../Navbar";
 
 function NeuroDashboard() {
-  const [showNotifications, setShowNotifications] = useState(true);
+  const [doctor, setDoctor] = useState(null);
+  const [stats, setStats] = useState({
+    totalAppointments: 0,
+    upcomingAppointments: 0,
+    totalPatients: 0,
+    totalPrescriptions: 0,
+    verifiedReports: 0,
+    genderStats: { male: 0, female: 0 }, // ✅ only Male/Female
+  });
+
+  useEffect(() => {
+    const fetchDoctorStats = async () => {
+      try {
+        const token = localStorage.getItem("doctorToken");
+        if (!token) return;
+
+        // ✅ fetch logged-in doctor
+        const doctorRes = await fetch("http://localhost:5000/api/doctor-auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const doctorData = await doctorRes.json();
+        if (doctorData.success) setDoctor(doctorData.doctor);
+
+        // ✅ fetch doctor stats
+        const statsRes = await fetch(
+          `http://localhost:5000/api/doctor-auth/${doctorData.doctor._id}/stats`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const statsData = await statsRes.json();
+        if (statsData.success) setStats(statsData.stats);
+      } catch (err) {
+        console.error("Error fetching doctor stats:", err);
+      }
+    };
+
+    fetchDoctorStats();
+  }, []);
+
+  if (!doctor) {
+    return <div className="p-4">Loading doctor dashboard...</div>;
+  }
+
+  // ✅ Gender data for Pie chart (explicit version)
+  const genderData = [
+    { name: "Male", value: stats.genderStats?.male || 0 },
+    { name: "Female", value: stats.genderStats?.female || 0 },
+  ].filter(item => item.value > 0); // remove zero values
+
+  const COLORS = ["#3b82f6", "#ec4899"]; // blue = Male, pink = Female
 
   return (
-    <>
-      <Navbar />
-      <div className="neuro-dashboard d-flex">
-        {/* Sidebar */}
-        <div className="sidebar p-3">
-          <div className="doctor-profile d-flex align-items-center mb-4">
-            <img
-              src={femaleProfile}
-              alt="Female Doctor"
-              className="profile-icon me-3"
-            />
-            <div className="doctor-name fw-semibold">Dr. Sara</div>
+    <div className="main-content">
+      {/* Top Section */}
+      <div className="top-section mb-4 d-flex align-items-center">
+        <User className="me-3 text-primary" size={40} />
+        <div>
+          <div className="fw-bold">{doctor.name}</div>
+          <div className="text-muted">{doctor.department}</div>
+          <div className="text-secondary">
+            You have {stats.upcomingAppointments} upcoming appointments
           </div>
+        </div>
+      </div>
 
-          <ul className="nav flex-column">
-            <li className="nav-item">
-              <Link to="verify-reports" className="nav-link">
-                Verify Test Reports
-              </Link>
+      {/* Cards Section */}
+      <div className="card-grid mb-4">
+        <div className="card">
+          <div className="fw-bold">Upcoming Appointments</div>
+          <div className="fs-4">{stats.upcomingAppointments}</div>
+        </div>
+        <div className="card">
+          <div className="fw-bold">Patients</div>
+          <div className="fs-4">{stats.totalPatients}</div>
+        </div>
+        <div className="card">
+          <div className="fw-bold">Prescriptions Added</div>
+          <div className="fs-4">{stats.totalPrescriptions}</div>
+        </div>
+        <div className="card">
+          <div className="fw-bold">Reports Verified</div>
+          <div className="fs-4">{stats.verifiedReports}</div>
+        </div>
+      </div>
+
+      {/* Bottom Section */}
+      <div className="bottom-grid mt-4">
+        {/* Gender Pie Chart */}
+        <div className="chart-section small-card">
+          <div className="section-title">Patient Gender Distribution</div>
+          {stats.totalPatients > 0 && genderData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={genderData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  dataKey="value"
+                  label={({ name, value }) =>
+                    value > 0 ? `${name} (${value})` : ""
+                  }
+                >
+                  {genderData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>No gender data available</p>
+          )}
+        </div>
+
+        {/* Quick Insights */}
+        <div className="block-section flex-grow-1 ms-3">
+          <div className="section-title">Quick Insights</div>
+          <ul>
+            <li>
+              <ClipboardList size={16} className="me-2" />{" "}
+              {stats.totalAppointments} total appointments handled
             </li>
-            <li className="nav-item">
-              <Link to="prescription-history" className="nav-link">
-                View Prescription History
-              </Link>
+            <li>
+              <Users size={16} className="me-2" /> {stats.totalPatients} patients treated
             </li>
-            <li className="nav-item">
-              <Link to="profile-management" className="nav-link">
-                Profile Management
-              </Link>
+            <li>
+              <FileText size={16} className="me-2" /> {stats.totalPrescriptions} prescriptions written
             </li>
-            <li className="nav-item">
-              <Link to="/" className="nav-link">
-                Logout
-              </Link>
+            <li>
+              <CheckCircle size={16} className="me-2" /> {stats.verifiedReports} reports verified
             </li>
           </ul>
         </div>
-
-        {/* Main Content */}
-        <div className="content p-4 flex-grow-1">
-          <div className="main-content">
-            {/* Top Section */}
-            <div className="top-section">
-              <div className="d-flex align-items-center">
-                <img
-                  src={femaleProfile}
-                  alt="Doctor"
-                  className="profile-icon me-3"
-                />
-                <div>
-                  <div className="fw-bold">Dr. Sara</div>
-                  <div className="text-muted">Qualifications</div>
-                  <div className="text-secondary">
-                    You have 19 appointments today
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Summary Cards */}
-            <div className="card-grid">
-              <div className="card">
-                <div className="fw-bold">Patients</div>
-                <div className="fs-4">156</div>
-              </div>
-              <div className="card">
-                <div className="fw-bold">Appointments</div>
-                <div className="fs-4">2,318</div>
-              </div>
-              <div className="card">
-                <div className="fw-bold">Reports</div>
-                <div className="fs-4">156</div>
-              </div>
-            </div>
-
-            {/* Bottom Grid (Patient Type + Achievements) */}
-            <div className="bottom-grid mt-4">
-              {/* Patient Type */}
-              <div className="chart-section small-card">
-                <div className="section-title">Patient Type</div>
-                <p>
-                  • Male – 50%
-                  <br />• Female – 50%
-                </p>
-              </div>
-
-              {/* Achievements */}
-              <div className="block-section flex-grow-1 ms-3">
-                <div className="section-title">Achievements</div>
-                <table className="table table-bordered mb-0" id="id3">
-                  <thead>
-                    <tr>
-                      <th>Achievement</th>
-                      <th>Year</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>award1</td>
-                      <td>2021</td>
-                    </tr>
-                    <tr>
-                      <td>award2</td>
-                      <td>2022</td>
-                    </tr>
-                    <tr>
-                      <td>award3</td>
-                      <td>2019</td>
-                    </tr>
-                    <tr>
-                      <td>award4</td>
-                      <td>2019</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* Route Content */}
-          <Routes>
-            <Route path="verify-reports" element={<VerifyReports />} />
-            <Route
-              path="prescription-history"
-              element={<PrescriptionHistory />}
-            />
-            <Route path="profile-management" element={<ProfileManagement />} />
-            <Route path="/" element={<Logout />} />
-          </Routes>
-        </div>
-
-        {/* Notification Panel */}
-        {showNotifications ? (
-          <div className="notification-panel p-3">
-            <h5>Notifications</h5>
-            <ul>
-              <li>Patient A report is pending.</li>
-              <li>New appointment booked.</li>
-              <li>Profile updated.</li>
-            </ul>
-            <button
-              className="btn btn-sm btn-outline-secondary mt-2"
-              onClick={() => setShowNotifications(false)}
-            >
-              Hide
-            </button>
-          </div>
-        ) : (
-          <button
-            className="btn btn-sm btn-info show-btn"
-            onClick={() => setShowNotifications(true)}
-          >
-            Show Notifications
-          </button>
-        )}
       </div>
-      
-    </>
+    </div>
   );
 }
 
