@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import "./Prescription.css";
+
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 function ViewPrescriptionPatient() {
@@ -12,13 +13,13 @@ function ViewPrescriptionPatient() {
     const fetchPrescriptions = async () => {
       try {
         const token = localStorage.getItem("token");
-
-        const res = await fetch(`${API_URL}/api/prescriptions/my`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const res = await fetch(`${API_URL}/api/patient-prescriptions/my`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         const data = await res.json();
-
         if (res.ok) {
           setPrescriptions(data);
         } else {
@@ -46,12 +47,13 @@ function ViewPrescriptionPatient() {
       <Navbar />
       <div className="vp-container p-4">
         <h4 className="vp-title mb-4">My Prescriptions</h4>
+
         {error && <div className="alert alert-danger mb-3">{error}</div>}
+
         {selectedPrescription ? (
           <div className="card mt-4 shadow-sm">
             <div className="card-body">
               <h5 className="card-title mb-3">Prescription Details</h5>
-
               <div className="vp-row-between mb-2">
                 <strong>PR No: {selectedPrescription.prNo}</strong>
                 <span>
@@ -59,13 +61,10 @@ function ViewPrescriptionPatient() {
                   {new Date(selectedPrescription.date).toLocaleDateString()}
                 </span>
               </div>
-
               <div className="vp-detail">
                 <strong>Doctor:</strong> {selectedPrescription.doctor?.name}
               </div>
-
               <hr />
-
               <div className="vp-detail">
                 <strong>Diagnosis:</strong>{" "}
                 {selectedPrescription.diagnosis || "N/A"}
@@ -90,7 +89,6 @@ function ViewPrescriptionPatient() {
                 <strong>Investigation:</strong>{" "}
                 {selectedPrescription.investigation || "N/A"}
               </div>
-
               <button onClick={handleGoBack} className="vp-btn-back mt-3">
                 ← Go Back
               </button>

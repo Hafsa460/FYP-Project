@@ -1,4 +1,3 @@
-// backend/seedDoctor.js
 const mongoose = require("mongoose");
 const Doctor = require("./models/Doctor");
 require("dotenv").config();
@@ -17,31 +16,7 @@ const doctors = [
     pno: 1000001, 
     password: "password123",
     department: "Cardiology",
-    designation: "Senior Cardiologist"  
-  },
-  { 
-    name: "Dr. Emily Davis", 
-    email: "emily@example.com", 
-    pno: 1000002, 
-    password: "securePass456",
-    department: "Neurology",
-    designation: "Assistant Neurologist"    
-  },
-  { 
-    name: "Dr. Mark Taylor", 
-    email: "mark@example.com", 
-    pno: 1000003, 
-    password: "docMark789",
-    department: "Pediatrics",
-    designation: "Junior Pediatrician"   
-  },
-  {
-    name: "Dr. John Smith",
-    email: "john@example.com",
-    pno: 1000001,
-    password: "password123",
-    department: "Cardiology",
-    designation: "Consultant Cardiologist",
+    designation: "Senior Cardiologist",
     gender: "male",
     leaveDays: [
       { date: "2025-09-27", reason: "Conference" },
@@ -49,20 +24,30 @@ const doctors = [
     ],
     workingHours: { start: "08:00", end: "14:00" }
   },
-  {
-    name: "Dr. Emily Davis",
-    email: "emily@example.com",
-    pno: 1000002,
+  { 
+    name: "Dr. Emily Davis", 
+    email: "emily@example.com", 
+    pno: 1000002, 
     password: "securePass456",
     department: "Neurology",
-    designation: "Assistant Professor of Neurology",
+    designation: "Assistant Neurologist",
     gender: "female",
     leaveDays: [
       { date: "2025-09-14", reason: "Medical Camp" }
     ],
     workingHours: { start: "08:00", end: "14:00" }
+  },
+  { 
+    name: "Dr. Mark Taylor", 
+    email: "mark@example.com", 
+    pno: 1000003, 
+    password: "docMark789",
+    department: "Pediatrics",
+    designation: "Junior Pediatrician",
+    gender: "male",
+    leaveDays: [],
+    workingHours: { start: "09:00", end: "15:00" }
   }
-
 ];
 
 async function seedDoctors() {
@@ -72,7 +57,7 @@ async function seedDoctors() {
 
     for (const doc of doctors) {
       const doctor = new Doctor(doc);
-      await doctor.save();
+      await doctor.save(); // password will be hashed if you have pre-save middleware
     }
 
     console.log("✅ Doctors seeded successfully.");
