@@ -17,12 +17,7 @@ const doctors = [
     pno: 1000001, 
     password: "password123",
     department: "Cardiology",
-    designation: "Senior Cardiologist",
-    leaveDays: [
-      { date: "2025-09-27", reason: "Conference" },
-      { date: "2025-09-18", reason: "Personal Leave" }
-    ],
-    workingHours: { start: "08:00", end: "14:00" }
+    designation: "Senior Cardiologist"  
   },
   { 
     name: "Dr. Emily Davis", 
@@ -30,11 +25,7 @@ const doctors = [
     pno: 1000002, 
     password: "securePass456",
     department: "Neurology",
-    designation: "Assistant Neurologist",
-    leaveDays: [
-      { date: "2025-09-14", reason: "Medical Camp" }
-    ],
-    workingHours: { start: "08:00", end: "14:00" }
+    designation: "Assistant Neurologist"    
   },
   { 
     name: "Dr. Mark Taylor", 
@@ -42,9 +33,36 @@ const doctors = [
     pno: 1000003, 
     password: "docMark789",
     department: "Pediatrics",
-    designation: "Junior Pediatrician",
-    workingHours: { start: "09:00", end: "15:00" }
+    designation: "Junior Pediatrician"   
+  },
+  {
+    name: "Dr. John Smith",
+    email: "john@example.com",
+    pno: 1000001,
+    password: "password123",
+    department: "Cardiology",
+    designation: "Consultant Cardiologist",
+    gender: "male",
+    leaveDays: [
+      { date: "2025-09-27", reason: "Conference" },
+      { date: "2025-09-18", reason: "Personal Leave" }
+    ],
+    workingHours: { start: "08:00", end: "14:00" }
+  },
+  {
+    name: "Dr. Emily Davis",
+    email: "emily@example.com",
+    pno: 1000002,
+    password: "securePass456",
+    department: "Neurology",
+    designation: "Assistant Professor of Neurology",
+    gender: "female",
+    leaveDays: [
+      { date: "2025-09-14", reason: "Medical Camp" }
+    ],
+    workingHours: { start: "08:00", end: "14:00" }
   }
+
 ];
 
 async function seedDoctors() {

@@ -34,16 +34,18 @@ router.post("/login", async (req, res) => {
     );
 
     res.status(200).json({
-      message: "Login successful",
-      token,
-      doctor: {
-        _id: doctor._id,
-        name: doctor.name,
-        email: doctor.email,
-        pno: doctor.pno,
-        department: doctor.department,
-      },
-    });
+  message: "Login successful",
+  token,
+  doctor: {
+    _id: doctor._id,
+    name: doctor.name,
+    email: doctor.email,
+    pno: doctor.pno,
+    department: doctor.department,
+    designation: doctor.designation, // ✅ added
+    gender: doctor.gender, // ✅ added
+  },
+});
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
@@ -111,9 +113,20 @@ router.get("/me", async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const doctor = await Doctor.findById(decoded.id).select("-password");
-    if (!doctor) return res.status(404).json({ success: false, error: "Doctor not found" });
+if (!doctor) return res.status(404).json({ success: false, error: "Doctor not found" });
 
-    res.json({ success: true, doctor });
+res.json({
+  success: true,
+  doctor: {
+    _id: doctor._id,
+    name: doctor.name,
+    email: doctor.email,
+    pno: doctor.pno,
+    department: doctor.department,
+    designation: doctor.designation, // ✅ added
+    gender: doctor.gender, // ✅ added
+  }
+});
   } catch (err) {
     console.error("Error in /me route:", err);
     res.status(500).json({ success: false, error: "Invalid token" });
