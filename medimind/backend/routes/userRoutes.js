@@ -5,15 +5,15 @@ const User = require("../models/User");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 // Generate unique MR number
@@ -48,7 +48,9 @@ router.post("/register", async (req, res) => {
     const m = today.getMonth() - birthDate.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
     if (age < 18) {
-      return res.status(400).json({ error: "You must be at least 18 years old." });
+      return res
+        .status(400)
+        .json({ error: "You must be at least 18 years old." });
     }
 
     // Check existing email
@@ -62,19 +64,19 @@ router.post("/register", async (req, res) => {
     const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
 
     // Save user
-  const user = new User({
-  email,
-  name,
-  dob,  // ✅ save DOB
-  age,  // ✅ calculated above
-  gender,
-  mrNo,
-  password,
-  isVerified: false,
-  verificationToken,
-  verificationTokenExpires
-});
-await user.save();
+    const user = new User({
+      email,
+      name,
+      dob, // ✅ save DOB
+      age, // ✅ calculated above
+      gender,
+      mrNo,
+      password,
+      isVerified: false,
+      verificationToken,
+      verificationTokenExpires,
+    });
+    await user.save();
 
     // 5. Send verification email
     const verifyLink = `${BACKEND_URL}/api/users/verify/${verificationToken}`;
@@ -91,14 +93,17 @@ await user.save();
           </a>
         </p>
         <p>This link expires in 24 hours.</p>
-      `
+      `,
     });
 
-    return res.status(201).json({ message: "Verification email sent. Please check your Gmail." });
-
+    return res
+      .status(201)
+      .json({ message: "Verification email sent. Please check your Gmail." });
   } catch (err) {
     console.error("Error in /register:", err);
-    return res.status(500).json({ error: "Server error. Please try again later." });
+    return res
+      .status(500)
+      .json({ error: "Server error. Please try again later." });
   }
 });
 
@@ -108,7 +113,7 @@ router.get("/verify/:token", async (req, res) => {
     const { token } = req.params;
     const user = await User.findOne({
       verificationToken: token,
-      verificationTokenExpires: { $gt: Date.now() }
+      verificationTokenExpires: { $gt: Date.now() },
     });
 
     if (!user) {
@@ -130,12 +135,14 @@ router.get("/verify/:token", async (req, res) => {
         <p>Your account has been verified successfully.</p>
         <p>Your username (MR No) is: <strong>${user.mrNo}</strong></p>
         <p>You can now log in using your MR No and password.</p>
-      `
+      `,
     });
 
     // Redirect to frontend
-    return res.redirect(302, `${FRONTEND_URL}/verify-success?mrNo=${user.mrNo}`);
-
+    return res.redirect(
+      302,
+      `${FRONTEND_URL}/verify-success?mrNo=${user.mrNo}`
+    );
   } catch (err) {
     console.error("Error in /verify:", err);
     return res.status(500).send("Server error.");
@@ -174,17 +181,17 @@ router.post("/resend-verification", async (req, res) => {
       html: `
         <p>Click here to confirm your account:</p>
         <p><a href="${verifyLink}">${verifyLink}</a></p>
-      `
+      `,
     });
 
     return res.json({ message: "Verification email resent successfully." });
-
   } catch (err) {
     console.error("Error in /resend-verification:", err);
-    return res.status(500).json({ error: "Server error. Please try again later." });
+    return res
+      .status(500)
+      .json({ error: "Server error. Please try again later." });
   }
 });
-
 
 router.get("/search/:mrNo", async (req, res) => {
   try {
