@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import Navbar from "../Navbar";
+import maleProfile from "../../images/male.png";
 import femaleProfile from "../../images/female.png";
 import "./NeuroDashboard.css";
 
@@ -51,6 +52,10 @@ function NeuroLayout() {
     navigate("/login-doctor");
   };
 
+  // ✅ Pick profile icon based on gender
+  const profileIcon =
+    doctor?.gender?.toLowerCase() === "male" ? maleProfile : femaleProfile;
+
   return (
     <>
       <Navbar />
@@ -58,14 +63,21 @@ function NeuroLayout() {
         {/* Sidebar */}
         <div className="sidebar p-3">
           <div className="doctor-profile d-flex align-items-center mb-4">
-            <img src={femaleProfile} alt="Doctor" className="profile-icon me-3" />
+            <img
+              src={profileIcon}
+              alt="Doctor"
+              className="profile-icon me-3"
+            />
             <div className="doctor-name fw-semibold">
               {loading ? "Loading..." : doctor ? `${doctor.name}` : "Not Found"}
             </div>
           </div>
           <ul className="nav flex-column">
             <li className="nav-item">
-              <Link to="/neuro-dashboard/appointment-schedule" className="nav-link">
+              <Link
+                to="/neuro-dashboard/appointment-schedule"
+                className="nav-link"
+              >
                 Appointment Schedule
               </Link>
             </li>
@@ -99,11 +111,6 @@ function NeuroLayout() {
               )}
             </li>
 
-            <li className="nav-item">
-              <Link to="/neuro-dashboard/profile-management" className="nav-link">
-                Profile Management
-              </Link>
-            </li>
             <li className="nav-item">
               <button
                 className="btn btn-link nav-link text-danger"
