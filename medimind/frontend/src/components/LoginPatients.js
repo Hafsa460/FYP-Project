@@ -44,7 +44,14 @@ export default function Login() {
       <div className="login-container shadow-lg row w-100">
         {/* Left Image Section */}
         <div className="col-md-6 image-section">
-          <img src={coverimage} alt="Login" className="img-fluid" />
+          <a href="/dash">
+            <img
+              src={coverimage}
+              alt="Login"
+              className="img-fluid"
+              style={{ cursor: "pointer" }}
+            />
+          </a>
         </div>
 
         {/* Right Form Section */}

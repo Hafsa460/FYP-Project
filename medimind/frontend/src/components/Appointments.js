@@ -90,7 +90,7 @@ function Appointment() {
       const result = await response.json();
       if (response.ok) {
         setMessage("✅ Appointment booked successfully!");
-        setTimeout(() => navigate("/patient-dashboard"), 1500);
+        setTimeout(() => navigate("/appointment"), 1500);
       } else {
         setMessage(result.error || "Failed to book appointment.");
       }
@@ -229,7 +229,7 @@ function Appointment() {
                 </select>
               </div>
 
-              <button type="submit" className="btn btn-primary w-100">
+              <button type="submit" className="btn w-100">
                 Book Appointment
               </button>
             </form>

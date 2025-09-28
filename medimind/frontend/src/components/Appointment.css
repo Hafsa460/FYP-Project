@@ -2,3 +2,10 @@
   background-color: #ffcccc !important;
   color: #d00 !important;
 }
+
+.btn {
+  background-color: #059da8;
+  color: #fff;
+  height: 50px;
+  font-size: large;
+}
