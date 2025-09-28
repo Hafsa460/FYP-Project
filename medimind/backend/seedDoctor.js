@@ -11,26 +11,40 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log("Connected to MongoDB Atlas"))
 .catch(err => console.error("Connection error:", err));
 
-// Manually specify unique 7-digit PNOs
 const doctors = [
-  { name: "Dr. John Smith", email: "john@example.com", pno: 1000001, password: "password123" },
-  { name: "Dr. Emily Davis", email: "emily@example.com", pno: 1000002, password: "securePass456" },
-  { name: "Dr. Mark Taylor", email: "mark@example.com", pno: 1000003, password: "docMark789" },
+  { 
+    name: "Dr. John Smith", 
+    email: "john@example.com", 
+    pno: 1000001, 
+    password: "password123",
+    department: "Cardiology",
+    designation: "Senior Cardiologist"  
+  },
+  { 
+    name: "Dr. Emily Davis", 
+    email: "emily@example.com", 
+    pno: 1000002, 
+    password: "securePass456",
+    department: "Neurology",
+    designation: "Assistant Neurologist"    
+  },
+  { 
+    name: "Dr. Mark Taylor", 
+    email: "mark@example.com", 
+    pno: 1000003, 
+    password: "docMark789",
+    department: "Pediatrics",
+    designation: "Junior Pediatrician"   
+  },
 ];
 
 async function seedDoctors() {
   try {
-    await Doctor.deleteMany();
+    await Doctor.deleteMany({});
     console.log("Old doctors removed.");
 
     for (let doc of doctors) {
-      // Do NOT hash manually, let pre("save") do it
-      await Doctor.create({ 
-        name: doc.name, 
-        email: doc.email, 
-        pno: doc.pno, 
-        password: doc.password // raw password
-      });
+      await Doctor.create(doc); // pre("save") will hash password
     }
 
     console.log("Doctors seeded successfully.");
