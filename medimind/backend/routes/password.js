@@ -14,14 +14,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Real email sender function (now supports HTML for button)
+// Real email sender function (supports HTML for button)
 const sendEmail = async (to, subject, text, html) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text, // plain text fallback
-    html, // HTML version
+    text,
+    html,
   };
 
   try {
@@ -32,7 +32,7 @@ const sendEmail = async (to, subject, text, html) => {
   }
 };
 
-// Request password reset (send email with token)
+// ✅ Request password reset (send email with token)
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: "Email is required" });
@@ -45,14 +45,20 @@ router.post("/forgot-password", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Generate token
+    // Generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-    await user.save();
-
     const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+
     console.log("[Password Reset] Reset URL generated:", resetUrl);
+
+    // ✅ Update only token fields (skip validation)
+    await User.updateOne(
+      { _id: user._id },
+      {
+        resetPasswordToken: resetToken,
+        resetPasswordExpires: Date.now() + 3600000, // 1h
+      }
+    );
 
     const plainTextMessage = `Click the link to reset your password: ${resetUrl}`;
     const htmlMessage = `
@@ -84,7 +90,7 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-// Reset password using token
+// ✅ Reset password using token
 router.post("/reset-password/:token", async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
@@ -92,6 +98,7 @@ router.post("/reset-password/:token", async (req, res) => {
 
   try {
     console.log("[Password Reset] Reset password request for token:", token);
+
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: Date.now() },
@@ -102,15 +109,15 @@ router.post("/reset-password/:token", async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
 
-    // Assign plain password, let pre-save hook hash it
+    // Assign plain password → pre-save hook will hash it
     user.password = password;
-    console.log("[Password Reset] Password will be hashed via pre-save hook for user:", user.email);
 
     // Clear reset token and expiry
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 
-    await user.save();
+    // ✅ Save without triggering missing field validation
+    await user.save({ validateBeforeSave: false });
 
     res.json({ message: "Password reset successful" });
   } catch (err) {
