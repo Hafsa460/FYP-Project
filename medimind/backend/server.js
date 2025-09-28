@@ -52,7 +52,7 @@ app.get("/", (req, res) => {
   res.send("✅ API is running");
 });
 
-// ===================== ROUTES =====================
+
 
 // Prescriptions
 app.use("/api/prescriptions", prescriptionRoutes);
