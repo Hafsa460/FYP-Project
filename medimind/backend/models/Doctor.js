@@ -3,21 +3,34 @@ const bcrypt = require("bcrypt");
 
 const doctorSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, unique: true, required: true },
-  pno: { type: Number, unique: true, required: true }, 
+  email: { type: String, required: true, unique: true },
+  pno: { type: Number, required: true, unique: true },
   password: { type: String, required: true },
   department: { type: String, required: true },
-    designation: { type: String, required:true} 
+    designation: { type: String, required:true},
+
+  leaveDays: [
+    {
+      date: { type: String, required: true },
+      reason: { type: String }
+    }
+  ],
+
+  workingHours: {
+    start: { type: String, default: "08:00" },
+    end: { type: String, default: "14:00" }
+  },
+
+  // 🔹 New field
+  appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }]
 });
 
-// Hash password before saving
 doctorSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-// Compare password method
 doctorSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
