@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./LandingPage.css";
 import Navbar from "./Navbar.js";
 
+
 function LandingPage() {
   const [departments, setDepartments] = useState([]);
   const [selectedDept, setSelectedDept] = useState(null);
