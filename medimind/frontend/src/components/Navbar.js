@@ -1,8 +1,15 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import coverimage from "../images/cover.png";
-
+import "./Navbar.css";
 function Navbar() {
+  const location = useLocation();
+  // Check if any user is logged in
+  const isLoggedIn = Boolean(
+    localStorage.getItem("token") ||
+      localStorage.getItem("doctorToken") ||
+      localStorage.getItem("adminToken")
+  );
   return (
     <nav
       className="navbar navbar-expand-lg navbar-light bg-light px-4 shadow-sm"
@@ -27,12 +34,14 @@ function Navbar() {
         </Link>
       </div>
       <div className="ms-auto d-flex">
-        <Link
-          to="/Login-option"
-          className="btn  me-2  btn-teal text-teal btn-teal:hover"
-        >
-          Login / Sign Up
-        </Link>
+        {(!isLoggedIn || location.pathname === "/dash") && (
+          <Link
+            to="/Login-option"
+            className="btn  me-2  btn-teal text-teal btn-teal:hover"
+          >
+            Login / Sign Up
+          </Link>
+        )}
       </div>
     </nav>
   );

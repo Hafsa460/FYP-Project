@@ -5,7 +5,7 @@ import LoginPatients from "./components/LoginPatients";
 import SignUp from "./components/SignUp";
 import LandingPage from "./components/LandingPage";
 import NeuroLayout from "./components/Neurologist/NeuroLayout";
-import AppointmentSchedule from "./components/Neurologist/AppointmentSchedule"; // ✅ import
+import AppointmentSchedule from "./components/Neurologist/AppointmentSchedule"; 
 import VerifyReports from "./components/Neurologist/VerifyReports";
 import AddPrescription from "./components/Neurologist/AddPrescription";
 import ViewPrescription from "./components/Neurologist/ViewPrescription";
@@ -22,7 +22,7 @@ import AdminLogin from "./components/AdminLogin";
 import Doctoradmin from "./components/DoctorAdmin";
 import Dptadmin from "./components/DptAdmin";
 import Superadmin from "./components/SuperAdmin";
-import NeuroDashboard from "./components/Neurologist/NeuroDashboard"; // ✅ import
+import NeuroDashboard from "./components/Neurologist/NeuroDashboard"; 
 import PrescriptionDetails from "./components/PrescriptionDetails";
 function App() {
   return (
