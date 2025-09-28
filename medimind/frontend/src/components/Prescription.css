@@ -1,61 +1,106 @@
-.appt-container {
-  background-color: #e0f7fa;
+/* CONTAINER */
+.vp-container {
+  background-color: #e0f7fa; /* same as dashboard content */
   border-radius: 12px;
   padding: 32px;
-  max-width: 700px;
+  max-width: 900px;
   margin: 32px auto;
   box-shadow: 0 2px 12px rgba(5, 157, 168, 0.08);
 }
 
-.appt-title {
-  color: #059da8;
-  font-size: 2rem;
+/* TITLE */
+.vp-title {
+  color: #059da8; /* dashboard accent teal */
+  font-size: 1.8rem;
   font-weight: bold;
+  margin-bottom: 20px;
 }
 
-.appt-summary {
+/* TABLE */
+.vp-card {
   background: #ffffff;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 4px rgba(5, 157, 168, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
 
-.appt-section {
+.vp-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vp-table th {
+  background: #4ba8b8; /* matches sidebar gradient start */
+  color: white;
+  font-weight: 600;
+  padding: 12px;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.vp-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e0f7fa;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.vp-table tr:hover {
+  background-color: rgba(91, 192, 222, 0.1);
+}
+
+/* BUTTONS */
+.vp-btn-details {
+  background: #059da8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.vp-btn-details:hover {
+  background: #007f89;
+}
+
+/* PRESCRIPTION DETAILS CARD */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
   color: #059da8;
-  margin-top: 24px;
   font-weight: 600;
 }
 
-.appt-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.vp-detail {
+  margin-bottom: 8px;
+  font-size: 0.95rem;
 }
 
-.appt-item {
-  background: #fff;
-  border-radius: 6px;
-  margin-bottom: 12px;
-  padding: 14px 18px;
+.vp-row-between {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 3px rgba(5, 157, 168, 0.04);
+  font-size: 0.95rem;
+  margin-bottom: 8px;
 }
 
-.appt-patient {
-  font-weight: 500;
+/* BACK BUTTON */
+.vp-btn-back {
+  background: transparent;
+  border: 2px solid #059da8;
   color: #059da8;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.appt-date {
-  color: #333;
-  font-size: 1rem;
-}
-
-.appt-message {
-  color: #888;
-  margin: 16px 0;
-  font-size: 1.1rem;
+.vp-btn-back:hover {
+  background: #059da8;
+  color: white;
 }
