@@ -12,7 +12,8 @@ function LandingPage() {
   const [doctors, setDoctors] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
 
-  useEffect(() => {
+useEffect(() => {
+    // fetch departments
     fetch("http://localhost:5000/api/departments")
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
@@ -29,13 +30,16 @@ function LandingPage() {
         setLoading(false);
       });
 
+    // fetch doctors
     fetch("http://localhost:5000/api/doctors")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch doctors");
         return res.json();
       })
       .then((data) => {
-        setDoctors(data);
+        // 🔹 make sure we always have an array
+        const doctorsArray = Array.isArray(data) ? data : data.doctors || [];
+        setDoctors(doctorsArray);
         setLoadingDoctors(false);
       })
       .catch((err) => {
@@ -47,6 +51,7 @@ function LandingPage() {
   if (loading) return <p className="text-center mt-20">Loading departments...</p>;
   if (error) return <p className="text-center mt-20 text-red-600">{error}</p>;
 
+  // 🔹 filter doctors by selected department
   const filteredDoctors = selectedDept
     ? doctors.filter((doc) => doc.department === selectedDept.name)
     : [];
@@ -55,28 +60,21 @@ function LandingPage() {
     <div className="font-sans">
       <Navbar />
 
-      {/* Section 1: Hero (Full Screen) */}
-<section className="h-screen flex flex-col items-center justify-center bg-[#e0f7fa] text-center shadow-md">
-  <h1 className="text-5xl font-bold text-[#00695c]">
-    Welcome to KRL Hospital
-  </h1>
-  <p className="text-lg mt-4 text-gray-700">
-    Providing quality healthcare with compassion and excellence.
-  </p>
-  <div className="mt-6 flex gap-4">
-    {/* Scroll to Departments */}
-    <a href="#departments" className="btn-primary">
-      View Departments
-    </a>
-    {/* Scroll to Contact */}
-    <a href="#final-section" className="btn-secondary">
-      Contact Us
-    </a>
-  </div>
-</section>
+      {/* Section 1: Hero */}
+      <section className="h-screen flex flex-col items-center justify-center bg-[#e0f7fa] text-center shadow-md">
+        <h1 className="text-5xl font-bold text-[#00695c]">
+          Welcome to KRL Hospital
+        </h1>
+        <p className="text-lg mt-4 text-gray-700">
+          Providing quality healthcare with compassion and excellence.
+        </p>
+        <div className="mt-6 flex gap-4">
+          <a href="#departments" className="btn-primary">View Departments</a>
+          <a href="#final-section" className="btn-secondary">Contact Us</a>
+        </div>
+      </section>
 
-
-      {/* Section 2: Departments + Doctors (Full Screen) */}
+      {/* Section 2: Departments + Doctors */}
       <section id="departments" className="h-screen flex flex-col md:flex-row">
         {/* Sidebar */}
         <aside className="w-full md:w-[260px] bg-gray-100 p-6 border-r border-gray-300 overflow-y-auto">
@@ -108,7 +106,8 @@ function LandingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
               <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
                 <strong>Doctors</strong>
-                <p className="text-xl font-bold">{selectedDept?.doctors || 0}</p>
+                {/* 🔹 show correct doctor count */}
+                <p className="text-xl font-bold">{filteredDoctors.length}</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
                 <strong>Nurses</strong>
@@ -120,6 +119,7 @@ function LandingPage() {
               </div>
             </div>
           </div>
+
 
           {/* Doctors */}
           <section className="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto">

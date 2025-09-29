@@ -132,9 +132,7 @@ function NeuroLayout() {
           <div className="notification-panel p-3">
             <h5>Notifications</h5>
             <ul>
-              <li>Patient A report is pending.</li>
               <li>New appointment booked.</li>
-              <li>Profile updated.</li>
             </ul>
             <button
               className="btn btn-sm btn-outline-secondary mt-2"
