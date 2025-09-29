@@ -22,7 +22,6 @@ function NeuroDashboard() {
         const token = localStorage.getItem("doctorToken");
         if (!token) return;
 
-        // ✅ fetch logged-in doctor
         const doctorRes = await fetch("http://localhost:5000/api/doctor-auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -50,7 +49,6 @@ function NeuroDashboard() {
     return <div className="p-4">Loading doctor dashboard...</div>;
   }
 
-  // ✅ Gender distribution chart data
   const genderData = [
     { name: "Male", value: stats.genderStats?.male || 0 },
     { name: "Female", value: stats.genderStats?.female || 0 },
@@ -60,7 +58,6 @@ function NeuroDashboard() {
 
   return (
     <div className="main-content">
-      {/* Doctor Profile Section */}
       <div className="doctor-card d-flex align-items-center mb-4 p-3 shadow-sm rounded">
         <img
           src={doctor.gender === "male" ? maleProfile : femaleProfile}
@@ -132,23 +129,30 @@ function NeuroDashboard() {
         </div>
 
         {/* Quick Insights */}
-        <div className="block-section flex-grow-1 ms-3">
-          <div className="section-title">Quick Insights</div>
-          <ul>
-            <li>
-              <ClipboardList size={16} className="me-2" />{" "}
-              {stats.totalAppointments} total appointments handled
-            </li>
-            <li>
-              <Users size={16} className="me-2" /> {stats.totalPatients} patients treated
-            </li>
-            <li>
-              <FileText size={16} className="me-2" /> {stats.totalPrescriptions} prescriptions written
-            </li>
-            <li>
-              <CheckCircle size={16} className="me-2" /> {stats.verifiedReports} reports verified
-            </li>
-          </ul>
+        <div className="chart-section small-card">
+          <div className="section-title">
+            <div className="block-section flex-grow-1 ms-3">
+              <div className="section-title">Quick Insights</div>
+              <ul>
+                <li>
+                  <ClipboardList size={16} className="me-2" />{" "}
+                  {stats.totalAppointments} total appointments handled
+                </li>
+                <li>
+                  <Users size={16} className="me-2" /> {stats.totalPatients}{" "}
+                  patients treated
+                </li>
+                <li>
+                  <FileText size={16} className="me-2" />{" "}
+                  {stats.totalPrescriptions} prescriptions written
+                </li>
+                <li>
+                  <CheckCircle size={16} className="me-2" />{" "}
+                  {stats.verifiedReports} reports verified
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
