@@ -96,6 +96,10 @@ console.log("Admin routes mounted at /api/admins");
 app.use("/api/adminpatient", patientRoutes);
 console.log("Patient routes mounted at /api/adminpatient");
 
+// Remove this duplicate line:
+app.use("/api/prescriptions", prescriptionRoutes);
+console.log("Prescription routes mounted at /api/prescriptions");
+
 // ===================== START SERVER =====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
