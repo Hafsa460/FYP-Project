@@ -1,48 +1,64 @@
+import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+
+// Auth & Landing
 import LoginDashboard from "./components/Dashboard";
 import Login from "./components/Login";
 import LoginPatients from "./components/LoginPatients";
 import SignUp from "./components/SignUp";
 import LandingPage from "./components/LandingPage";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassowrd";
+
+// Doctor (Neurologist) side
 import NeuroLayout from "./components/Neurologist/NeuroLayout";
-import AppointmentSchedule from "./components/Neurologist/AppointmentSchedule"; // ✅ import
+import AppointmentSchedule from "./components/Neurologist/AppointmentSchedule";
 import VerifyReports from "./components/Neurologist/VerifyReports";
 import AddPrescription from "./components/Neurologist/AddPrescription";
 import ViewPrescription from "./components/Neurologist/ViewPrescription";
-import ViewPrescriptionPatient from "./components/ViewPrescriptionPatient";
 import ProfileManagement from "./components/Neurologist/ProfileManagement";
+import NeuroDashboard from "./components/Neurologist/NeuroDashboard";
+
+// Patient side
 import PatientDashboard from "./components/PatientDashboard";
 import Appointment from "./components/Appointments";
 import TestReport from "./components/TestReport";
+import ViewPrescriptionPatient from "./components/ViewPrescriptionPatient";
 import VerifySuccess from "./components/VerifySuccess";
-import ForgotPassword from "./components/ForgotPassword";
-import ResetPassword from "./components/ResetPassowrd";
+import PrescriptionDetails from "./components/PrescriptionDetails";
+
+// Admins
 import AdminDashboard from "./components/PatientAdmin/AdminPage";
 import AdminLogin from "./components/AdminLogin";
 import Doctoradmin from "./components/DoctorAdmin";
 import Dptadmin from "./components/DptAdmin";
 import Superadmin from "./components/SuperAdmin";
-import NeuroDashboard from "./components/Neurologist/NeuroDashboard"; // ✅ import
-import PrescriptionDetails from "./components/PrescriptionDetails";
+
+// Doctor Admin Dashboard pages
+import DoctorAdminLayout from "./components/DoctorAdmin/DoctorAdminLayout";
+import DoctorAdminDashboard from "./components/DoctorAdmin/DoctorAdminDashboard";
+import DoctorDetails from "./components/DoctorAdmin/DoctorDetails";
+
 function App() {
   return (
     <Routes>
-      {/* Default landing */}
+      {/* Default redirect */}
       <Route path="/" element={<Navigate to="/dash" replace />} />
       <Route path="/dash" element={<LandingPage />} />
 
-      {/* Auth routes */}
+      {/* Login & Signup */}
       <Route path="/Login-option" element={<LoginDashboard />} />
       <Route path="/login-doctor" element={<Login />} />
       <Route path="/login-patient" element={<LoginPatients />} />
       <Route path="/signup" element={<SignUp />} />
 
-      {/* Doctor dashboard with nested routes */}
-      <Route path="/neuro-dashboard" element={<NeuroLayout />}>
-        {/* ✅ Default page after login */}
-        <Route index element={<NeuroDashboard />} />
+      {/* Forgot/Reset Password */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* Other routes */}
+      {/* Neurologist Layout (nested routes) */}
+      <Route path="/neuro-dashboard" element={<NeuroLayout />}>
+        <Route index element={<NeuroDashboard />} />
         <Route path="appointment-schedule" element={<AppointmentSchedule />} />
         <Route path="verify-reports" element={<VerifyReports />} />
         <Route path="add" element={<AddPrescription />} />
@@ -50,29 +66,26 @@ function App() {
         <Route path="profile-management" element={<ProfileManagement />} />
       </Route>
 
-      {/* Patient & Admin */}
+      {/* Patient side routes */}
       <Route path="/PatientDashboard" element={<PatientDashboard />} />
       <Route path="/appointment" element={<Appointment />} />
-      <Route path="/manage-appointment" element={<ProfileManagement />} />
-
-      <Route
-        path="/view-prescriptionspatient"
-        element={<ViewPrescriptionPatient />}
-      />
+      <Route path="/view-prescriptionspatient" element={<ViewPrescriptionPatient />} />
       <Route path="/prescription/:id" element={<PrescriptionDetails />} />
-      <Route path="/test-history" element={<VerifyReports />} />
-      <Route path="/profile-management" element={<ProfileManagement />} />
-      <Route path="/verify-success" element={<VerifySuccess />} />
       <Route path="/testreport" element={<TestReport />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/verify-success" element={<VerifySuccess />} />
 
-      {/* Admin dashboards */}
-      <Route path="/PatientAdmin/*" element={<AdminDashboard />} />
+      {/* Admin routes */}
       <Route path="/adminLogin" element={<AdminLogin />} />
-      <Route path="/dctr" element={<Doctoradmin />} />
-      <Route path="/super" element={<Superadmin />} />
+      <Route path="/PatientAdmin/*" element={<AdminDashboard />} />
       <Route path="/department" element={<Dptadmin />} />
+      <Route path="/super" element={<Superadmin />} />
+      <Route path="/dctr" element={<Doctoradmin />} />
+
+      {/* Doctor Admin nested routes */}
+      <Route path="/doctor-admin" element={<DoctorAdminLayout />}>
+        <Route index element={<DoctorAdminDashboard />} />
+        <Route path="doctor/:id" element={<DoctorDetails />} />
+      </Route>
     </Routes>
   );
 }
