@@ -1,142 +1,120 @@
+// src/components/DoctorAdmin/DoctorAdminDashboard.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import "./DoctorAdmin.css";
+import maleProfile from "../../images/male.png";
+import femaleProfile from "../../images/female.png";
+
+const COLORS = ["#3b82f6", "#f97316", "#10b981", "#ef4444", "#8b5cf6"];
 
 const DoctorAdminDashboard = () => {
   const [overview, setOverview] = useState({});
-  const [doctors, setDoctors] = useState([]);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [search, setSearch] = useState("");
-  const [message, setMessage] = useState("");
+  const [admin, setAdmin] = useState(null);
 
-  const token = localStorage.getItem("token"); // doctorAdmin token
+  const token = localStorage.getItem("adminToken");
 
-  // Fetch dashboard overview
   const fetchOverview = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/doctor-admin/overview", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setOverview(res.data);
+      if (res.data && res.data.success) setOverview(res.data);
     } catch (err) {
       console.error("Error fetching overview", err);
     }
   };
 
-  // Fetch all doctors
-  const fetchDoctors = async () => {
+  const fetchAdmin = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/doctor-admin/doctors", {
+      const res = await axios.get("http://localhost:5000/api/doctor-admin/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setDoctors(res.data);
+      if (res.data && res.data.success) setAdmin(res.data.admin);
     } catch (err) {
-      console.error("Error fetching doctors", err);
+      console.error("Error fetching admin info", err);
     }
   };
 
   useEffect(() => {
     fetchOverview();
-    fetchDoctors();
+    fetchAdmin();
   }, []);
 
-  // Approve doctor edit request
-  const handleApproveEdit = async (doctorId) => {
-    try {
-      await axios.put(
-        `http://localhost:5000/api/doctor-admin/doctor-edit/${doctorId}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setMessage("Doctor edit request approved!");
-      fetchDoctors();
-      setTimeout(() => setMessage(""), 3000);
-    } catch (err) {
-      console.error("Error approving edit", err);
-      setMessage("Failed to approve edit request");
-    }
-  };
-
-  const filteredDoctors = doctors.filter((doc) =>
-    doc.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const deptData = (overview.doctorsByDept || []).map((d) => ({
+    name: d.department,
+    value: d.count,
+  }));
 
   return (
-    <div className="doctor-admin-dashboard">
+    <div className="admin-dashboard-content">
       <h2>Doctor Admin Dashboard</h2>
-      {message && <p className="message">{message}</p>}
 
-      {/* Overview Section */}
-      <div className="overview-cards">
-        <div className="card">
-          <h3>Total Doctors</h3>
-          <p>{overview.totalDoctors || 0}</p>
-        </div>
-        <div className="card">
-          <h3>Total Appointments</h3>
-          <p>{overview.totalAppointments || 0}</p>
-        </div>
-        <div className="card">
-          <h3>Departments</h3>
-          <p>{overview.departments ? overview.departments.length : 0}</p>
-        </div>
-      </div>
-
-      {/* Search Doctors */}
-      <input
-        type="text"
-        placeholder="Search doctor..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="search-input"
-      />
-
-      {/* Doctor List */}
-      <table className="doctor-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Edit Request</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredDoctors.map((doctor) => (
-            <tr key={doctor._id}>
-              <td>{doctor.name}</td>
-              <td>{doctor.department}</td>
-              <td>{doctor.email}</td>
-              <td>{doctor.pno}</td>
-              <td>{doctor.editRequest ? "Pending" : "No"}</td>
-              <td>
-                <button onClick={() => setSelectedDoctor(doctor)}>View</button>
-                {doctor.editRequest && (
-                  <button onClick={() => handleApproveEdit(doctor._id)}>
-                    Approve
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Doctor Details Modal */}
-      {selectedDoctor && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Doctor Details</h3>
-            <p><b>Name:</b> {selectedDoctor.name}</p>
-            <p><b>Email:</b> {selectedDoctor.email}</p>
-            <p><b>Department:</b> {selectedDoctor.department}</p>
-            <p><b>Designation:</b> {selectedDoctor.designation}</p>
-            <button onClick={() => setSelectedDoctor(null)}>Close</button>
+      {/* ----------- Admin Card ----------- */}
+      {admin && (
+        <div className="card admin-card mb-3 d-flex align-items-center p-3 shadow-sm rounded">
+          <img
+            src={admin.gender === "male" ? maleProfile : femaleProfile}
+            alt="Admin"
+            className="profile-icon me-3"
+          />
+          <div>
+            <div className="fw-bold fs-5">{admin.name}</div>
+            <div className="text-muted">ID: {admin.id}</div>
+            <div className="text-muted">Role: {admin.role}</div>
           </div>
         </div>
       )}
+
+      {/* ----------- Overview Cards ----------- */}
+      <div className="overview-cards mb-3">
+        <div className="card">
+          <div className="card-title">Total Doctors</div>
+          <div className="card-value">{overview.totalDoctors ?? 0}</div>
+        </div>
+
+        <div className="card">
+          <div className="card-title">Total Appointments</div>
+          <div className="card-value">{overview.totalAppointments ?? 0}</div>
+          <div className="card-sub">
+            Pending: {overview.apptStatus?.pending ?? 0} / Completed:{" "}
+            {overview.apptStatus?.completed ?? 0}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-title">Total Prescriptions</div>
+          <div className="card-value">{overview.totalPrescriptions ?? 0}</div>
+        </div>
+      </div>
+
+      {/* ----------- Chart Only ----------- */}
+      <div style={{ width: "100%", marginTop: 20 }}>
+        <h4>Doctors by Department</h4>
+        {deptData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={deptData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={110}
+                label
+              >
+                {deptData.map((entry, idx) => (
+                  <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div>No department data</div>
+        )}
+      </div>
     </div>
   );
 };
