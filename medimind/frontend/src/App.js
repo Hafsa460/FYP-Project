@@ -42,7 +42,7 @@ import DoctorDetails from "./components/DoctorAdmin/DoctorDetails";
 function App() {
   return (
     <Routes>
-      {/* Default redirect */}
+
       <Route path="/" element={<Navigate to="/dash" replace />} />
       <Route path="/dash" element={<LandingPage />} />
 
@@ -56,7 +56,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-      {/* Neurologist Layout (nested routes) */}
+      {/* Neurologist Layout */}
       <Route path="/neuro-dashboard" element={<NeuroLayout />}>
         <Route index element={<NeuroDashboard />} />
         <Route path="appointment-schedule" element={<AppointmentSchedule />} />
@@ -66,7 +66,7 @@ function App() {
         <Route path="profile-management" element={<ProfileManagement />} />
       </Route>
 
-      {/* Patient side routes */}
+      {/* Patient */}
       <Route path="/PatientDashboard" element={<PatientDashboard />} />
       <Route path="/appointment" element={<Appointment />} />
       <Route path="/view-prescriptionspatient" element={<ViewPrescriptionPatient />} />
@@ -74,16 +74,21 @@ function App() {
       <Route path="/testreport" element={<TestReport />} />
       <Route path="/verify-success" element={<VerifySuccess />} />
 
-      {/* Admin routes */}
+      {/* Admin */}
       <Route path="/adminLogin" element={<AdminLogin />} />
       <Route path="/PatientAdmin/*" element={<AdminDashboard />} />
       <Route path="/department" element={<Dptadmin />} />
       <Route path="/super" element={<Superadmin />} />
       <Route path="/dctr" element={<Doctoradmin />} />
 
-      {/* Doctor Admin nested routes */}
+      {/* Doctor Admin */}
       <Route path="/doctor-admin" element={<DoctorAdminLayout />}>
         <Route index element={<DoctorAdminDashboard />} />
+
+        {/* Manage Doctors goes to Dashboard list */}
+        <Route path="manage" element={<DoctorDetails />} />
+
+        {/* Doctor Details page */}
         <Route path="doctor/:id" element={<DoctorDetails />} />
       </Route>
     </Routes>

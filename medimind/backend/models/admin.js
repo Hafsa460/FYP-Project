@@ -1,3 +1,4 @@
+// models/admin.js
 const mongoose = require("mongoose");
 
 const adminSchema = new mongoose.Schema({
@@ -20,7 +21,13 @@ const adminSchema = new mongoose.Schema({
     enum: ["doctorAdmin", "patientAdmin", "departmentAdmin", "superAdmin"],
     required: true,
   },
+  // optional gender for profile icon selection
+  gender: {
+    type: String,
+    enum: ["male", "female"],
+    default: "female",
+  },
 }, { timestamps: true });
 
-// ✅ Fix: Prevent model overwrite
+// Prevent model overwrite
 module.exports = mongoose.models.Admin || mongoose.model("Admin", adminSchema);
