@@ -5,16 +5,13 @@ const mongoose = require("mongoose");
 
 const router = express.Router();
 
-// require models (use the same filenames you already have)
 const Doctor = require("../models/Doctor");
 const Appointment = require("../models/Appointment");
 const Prescription = require("../models/Prescription");
 const User = require("../models/User");
-const Admin = require("../models/admin"); // note: your model file name is admin.js
+const Admin = require("../models/admin");
 
-// -------------------------
-// Helper: verify admin token inline (no external middleware)
-// -------------------------
+// Helper: verify admin token inline
 async function requireAdmin(req, res) {
   try {
     const header = req.header("Authorization");
@@ -28,12 +25,9 @@ async function requireAdmin(req, res) {
       return { error: "Invalid token", status: 401 };
     }
 
-    // decoded contains { id: admin.id, name, role } (as issued in your admin login)
-    // find admin in DB by numeric id field
     const admin = await Admin.findOne({ id: decoded.id }).select("-password");
     if (!admin) return { error: "Admin not found", status: 403 };
 
-    // only doctorAdmin or superAdmin allowed
     if (!(admin.role === "doctorAdmin" || admin.role === "superAdmin")) {
       return { error: "Access denied: not doctor admin", status: 403 };
     }
@@ -45,32 +39,37 @@ async function requireAdmin(req, res) {
   }
 }
 
-// -------------------------
-// ROUTES
-// -------------------------
-
-// GET /api/doctor-admin/overview
+// Overview: totals, appointment status breakdown, prescriptions total, doctorsByDept
 router.get("/overview", async (req, res) => {
   const check = await requireAdmin(req, res);
   if (check.error) return res.status(check.status).json({ error: check.error });
 
   try {
-    const totalDoctors = await Doctor.countDocuments();
+    const totalDoctors = await Doctor.countDocuments({ active: true });
     const totalAppointments = await Appointment.countDocuments();
 
+    // appointment status counts
+    const apptStatusAgg = await Appointment.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]);
+    const apptStatus = {};
+    apptStatusAgg.forEach(a => { apptStatus[a._id || "unknown"] = a.count; });
+
+    const totalPrescriptions = await Prescription.countDocuments();
+
     const doctorsByDept = await Doctor.aggregate([
+      { $match: { active: true } },
       { $group: { _id: "$department", count: { $sum: 1 } } },
       { $project: { department: "$_id", count: 1, _id: 0 } },
     ]);
-
-    const doctorsPerAdmin = []; // placeholder
 
     res.json({
       success: true,
       totalDoctors,
       totalAppointments,
+      apptStatus,
+      totalPrescriptions,
       doctorsByDept,
-      doctorsPerAdmin,
     });
   } catch (err) {
     console.error("overview error:", err);
@@ -78,17 +77,19 @@ router.get("/overview", async (req, res) => {
   }
 });
 
-// GET /api/doctor-admin/doctors
+// GET doctors (active by default)
 router.get("/doctors", async (req, res) => {
   const check = await requireAdmin(req, res);
   if (check.error) return res.status(check.status).json({ error: check.error });
 
   try {
-    const { name, department, designation } = req.query;
+    const { name, department, designation, active } = req.query;
     const q = {};
     if (name) q.name = { $regex: name, $options: "i" };
     if (department) q.department = { $regex: department, $options: "i" };
     if (designation) q.designation = { $regex: designation, $options: "i" };
+    if (active !== undefined) q.active = active === "true";
+    else q.active = true;
 
     const doctors = await Doctor.find(q).select("-password").lean();
     const ids = doctors.map((d) => d._id);
@@ -114,7 +115,7 @@ router.get("/doctors", async (req, res) => {
   }
 });
 
-// GET /api/doctor-admin/doctor/:id
+// GET single doctor
 router.get("/doctor/:id", async (req, res) => {
   const check = await requireAdmin(req, res);
   if (check.error) return res.status(check.status).json({ error: check.error });
@@ -125,8 +126,7 @@ router.get("/doctor/:id", async (req, res) => {
       return res.status(400).json({ success: false, error: "Invalid doctor id" });
 
     const doctor = await Doctor.findById(doctorId).select("-password").lean();
-    if (!doctor)
-      return res.status(404).json({ success: false, error: "Doctor not found" });
+    if (!doctor) return res.status(404).json({ success: false, error: "Doctor not found" });
 
     res.json({ success: true, doctor });
   } catch (err) {
@@ -135,7 +135,7 @@ router.get("/doctor/:id", async (req, res) => {
   }
 });
 
-// ✅ FIXED HERE — GET /api/doctor-admin/doctor/:id/stats
+// GET doctor stats (unchanged logic but robust)
 router.get("/doctor/:id/stats", async (req, res) => {
   const check = await requireAdmin(req, res);
   if (check.error) return res.status(check.status).json({ error: check.error });
@@ -155,12 +155,7 @@ router.get("/doctor/:id/stats", async (req, res) => {
       ...patientsFromAppt.map((id) => id.toString()),
       ...patientsFromPres.map((id) => id.toString()),
     ]);
-
-    // ✅ FIXED ObjectId creation
-    const patientIds = Array.from(patientIdsSet).map(
-      (id) => new mongoose.Types.ObjectId(id)
-    );
-
+    const patientIds = Array.from(patientIdsSet).map((id) => new mongoose.Types.ObjectId(id));
     const totalPatients = patientIds.length;
 
     let genderStats = { Male: 0, Female: 0, Unknown: 0 };
@@ -182,7 +177,7 @@ router.get("/doctor/:id/stats", async (req, res) => {
       .lean();
 
     const doctor = await Doctor.findById(doctorId)
-      .select("department designation workingHours name gender")
+      .select("department designation workingHours name gender createdAt")
       .lean();
 
     res.json({
@@ -202,32 +197,93 @@ router.get("/doctor/:id/stats", async (req, res) => {
   }
 });
 
-// GET /api/doctor-admin/search
-router.get("/search", async (req, res) => {
+// CREATE doctor
+router.post("/doctor", async (req, res) => {
   const check = await requireAdmin(req, res);
   if (check.error) return res.status(check.status).json({ error: check.error });
 
   try {
-    const { term, department, designation } = req.query;
-    const q = {};
-    if (term)
-      q.$or = [
-        { name: { $regex: term, $options: "i" } },
-        { email: { $regex: term, $options: "i" } },
-        { pno: { $regex: term, $options: "i" } },
-      ];
-    if (department) q.department = { $regex: department, $options: "i" };
-    if (designation) q.designation = { $regex: designation, $options: "i" };
+    const { name, email, pno, password, department, designation, gender, workingHours } = req.body;
+    if (!name || !email || !pno || !password || !department || !designation || !gender) {
+      return res.status(400).json({ success: false, error: "Missing required fields" });
+    }
 
-    const doctors = await Doctor.find(q).select("-password").lean();
-    res.json({ success: true, doctors });
+    const exists = await Doctor.findOne({ $or: [{ email }, { pno }] });
+    if (exists) return res.status(400).json({ success: false, error: "Doctor with email or phone already exists" });
+
+    const newDoc = new Doctor({
+      name,
+      email,
+      pno,
+      password,
+      department,
+      designation,
+      gender,
+      workingHours,
+    });
+
+    await newDoc.save();
+    res.json({ success: true, doctor: newDoc });
   } catch (err) {
-    console.error("search error:", err);
+    console.error("create doctor error:", err);
     res.status(500).json({ success: false, error: "Server error" });
   }
 });
 
-// GET /api/doctor-admin/notifications
+// UPDATE doctor
+router.put("/doctor/:id", async (req, res) => {
+  const check = await requireAdmin(req, res);
+  if (check.error) return res.status(check.status).json({ error: check.error });
+
+  try {
+    const doctorId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(doctorId))
+      return res.status(400).json({ success: false, error: "Invalid doctor id" });
+
+    // Prevent password update here (or if included, hash it)
+    const update = { ...req.body };
+    delete update.password;
+
+    const updated = await Doctor.findByIdAndUpdate(doctorId, update, { new: true }).select("-password").lean();
+    if (!updated) return res.status(404).json({ success: false, error: "Doctor not found" });
+
+    res.json({ success: true, doctor: updated });
+  } catch (err) {
+    console.error("update doctor error:", err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
+// DELETE doctor (soft-delete if references exist)
+router.delete("/doctor/:id", async (req, res) => {
+  const check = await requireAdmin(req, res);
+  if (check.error) return res.status(check.status).json({ error: check.error });
+
+  try {
+    const doctorId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(doctorId))
+      return res.status(400).json({ success: false, error: "Invalid doctor id" });
+
+    // Check references
+    const apptCount = await Appointment.countDocuments({ doctorId });
+    const presCount = await Prescription.countDocuments({ doctor: doctorId });
+
+    if (apptCount > 0 || presCount > 0) {
+      // soft-delete
+      const updated = await Doctor.findByIdAndUpdate(doctorId, { active: false }, { new: true }).select("-password").lean();
+      return res.json({ success: true, message: "Doctor soft-deactivated due to existing references", doctor: updated });
+    } else {
+      // safe to remove
+      await Doctor.findByIdAndDelete(doctorId);
+      return res.json({ success: true, message: "Doctor deleted" });
+    }
+  } catch (err) {
+    console.error("delete doctor error:", err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
+// notifications unchanged
 router.get("/notifications", async (req, res) => {
   const check = await requireAdmin(req, res);
   if (check.error) return res.status(check.status).json({ error: check.error });
@@ -251,9 +307,7 @@ router.get("/notifications", async (req, res) => {
     todaysAppointments.forEach((a) => {
       notifications.push({
         type: "appointment",
-        message: `${a.patientId?.name || "Patient"} has appointment with Dr. ${
-          a.doctorId?.name || ""
-        } on ${new Date(a.date).toLocaleDateString()} ${a.time}`,
+        message: `${a.patientId?.name || "Patient"} has appointment with Dr. ${a.doctorId?.name || ""} on ${new Date(a.date).toLocaleDateString()} ${a.time}`,
         createdAt: a.date,
       });
     });
