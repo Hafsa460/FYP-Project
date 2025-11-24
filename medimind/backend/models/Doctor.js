@@ -7,6 +7,7 @@ const doctorSchema = new mongoose.Schema({
   pno: { type: Number, required: true, unique: true },
   password: { type: String, required: true },
   department: { type: String, required: true },
+    designation: { type: String, required:true},
 
   // 🔹 Add these new fields
   designation: { type: String, default: "Doctor" }, // e.g. "Consultant", "Professor"
