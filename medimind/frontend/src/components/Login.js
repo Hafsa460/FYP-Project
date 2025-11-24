@@ -9,41 +9,47 @@ export default function DoctorLogin() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
- const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  try {
-    const res = await axios.post(
-      "http://localhost:5000/api/doctor-auth/login",
-      {
-        pno: Number(pno),
-        password,
-      }
-    );
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/doctor-auth/login",
+        {
+          pno: Number(pno),
+          password,
+        }
+      );
 
-    // ✅ Store token + doctor info
-    localStorage.setItem("doctorToken", res.data.token);
-    localStorage.setItem("doctor", JSON.stringify(res.data.doctor));
+      // ✅ Store token + doctor info
+      localStorage.setItem("doctorToken", res.data.token);
+      localStorage.setItem("doctor", JSON.stringify(res.data.doctor));
 
-    navigate("/neuro-dashboard");
-  } catch (err) {
-    console.error("Login failed:", err.response?.data || err);
-    setError(
-      err.response?.data?.message || "Login failed. Please try again."
-    );
-  }
-};
-
+      navigate("/neuro-dashboard");
+    } catch (err) {
+      console.error("Login failed:", err.response?.data || err);
+      setError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
+    }
+  };
 
   return (
     <div className="login-page d-flex align-items-center justify-content-center">
       <div className="login-container shadow-lg row w-100">
         {/* Left Image Section */}
         <div className="col-md-6 image-section">
-          <img src={coverimage} alt="Login" className="img-fluid" />
+          <a href="/dash">
+            <img
+              src={coverimage}
+              alt="Login"
+              className="img-fluid"
+              style={{ cursor: "pointer" }}
+            />
+          </a>
         </div>
 
         {/* Right Form Section */}

@@ -10,13 +10,13 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => console.error("❌ Connection error:", err));
 
 const doctors = [
-  {
-    name: "Dr. John Smith",
-    email: "john@example.com",
-    pno: 1000001,
+  { 
+    name: "Dr. John Smith", 
+    email: "john@example.com", 
+    pno: 1000001, 
     password: "password123",
     department: "Cardiology",
-    designation: "Consultant Cardiologist",
+    designation: "Senior Cardiologist",
     gender: "male",
     leaveDays: [
       { date: "2025-09-27", reason: "Conference" },
@@ -24,30 +24,40 @@ const doctors = [
     ],
     workingHours: { start: "08:00", end: "14:00" }
   },
-  {
-    name: "Dr. Emily Davis",
-    email: "emily@example.com",
-    pno: 1000002,
+  { 
+    name: "Dr. Emily Davis", 
+    email: "emily@example.com", 
+    pno: 1000002, 
     password: "securePass456",
     department: "Neurology",
-    designation: "Assistant Professor of Neurology",
+    designation: "Assistant Neurologist",
     gender: "female",
     leaveDays: [
       { date: "2025-09-14", reason: "Medical Camp" }
     ],
     workingHours: { start: "08:00", end: "14:00" }
+  },
+  { 
+    name: "Dr. Mark Taylor", 
+    email: "mark@example.com", 
+    pno: 1000003, 
+    password: "docMark789",
+    department: "Pediatrics",
+    designation: "Junior Pediatrician",
+    gender: "male",
+    leaveDays: [],
+    workingHours: { start: "09:00", end: "15:00" }
   }
-
 ];
 
 async function seedDoctors() {
   try {
-    await Doctor.deleteMany();
+    await Doctor.deleteMany({});
     console.log("🗑 Old doctors removed.");
 
     for (const doc of doctors) {
       const doctor = new Doctor(doc);
-      await doctor.save(); // password gets hashed
+      await doctor.save(); // password will be hashed if you have pre-save middleware
     }
 
     console.log("✅ Doctors seeded successfully.");
