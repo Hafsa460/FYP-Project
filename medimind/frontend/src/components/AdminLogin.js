@@ -26,7 +26,8 @@ export default function AdminLogin() {
       localStorage.setItem("adminRole", res.data.role);
       localStorage.setItem("adminName", res.data.name);
 
-      if (res.data.role === "doctorAdmin") navigate("/dctr");
+      // ✅ Role-based redirection
+      if (res.data.role === "doctorAdmin") navigate("/DoctorAdmin");
       else if (res.data.role === "patientAdmin")
         navigate("/PatientAdmin/AdminPage");
       else if (res.data.role === "departmentAdmin") navigate("/department");
