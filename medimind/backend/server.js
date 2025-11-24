@@ -24,7 +24,12 @@ const app = express();
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
 // Middleware
-app.use(cors({ origin: FRONTEND_URL }));
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Log incoming requests for debugging
@@ -55,8 +60,11 @@ app.get("/", (req, res) => {
 // Prescriptions
 app.use("/api/prescriptions", prescriptionRoutes);
 console.log("Prescription routes mounted at /api/prescriptions");
-app.use("/api/prescriptions", prescriptionPatientRoutes);
-console.log("Prescription routes mounted at /api/prescriptions");
+
+// Prescriptions (Patient-specific)
+app.use("/api/patient-prescriptions", prescriptionPatientRoutes);
+console.log("Prescription (patient) routes mounted at /api/patient-prescriptions");
+
 
 // Users
 app.use("/api/users", userRoutes);
@@ -76,6 +84,9 @@ console.log("Doctor routes mounted at /api/doctors");
 app.use("/api/doctor-auth", doctorAuthRoutes); // for doctor authentication
 console.log("Doctor auth routes mounted at /api/doctor-auth");
 
+const departmentRoutes = require("./routes/departmentRoutes");
+app.use("/api/departments", departmentRoutes);
+
 // Appointments
 app.use("/api/appointments", appointmentRoutes);
 console.log("Appointment routes mounted at /api/appointments");
@@ -87,6 +98,10 @@ console.log("Admin routes mounted at /api/admins");
 // Admin - Patients
 app.use("/api/adminpatient", patientRoutes);
 console.log("Patient routes mounted at /api/adminpatient");
+
+// Remove this duplicate line:
+app.use("/api/prescriptions", prescriptionRoutes);
+console.log("Prescription routes mounted at /api/prescriptions");
 
 
 app.use("/api/doctor-admin", doctorAdminRoutes);

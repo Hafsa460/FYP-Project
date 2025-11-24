@@ -8,136 +8,135 @@ const authMiddleware = require("../middleware/auth");
 
 const router = express.Router();
 
-
-// 📌 Book an appointment
+/* ----------------------------------------
+ 📌 BOOK APPOINTMENT (STATUS ALWAYS SAVED)
+---------------------------------------- */
 router.post("/book", authMiddleware, async (req, res) => {
+  console.log("📌 BODY RECEIVED:", req.body);
+  console.log("📌 USER FROM TOKEN:", req.user);
+
   try {
+    console.log(Appointment.schema.paths.status);
     let { doctorId, date, time } = req.body;
     const patientId = req.user.id;
 
-    // convert date string -> Date
     date = new Date(date);
 
-    // doctor leave check
     const leave = await DoctorLeave.findOne({ doctorId, date });
     if (leave) return res.status(400).json({ error: "Doctor is on leave" });
 
-    // doctor conflict
     const doctorConflict = await Appointment.findOne({ doctorId, date, time });
-    if (doctorConflict)
-      return res.status(400).json({ error: "Doctor already booked" });
+    if (doctorConflict) return res.status(400).json({ error: "Doctor already booked" });
 
-    // patient conflict
     const patientConflict = await Appointment.findOne({ patientId, date, time });
-    if (patientConflict)
-      return res.status(400).json({ error: "You already booked this slot" });
+    if (patientConflict) return res.status(400).json({ error: "You already booked this slot" });
 
     const appointment = await Appointment.create({
       doctorId,
       patientId,
       date,
       time,
+      status: "Pending", // always save
     });
 
-    await User.findByIdAndUpdate(patientId, {
-      $push: { appointments: appointment._id },
-    });
-    await Doctor.findByIdAndUpdate(doctorId, {
-      $push: { appointments: appointment._id },
-    });
+    await User.findByIdAndUpdate(patientId, { $push: { appointments: appointment._id } });
+    await Doctor.findByIdAndUpdate(doctorId, { $push: { appointments: appointment._id } });
 
-    res.status(201).json({ message: "✅ Appointment booked", appointment });
+    res.status(201).json({ message: "Appointment booked", appointment });
   } catch (err) {
     console.error("Error booking appointment:", err);
     res.status(500).json({ error: "Failed to book appointment" });
   }
 });
 
-
-// 📌 Get patient’s appointments
+/* ----------------------------------------
+ 📌 GET PATIENT APPOINTMENTS
+---------------------------------------- */
 router.get("/patient/:patientId", async (req, res) => {
   try {
     const { patientId } = req.params;
 
     const appointments = await Appointment.find({ patientId })
+      .select("doctorId patientId date time status createdAt updatedAt") // ✅ include status
       .populate("doctorId", "name department");
 
     res.json(appointments);
   } catch (err) {
-    console.error("Error fetching appointments:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-
-// 📌 Get ALL appointments for a doctor
+/* ----------------------------------------
+ 📌 GET ALL APPOINTMENTS FOR A DOCTOR
+---------------------------------------- */
 router.get("/doctor/:doctorId", async (req, res) => {
   try {
     const { doctorId } = req.params;
 
     const appointments = await Appointment.find({ doctorId })
+      .select("doctorId patientId date time status createdAt updatedAt") // ✅ include status
       .sort({ date: 1, time: 1 })
       .populate("patientId", "name age gender")
       .populate("doctorId", "name department");
 
     res.json(appointments);
   } catch (err) {
-    console.error("Error fetching doctor's appointments:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-
-// 📌 Get today's appointments for a doctor
+/* ----------------------------------------
+ 📌 GET TODAY'S APPOINTMENTS FOR DOCTOR
+---------------------------------------- */
 router.get("/doctor/:doctorId/today", async (req, res) => {
   try {
     const { doctorId } = req.params;
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
-
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
     const appointments = await Appointment.find({
       doctorId: new mongoose.Types.ObjectId(doctorId),
-      date: { $gte: startOfDay, $lte: endOfDay }
+      date: { $gte: startOfDay, $lte: endOfDay },
     })
+      .select("doctorId patientId date time status createdAt updatedAt") // ✅ include status
       .populate("patientId", "name")
       .populate("doctorId", "name department");
 
     res.json(appointments);
   } catch (err) {
-    console.error("Error fetching today’s appointments:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-
-// 📌 Get appointments for doctor + specific date (for availability check)
+/* ----------------------------------------
+ 📌 GET APPOINTMENTS FOR SPECIFIC DATE
+---------------------------------------- */
 router.get("/", async (req, res) => {
   try {
     const { doctorId, date } = req.query;
 
-    if (!doctorId || !date) {
+    if (!doctorId || !date)
       return res.status(400).json({ error: "doctorId and date are required" });
-    }
 
-    // Parse the date range
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
 
     const appointments = await Appointment.find({
       doctorId,
-      date: { $gte: startOfDay, $lte: endOfDay },
-    });
+      date: { $gte: start, $lte: end },
+    }).select("doctorId patientId date time status createdAt updatedAt"); // ✅ include status
 
     res.json(appointments);
   } catch (err) {
-    console.error("Error fetching availability:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -161,5 +160,30 @@ router.get("/doctor/:doctorId/waiting", async (req, res) => {
   }
 });
 
+/* ----------------------------------------
+ 📌 UPDATE APPOINTMENT STATUS
+---------------------------------------- */
+router.put("/:appointmentId/status", authMiddleware, async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { status } = req.body;
+
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { status },
+      { new: true } // return updated document
+    )
+      .populate("patientId", "name age gender")
+      .populate("doctorId", "name department");
+
+    if (!updatedAppointment)
+      return res.status(404).json({ error: "Appointment not found" });
+
+    res.json({ message: "Status updated", appointment: updatedAppointment });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update status" });
+  }
+});
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ClipboardList, FileText, Users, CheckCircle } from "lucide-react";
+import { ClipboardList, FileText, Users, CheckCircle, Clock } from "lucide-react";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import "./NeuroDashboard.css";
 import maleProfile from "../../images/male.png";
@@ -14,6 +14,8 @@ function NeuroDashboard() {
     totalPrescriptions: 0,
     verifiedReports: 0,
     genderStats: { male: 0, female: 0 },
+    pendingAppointments: 0,
+    completedAppointments: 0,
   });
 
   useEffect(() => {
@@ -22,7 +24,6 @@ function NeuroDashboard() {
         const token = localStorage.getItem("doctorToken");
         if (!token) return;
 
-        // ✅ fetch logged-in doctor
         const doctorRes = await fetch("http://localhost:5000/api/doctor-auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -36,7 +37,28 @@ function NeuroDashboard() {
             { headers: { Authorization: `Bearer ${token}` } }
           );
           const statsData = await statsRes.json();
-          if (statsData.success) setStats(statsData.stats);
+
+          // ✅ Fetch appointment details for status counts
+          const apptRes = await fetch(
+            `http://localhost:5000/api/appointments/doctor/${doctorData.doctor._id}`
+          );
+          const apptData = await apptRes.json();
+
+          let pending = 0;
+          let completed = 0;
+
+          apptData.forEach((a) => {
+            if (a.status === "Pending") pending++;
+            if (a.status === "Completed") completed++;
+          });
+
+          if (statsData.success) {
+            setStats({
+              ...statsData.stats,
+              pendingAppointments: pending,
+              completedAppointments: completed,
+            });
+          }
         }
       } catch (err) {
         console.error("Error fetching doctor stats:", err);
@@ -50,7 +72,6 @@ function NeuroDashboard() {
     return <div className="p-4">Loading doctor dashboard...</div>;
   }
 
-  // ✅ Gender distribution chart data
   const genderData = [
     { name: "Male", value: stats.genderStats?.male || 0 },
     { name: "Female", value: stats.genderStats?.female || 0 },
@@ -60,7 +81,6 @@ function NeuroDashboard() {
 
   return (
     <div className="main-content">
-      {/* Doctor Profile Section */}
       <div className="doctor-card d-flex align-items-center mb-4 p-3 shadow-sm rounded">
         <img
           src={doctor.gender === "male" ? maleProfile : femaleProfile}
@@ -80,20 +100,20 @@ function NeuroDashboard() {
       {/* Cards Section */}
       <div className="card-grid mb-4">
         <div className="card">
-          <div className="fw-bold">Upcoming Appointments</div>
-          <div className="fs-4">{stats.upcomingAppointments}</div>
+          <div className="fw-bold">Total Appointments</div>
+          <div className="fs-4">{stats.totalAppointments}</div>
         </div>
         <div className="card">
-          <div className="fw-bold">Patients</div>
-          <div className="fs-4">{stats.totalPatients}</div>
+          <div className="fw-bold">Pending Appointments</div>
+          <div className="fs-4 text-warning">{stats.pendingAppointments}</div>
         </div>
         <div className="card">
-          <div className="fw-bold">Prescriptions Added</div>
-          <div className="fs-4">{stats.totalPrescriptions}</div>
+          <div className="fw-bold">Completed Appointments</div>
+          <div className="fs-4 text-success">{stats.completedAppointments}</div>
         </div>
         <div className="card">
-          <div className="fw-bold">Reports Verified</div>
-          <div className="fs-4">{stats.verifiedReports}</div>
+          <div className="fw-bold">Patients Under Request</div>
+          <div className="fs-4 text-primary">{stats.pendingAppointments}</div>
         </div>
       </div>
 
@@ -132,23 +152,34 @@ function NeuroDashboard() {
         </div>
 
         {/* Quick Insights */}
-        <div className="block-section flex-grow-1 ms-3">
-          <div className="section-title">Quick Insights</div>
-          <ul>
-            <li>
-              <ClipboardList size={16} className="me-2" />{" "}
-              {stats.totalAppointments} total appointments handled
-            </li>
-            <li>
-              <Users size={16} className="me-2" /> {stats.totalPatients} patients treated
-            </li>
-            <li>
-              <FileText size={16} className="me-2" /> {stats.totalPrescriptions} prescriptions written
-            </li>
-            <li>
-              <CheckCircle size={16} className="me-2" /> {stats.verifiedReports} reports verified
-            </li>
-          </ul>
+        <div className="chart-section small-card">
+          <div className="section-title">
+            <div className="block-section flex-grow-1 ms-3">
+              <div className="section-title">Quick Insights</div>
+              <ul>
+                <li>
+                  <ClipboardList size={16} className="me-2" />{" "}
+                  {stats.totalAppointments} total appointments handled
+                </li>
+                <li>
+                  <Clock size={16} className="me-2" />{" "}
+                  {stats.pendingAppointments} appointments pending
+                </li>
+                <li>
+                  <CheckCircle size={16} className="me-2" />{" "}
+                  {stats.completedAppointments} appointments completed
+                </li>
+                <li>
+                  <Users size={16} className="me-2" /> {stats.totalPatients}{" "}
+                  patients treated
+                </li>
+                <li>
+                  <FileText size={16} className="me-2" />{" "}
+                  {stats.totalPrescriptions} prescriptions written
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
