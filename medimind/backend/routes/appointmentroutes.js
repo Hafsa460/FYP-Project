@@ -142,5 +142,24 @@ router.get("/", async (req, res) => {
   }
 });
 
+// 📌 Get only waiting appointments for a doctor
+router.get("/doctor/:doctorId/waiting", async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+
+    const appointments = await Appointment.find({
+      doctorId,
+      status: "waiting",
+    })
+      .sort({ date: 1, time: 1 })
+      .populate("patientId", "name");
+
+    res.json(appointments);
+  } catch (err) {
+    console.error("Error fetching waiting appointments:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 module.exports = router;
