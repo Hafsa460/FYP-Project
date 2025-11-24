@@ -1,3 +1,4 @@
+// models/Doctor.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
@@ -7,10 +8,10 @@ const doctorSchema = new mongoose.Schema({
   pno: { type: Number, required: true, unique: true },
   password: { type: String, required: true },
   department: { type: String, required: true },
-    designation: { type: String, required:true},
 
-  // 🔹 Add these new fields
-  designation: { type: String, default: "Doctor" }, // e.g. "Consultant", "Professor"
+  // OPTION 3: required + default
+  designation: { type: String, required: true, default: "Doctor" },
+
   gender: { type: String, enum: ["male", "female"], required: true },
 
   leaveDays: [
@@ -26,7 +27,10 @@ const doctorSchema = new mongoose.Schema({
   },
 
   appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }],
-});
+
+  // soft-delete flag
+  active: { type: Boolean, default: true },
+}, { timestamps: true });
 
 doctorSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
@@ -38,4 +42,4 @@ doctorSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-module.exports = mongoose.model("Doctor", doctorSchema);
+module.exports = mongoose.models.Doctor || mongoose.model("Doctor", doctorSchema);
