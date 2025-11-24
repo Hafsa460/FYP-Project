@@ -15,6 +15,9 @@ const patientRoutes = require("./routes/adminpatient");
 const appointmentRoutes = require("./routes/appointmentroutes");
 const prescriptionRoutes = require("./routes/prescriptionRoutes");
 const prescriptionPatientRoutes = require("./routes/prescriptionPatient");
+const doctorAdminRoutes = require("./routes/doctorAdminRoutes");
+
+
 const app = express();
 
 // Frontend URL from .env or default
@@ -85,6 +88,9 @@ console.log("Admin routes mounted at /api/admins");
 app.use("/api/adminpatient", patientRoutes);
 console.log("Patient routes mounted at /api/adminpatient");
 
+
+app.use("/api/doctor-admin", doctorAdminRoutes);
+console.log("Doctor admin routes mounted at /api/doctor-admin");
 // ===================== START SERVER =====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
