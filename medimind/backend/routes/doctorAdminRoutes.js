@@ -17,7 +17,7 @@ async function requireAdmin(req, res) {
     const header = req.header("Authorization");
     if (!header) return { error: "No token provided", status: 401 };
 
-    const token = header.replace("Bearer ", "");
+    const token = header.replace("Bearer ", "").trim();
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -25,6 +25,7 @@ async function requireAdmin(req, res) {
       return { error: "Invalid token", status: 401 };
     }
 
+    // find admin - adjust field if your Admin model stores _id instead of id
     const admin = await Admin.findOne({ id: decoded.id }).select("-password");
     if (!admin) return { error: "Admin not found", status: 403 };
 
@@ -48,12 +49,16 @@ router.get("/overview", async (req, res) => {
     const totalDoctors = await Doctor.countDocuments({ active: true });
     const totalAppointments = await Appointment.countDocuments();
 
-    // appointment status counts
+    // appointment status counts (normalize keys to lowercase)
     const apptStatusAgg = await Appointment.aggregate([
       { $group: { _id: "$status", count: { $sum: 1 } } }
     ]);
+
     const apptStatus = {};
-    apptStatusAgg.forEach(a => { apptStatus[a._id || "unknown"] = a.count; });
+    apptStatusAgg.forEach(a => {
+      const key = (a._id || "unknown").toString();
+      apptStatus[key.toLowerCase()] = a.count;
+    });
 
     const totalPrescriptions = await Prescription.countDocuments();
 
@@ -92,6 +97,12 @@ router.get("/doctors", async (req, res) => {
     else q.active = true;
 
     const doctors = await Doctor.find(q).select("-password").lean();
+
+    // safe-guard: if no doctors, return empty list
+    if (!doctors || doctors.length === 0) {
+      return res.json({ success: true, doctors: [] });
+    }
+
     const ids = doctors.map((d) => d._id);
     const counts = await Appointment.aggregate([
       { $match: { doctorId: { $in: ids } } },
@@ -152,20 +163,21 @@ router.get("/doctor/:id/stats", async (req, res) => {
     const patientsFromPres = await Prescription.distinct("patient", { doctor: doctorId });
 
     const patientIdsSet = new Set([
-      ...patientsFromAppt.map((id) => id.toString()),
-      ...patientsFromPres.map((id) => id.toString()),
+      ...patientsFromAppt.map((id) => id?.toString()).filter(Boolean),
+      ...patientsFromPres.map((id) => id?.toString()).filter(Boolean),
     ]);
+
     const patientIds = Array.from(patientIdsSet).map((id) => new mongoose.Types.ObjectId(id));
     const totalPatients = patientIds.length;
 
-    let genderStats = { Male: 0, Female: 0, Unknown: 0 };
+    let genderStats = { male: 0, female: 0, unknown: 0 };
     if (patientIds.length > 0) {
       const genders = await User.aggregate([
         { $match: { _id: { $in: patientIds } } },
         { $group: { _id: "$gender", count: { $sum: 1 } } },
       ]);
       genders.forEach((g) => {
-        const key = g._id || "Unknown";
+        const key = (g._id || "unknown").toString().toLowerCase();
         genderStats[key] = g.count;
       });
     }

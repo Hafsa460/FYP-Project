@@ -86,7 +86,7 @@ function App() {
         <Route index element={<DoctorAdminDashboard />} />
 
         {/* Manage Doctors goes to Dashboard list */}
-        <Route path="manage" element={<DoctorDetails />} />
+        <Route path="manage" element={<DoctorAdminDashboard />} />
 
         {/* Doctor Details page */}
         <Route path="doctor/:id" element={<DoctorDetails />} />

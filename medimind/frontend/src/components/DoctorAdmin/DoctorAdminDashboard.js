@@ -41,6 +41,13 @@ const DoctorAdminDashboard = () => {
     fetchAdmin();
   }, []);
 
+  // helper to read appt status counts case-insensitively
+  const getApptCount = (statusKey) => {
+    const statusObj = overview.apptStatus || {};
+    const foundKey = Object.keys(statusObj || {}).find(k => k && k.toString().toLowerCase() === statusKey.toString().toLowerCase());
+    return foundKey ? statusObj[foundKey] : 0;
+  };
+
   const deptData = (overview.doctorsByDept || []).map((d) => ({
     name: d.department,
     value: d.count,
@@ -77,8 +84,7 @@ const DoctorAdminDashboard = () => {
           <div className="card-title">Total Appointments</div>
           <div className="card-value">{overview.totalAppointments ?? 0}</div>
           <div className="card-sub">
-            Pending: {overview.apptStatus?.pending ?? 0} / Completed:{" "}
-            {overview.apptStatus?.completed ?? 0}
+            Pending: {getApptCount("pending")} / Completed: {getApptCount("completed")}
           </div>
         </div>
 
