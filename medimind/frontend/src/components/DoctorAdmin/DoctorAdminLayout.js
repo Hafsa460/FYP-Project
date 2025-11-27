@@ -69,9 +69,7 @@ function DoctorAdminLayout() {
             <Link to="/doctor-admin" className="nav-link">Dashboard</Link>
           </li>
           <li className="nav-item">
-            <Link to="/doctor-admin/manage" className="nav-link">Manage Doctors</Link>
-
-
+            <Link to="doctor/:id" className="nav-link">Manage Doctors</Link>
           </li>
           <li className="nav-item">
             <Link to="/doctor-admin/notifications" className="nav-link">Notifications</Link>
