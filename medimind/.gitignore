@@ -20,6 +20,13 @@ yarn-error.log*
 /build/
 /dist/
 
+# Python virtual environment
+venv/
+__pycache__/
+
+# TensorFlow / Keras models
+*.h5
+
 # OS / Misc files
 .DS_Store
 Thumbs.db
@@ -29,6 +36,3 @@ Thumbs.db
 .idea/
 *.sublime-workspace
 *.sublime-project
-# .gitignore
-venv/
-
