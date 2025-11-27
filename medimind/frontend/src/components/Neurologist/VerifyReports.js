@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import './VerifyReports.css'; // Make sure this CSS file exists
 
 function VerifyReports() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -53,33 +54,29 @@ function VerifyReports() {
   };
 
   return (
-    <div style={{ maxWidth: "500px", margin: "20px auto" }}>
+    <div className="verify-reports-container">
       <h3>Verify Test Reports</h3>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          style={{ marginBottom: "10px" }}
-        />
-        <br />
+      <form className="verify-reports-form" onSubmit={handleSubmit}>
+        <input type="file" accept="image/*" onChange={handleFileChange} />
         <button type="submit" disabled={loading}>
-          {loading ? "Predicting..." : "Upload & Predict"}
+          {loading ? "Predicting..." : "Predict"}
         </button>
       </form>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {selectedFile && (
+        <div className="image-preview">
+          <img src={URL.createObjectURL(selectedFile)} alt="Preview" />
+        </div>
+      )}
+
+      {error && <p className="error-message">{error}</p>}
 
       {result && (
-        <div style={{ marginTop: "20px" }}>
+        <div className="result-box">
           <h4>Prediction Result:</h4>
-          <p>
-            <strong>Prediction:</strong> {result.prediction}
-          </p>
-          <p>
-            <strong>Confidence:</strong> {result.confidence}
-          </p>
+          <p><strong>Prediction:</strong> {result.prediction}</p>
+          <p><strong>Confidence:</strong> {result.confidence}</p>
         </div>
       )}
     </div>

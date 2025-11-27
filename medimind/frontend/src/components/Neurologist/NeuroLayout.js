@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import Navbar from "../Navbar";
 import maleProfile from "../../images/male.png";
@@ -8,35 +8,49 @@ import "./NeuroDashboard.css";
 function NeuroLayout() {
   const [showNotifications, setShowNotifications] = useState(true);
   const [prescriptionOpen, setPrescriptionOpen] = useState(false);
-  const [doctor, setDoctor] = useState(null); // ✅ Store doctor details
+  const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [appointments, setAppointments] = useState([]); // ✅ Store upcoming appointments
   const navigate = useNavigate();
 
-  // ✅ Fetch logged-in doctor from backend
+  // Fetch logged-in doctor
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
         const token = localStorage.getItem("doctorToken");
         if (!token) {
-          navigate("/login-doctor"); // if no token → go to login
+          navigate("/login-doctor");
           return;
         }
 
         const res = await fetch("http://localhost:5000/api/doctor-auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const data = await res.json();
         if (data.success) {
           setDoctor(data.doctor);
+
+          // Fetch upcoming appointments for this doctor
+   const apptRes = await fetch(
+  `http://localhost:5000/api/doctors/${data.doctor._id}/upcoming`,
+  { headers: { Authorization: `Bearer ${token}` } }
+);
+
+if (!apptRes.ok) {
+  console.error("Failed to fetch appointments:", apptRes.status);
+  setAppointments([]); // fallback
+  return;
+}
+
+const apptData = await apptRes.json();
+if (apptData.success) setAppointments(apptData.appointments);
+
         } else {
-          console.error("Failed to fetch doctor:", data.error);
           navigate("/login-doctor");
         }
       } catch (err) {
-        console.error("Error fetching doctor:", err);
+        console.error(err);
         navigate("/login-doctor");
       } finally {
         setLoading(false);
@@ -52,7 +66,6 @@ function NeuroLayout() {
     navigate("/login-doctor");
   };
 
-  // ✅ Pick profile icon based on gender
   const profileIcon =
     doctor?.gender?.toLowerCase() === "male" ? maleProfile : femaleProfile;
 
@@ -63,21 +76,15 @@ function NeuroLayout() {
         {/* Sidebar */}
         <div className="sidebar p-3">
           <div className="doctor-profile d-flex align-items-center mb-4">
-            <img
-              src={profileIcon}
-              alt="Doctor"
-              className="profile-icon me-3"
-            />
+            <img src={profileIcon} alt="Doctor" className="profile-icon me-3" />
             <div className="doctor-name fw-semibold">
-              {loading ? "Loading..." : doctor ? `${doctor.name}` : "Not Found"}
+              {loading ? "Loading..." : doctor ? doctor.name : "Not Found"}
             </div>
           </div>
+
           <ul className="nav flex-column">
             <li className="nav-item">
-              <Link
-                to="/neuro-dashboard/appointment-schedule"
-                className="nav-link"
-              >
+              <Link to="/neuro-dashboard/appointment-schedule" className="nav-link">
                 Appointment Schedule
               </Link>
             </li>
@@ -132,7 +139,16 @@ function NeuroLayout() {
           <div className="notification-panel p-3">
             <h5>Notifications</h5>
             <ul>
-              <li>New appointment booked.</li>
+              {appointments.length > 0 ? (
+                appointments.slice(0, 5).map((appt) => (
+                  <li key={appt._id}>
+                    Appointment: {new Date(appt.date).toLocaleDateString()} at{" "}
+                    {appt.time} with {appt.patientId?.name || "Unknown Patient"}
+                  </li>
+                ))
+              ) : (
+                <li>No upcoming appointments</li>
+              )}
             </ul>
             <button
               className="btn btn-sm btn-outline-secondary mt-2"
