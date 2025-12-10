@@ -1,53 +1,241 @@
-.text-teal {
-  color: #059da8;
+/* --------------------
+  Landing Page CSS
+  Keeps your look, adds layout and animations
+   -------------------- */
+
+:root{
+  --teal: #059da8;
+  --teal-dark: #007d87;
+  --bg: #f7fdfd;
+  --card-bg: #ffffff;
 }
 
-/* Make landing page text larger and add line spacing */
-.landing-large-text, .landing-large-text * {
-  font-size: 1.35rem;
-  line-height: 2.1;
+/* Reset anchor underline only for buttons / links used as buttons */
+a { text-decoration: none; }
+
+/* page root */
+.landing-root { background: var(--bg); color: #0f172a; }
+
+/* --------------------
+   Hero
+   -------------------- */
+.hero {
+  background: linear-gradient(180deg, rgba(5,157,168,0.06) 0%, rgba(255,255,255,1) 40%);
+  position: relative;
+  padding: 3rem 0;
 }
 
-/* Buttons */
+/* hero content */
+.hero-inner { text-align: center; }
+
+.hero-logo {
+  width: 10rem;
+  height: 10rem;
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px rgba(4,15,20,0.08);
+  object-fit: cover;
+}
+
+/* CTA buttons (preserve your existing sizes) */
+.btn {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 0.6rem 1.25rem;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.5;
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
 .btn-primary {
-  background-color: #059da8;
-  color: white;
-  padding: 16px 32px;
-  border-radius: 16px;
-  font-weight: bold;
-  font-size: 1.25rem;
-  line-height: 2;
-  transition: all 0.3s ease;
+  background: var(--teal);
+  color: #fff;
+  border: none;
 }
-.btn-primary:hover {
-  background-color: #007d87;
-  transform: translateY(-2px);
-  box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
-}
+.btn-primary:hover { background: var(--teal-dark); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(5,157,168,0.12); }
 
 .btn-secondary {
-  background-color: white;
-  color: #059da8;
-  padding: 16px 32px;
-  border: 2px solid #059da8;
-  border-radius: 16px;
-  font-weight: bold;
-  font-size: 1.25rem;
-  line-height: 2;
-  transition: all 0.3s ease;
+  background: #fff;
+  color: var(--teal);
+  border: 2px solid var(--teal);
 }
-.btn-secondary:hover {
-  background-color: #e0f7fa;
-  transform: translateY(-2px);
-  box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+.btn-secondary:hover { background: var(--teal); color: #fff; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(5,157,168,0.08); }
+
+/* smaller variants used in cards */
+.btn-small { padding: .45rem .9rem; font-weight:700; border-radius:9999px; }
+.btn-primary-sm { background: var(--teal); color:#fff; }
+.btn-primary-sm:hover { background: var(--teal-dark); }
+
+/* Scroll indicator - keep visible at reasonable distance from bottom */
+.scroll-indicator {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #475569;
+  font-size: .9rem;
+  opacity: .95;
+  animation: bounce 2.2s infinite;
 }
 
-/* Testimonials and contact cards use hero section background */
-.testimonial-card, .contact-card {
-  background-color: #e0f7fa;
-  color: #00695c;
-  border-radius: 16px;
-  box-shadow: 0px 4px 16px rgba(0,0,0,0.08);
-  font-size: 1.15rem;
-  line-height: 2;
+/* small arrow styling */
+.scroll-arrow { width: 1.25rem; height: 1.25rem; color: var(--teal); }
+
+/* ensure arrow visible even at 100% zoom if hero uses min-height */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+  40% { transform: translateX(-50%) translateY(-8px); }
+  60% { transform: translateX(-50%) translateY(-4px); }
+}
+
+/* Floating logo */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+/* fade-in */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-title, .hero-sub, .hero-ctas { animation: fadeInUp .9s ease forwards; }
+.hero-title { animation-delay: .1s; }
+.hero-sub { animation-delay: .2s; }
+.hero-ctas { animation-delay: .3s; }
+
+/* --------------------
+  Stats cards
+  -------------------- */
+.stat-card {
+  background: #f0fdfa;
+  border-radius: 12px;
+  padding: 1.4rem;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(9,30,30,0.03);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.stat-card:hover { transform: translateY(-6px); box-shadow: 0 14px 40px rgba(9,30,30,0.06); }
+.stat-value { font-size: 2rem; font-weight: 800; color: var(--teal); }
+.stat-label { margin-top: .4rem; color: #475569; }
+
+/* --------------------
+  Services grid
+  -------------------- */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+}
+@media(min-width:640px){ .services-grid { grid-template-columns: repeat(2,1fr); } }
+@media(min-width:1024px){ .services-grid { grid-template-columns: repeat(4,1fr); } }
+
+.service-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.2rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.03);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.service-card:hover { transform: translateY(-6px); box-shadow: 0 18px 48px rgba(2,6,23,0.07); }
+.service-title { font-weight:700; color: #07575b; margin-bottom: .4rem; }
+.service-desc { color: #475569; font-size: .95rem; }
+
+/* --------------------
+  Charts layout
+  -------------------- */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media(min-width: 900px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
+.chart-card { background: var(--card-bg); padding: 1rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(2,6,23,0.03); }
+.chart-title { font-weight:700; margin-bottom: .6rem; }
+
+/* --------------------
+  Cards grid (departments & doctors)
+  -------------------- */
+.cards-grid { 
+  display: grid; 
+  grid-template-columns: repeat(1,1fr); 
+  gap: 1rem;
+}
+@media(min-width:640px){ .cards-grid { grid-template-columns: repeat(2,1fr); } }
+@media(min-width:1024px){ .cards-grid { grid-template-columns: repeat(3,1fr); } }
+@media(min-width:1280px){ .cards-grid { grid-template-columns: repeat(4,1fr); } }
+
+.info-card, .doctor-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.03);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.info-card:hover, .doctor-card:hover { transform: translateY(-6px); box-shadow: 0 18px 48px rgba(2,6,23,0.07); }
+
+.info-icon {
+  width: 3rem; height: 3rem; margin: 0 auto 0.6rem;
+  border-radius: 9999px; background:#e6fffa; color: #056b6a; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.15rem;
+}
+.info-title { font-size: 1.15rem; font-weight:700; color: #07575b; margin-bottom:.4rem; }
+.info-meta { color:#475569; margin-bottom:.8rem; }
+
+/* doctor card */
+.doc-avatar { width: 4.25rem; height: 4.25rem; margin: 0 auto; border-radius:9999px; background:#e6fffa; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#056b6a; font-weight:800; }
+.doc-name { margin-top:.75rem; font-weight:700; }
+.doc-role { color:#475569; margin-bottom:.6rem; }
+
+/* testimonials */
+.testimonial-list { display:flex; flex-direction:column; gap:1rem; }
+@media(min-width:1024px){ .testimonial-list { flex-direction:row; } }
+.testimonial { background:#e6fffa; padding:1rem; border-radius:10px; box-shadow: 0 8px 30px rgba(2,6,23,0.03); }
+
+/* footer */
+.footer { background: var(--teal); color: #fff; }
+
+/* small utility */
+.text-center { text-align:center; }
+.max-w-6xl { max-width: 72rem; margin-left:auto; margin-right:auto; }
+.max-w-5xl { max-width: 64rem; margin-left:auto; margin-right:auto; }
+
+/* accessibility focus */
+a:focus, button:focus { outline: 3px solid rgba(5,157,168,0.18); outline-offset: 2px; border-radius:6px; }
+
+/* end */
+/* --- Smooth scroll --- */
+html {
+  scroll-behavior: smooth;
+}
+
+/* --- Bigger buttons --- */
+.btn {
+  font-size: 34px;
+  padding: 0.8rem 1.6rem;
+}
+
+/* --- Doctor card fixes --- */
+.doctor-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 260px; /* equal height for all cards */
+}
+
+.doc-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1rem;
+}
+
+.btn-primary-sm {
+  margin-top: auto; /* push button to bottom */
 }
