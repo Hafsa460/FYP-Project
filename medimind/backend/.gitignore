@@ -29,3 +29,7 @@ Thumbs.db
 .idea/
 *.sublime-workspace
 *.sublime-project
+
+# Ignore uploaded scans and reports
+uploads/
+tmp_uploads/
