@@ -168,7 +168,7 @@ async function generatePdf({ pdfPath, caseId, patient, doctor, imagePath, label,
 
       doc
         .fontSize(14)
-        .text("Scan Information", rightX, startY, { underline: true });
+        .text("Scan Information", rightX, startY, { underline: true },);
 
       doc.moveDown(1);
 
@@ -185,39 +185,38 @@ async function generatePdf({ pdfPath, caseId, patient, doctor, imagePath, label,
       doc.text(`Scan Date: ${new Date().toLocaleDateString()}`, rightX);
       doc.text(`Uploaded By: Dr. ${doctor.name}`, rightX);
 
-      doc.moveDown(6);
+// ---- extra spacing before AI table ----
+doc.moveDown(6);
 
-      // ---- AI ANALYSIS TABLE ----
-      doc.fontSize(14).text("AI Analysis Result", 50, doc.y, { underline: true, align: "left" });
-      doc.moveDown(0.8);
+// ---- AI ANALYSIS TABLE ----
+doc.fontSize(14).text("AI Analysis Result", 50, doc.y, { underline: true, align: "left" });
+doc.moveDown(0.8);
 
-      // Table Headers
-      let tableTop = doc.y;
-      doc.fontSize(12);
+// Table Headers
+let tableTop = doc.y;
+doc.fontSize(12);
 
-      doc.text("Scan Name", 50, tableTop);
-      doc.text("Result", 180, tableTop);
-      doc.text("Score", 300, tableTop);
-      doc.text("Date", 400, tableTop);
+doc.text("Scan Name", 50, tableTop);
+doc.text("Result", 180, tableTop);
+doc.text("Score", 300, tableTop);
+doc.text("Date", 400, tableTop);
 
-      doc.moveDown(0.5);
+doc.moveDown(0.5);
 
-      // Divider line
-      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-      doc.moveDown(0.5);
+// Divider
+doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+doc.moveDown(0.5);
 
-      // Table row
-      const score = `${(Number(confidence) * 100).toFixed(2)}%`;
+// Table row (aligned)
+const score = `${(Number(confidence) * 100).toFixed(2)}%`;
 
-      const rowY = doc.y;
+const rowY = doc.y;
+doc.text("Brain MRI", 50, rowY);
+doc.text(label, 180, rowY);
+doc.text(score, 300, rowY);
+doc.text(new Date().toLocaleDateString(), 400, rowY);
 
-        doc.text("Brain MRI", 50, rowY);
-        doc.text(label, 180, rowY);
-        doc.text(score, 300, rowY);
-        doc.text(new Date().toLocaleDateString(), 400, rowY);
-
-
-      doc.moveDown(2);
+doc.moveDown(2);
 
       // ---- MRI IMAGE PAGE ----
       doc.addPage();
