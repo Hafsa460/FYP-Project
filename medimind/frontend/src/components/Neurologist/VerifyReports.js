@@ -1,82 +1,185 @@
+// src/components/Neurologist/VerifyReports.js
 import React, { useState } from "react";
-import './VerifyReports.css'; // Make sure this CSS file exists
+import "./VerifyReports.css";
 
 function VerifyReports() {
+  const [mrNoInput, setMrNoInput] = useState("");
+  const [patient, setPatient] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [confirmed, setConfirmed] = useState(false);
+  const [report, setReport] = useState(null);
 
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-    setResult(null);
-    setError(null);
-  };
+  const storedDoc = (() => {
+    try { return JSON.parse(localStorage.getItem("doctor")); } catch (e) { return null; }
+  })();
+  const doctorPno = storedDoc?.pno || "";
 
-  const handleSubmit = async (e) => {
+  async function searchPatient(e) {
     e.preventDefault();
-
-    if (!selectedFile) {
-      setError("Please select an image first.");
-      return;
-    }
-
-    setLoading(true);
     setError(null);
+    setPatient(null);
+    setReport(null);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setResult(null);
+
+    if (!mrNoInput) return setError("Enter MR No");
 
     try {
-      const formData = new FormData();
-      formData.append("image", selectedFile); // ⚡ Key must match Flask
+      const res = await fetch(`http://localhost:5000/api/users/search/${mrNoInput}`);
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || "Patient not found");
+      }
+      const data = await res.json();
+      setPatient(data);
+    } catch (err) {
+      setError(err.message || "Search failed");
+    }
+  }
 
-      const res = await fetch("http://127.0.0.1:5000/predict-stroke", {
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    setResult(null);
+    setError(null);
+    setConfirmed(false);
+    setReport(null);
+
+    if (file) setPreviewUrl(URL.createObjectURL(file));
+    else setPreviewUrl(null);
+  }
+
+  function handleConfirmPreview() {
+    if (!patient) return setError("Search and select patient first");
+    if (!selectedFile) return setError("Select image first");
+    setConfirmed(true);
+    setError(null);
+  }
+
+  async function handleUploadAndGenerate(e) {
+    e.preventDefault();
+    setError(null);
+
+    if (!confirmed) return setError("Please confirm the upload first");
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+      formData.append("mrNo", patient.mrNo);
+      formData.append("doctorPno", doctorPno);
+
+      const res = await fetch("http://localhost:5000/api/reports/create", {
         method: "POST",
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Failed to get prediction from server");
-
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Upload failed");
 
-      if (data.success) {
-        setResult({
-          prediction: data.prediction,
-          confidence: data.confidence.toFixed(2),
-        });
-      } else {
-        setError(data.message || "Prediction failed. Please try again.");
-      }
+      setReport(data.report);
+      setResult({
+        prediction: data.report.prediction.label,
+        confidence: (data.report.prediction.confidence * 100).toFixed(2),
+      });
+
     } catch (err) {
-      console.error(err);
-      setError("Error connecting to the server.");
+      setError(err.message || "Error uploading");
     } finally {
       setLoading(false);
+      setConfirmed(false);
     }
-  };
+  }
 
   return (
     <div className="verify-reports-container">
       <h3>Verify Test Reports</h3>
 
-      <form className="verify-reports-form" onSubmit={handleSubmit}>
-        <input type="file" accept="image/*" onChange={handleFileChange} />
-        <button type="submit" disabled={loading}>
-          {loading ? "Predicting..." : "Predict"}
-        </button>
-      </form>
-
-      {selectedFile && (
-        <div className="image-preview">
-          <img src={URL.createObjectURL(selectedFile)} alt="Preview" />
-        </div>
-      )}
+      {/* STEP 1: MR SEARCH BOX ONLY */}
+      {/* Hide search form once patient is found */}
+{!patient && (
+  <form className="search-form" onSubmit={searchPatient}>
+    <input
+      type="text"
+      placeholder="Search MR No (e.g. 123456)"
+      value={mrNoInput}
+      onChange={(e) => setMrNoInput(e.target.value)}
+    />
+    <button type="submit">Search Patient</button>
+  </form>
+)}
 
       {error && <p className="error-message">{error}</p>}
 
+      {/* STEP 2: SHOW PATIENT INFO + ENABLE IMAGE SECTION */}
+      {patient && (
+        <>
+          <div className="patient-card">
+            <p><strong>Name:</strong> {patient.name}</p>
+            <p><strong>MR No:</strong> {patient.mrNo}</p>
+            <p><strong>Age:</strong> {patient.age}</p>
+            <p><strong>Gender:</strong> {patient.gender}</p>
+          </div>
+
+          {/* Only show upload form if patient is found */}
+          <form className="verify-reports-form" onSubmit={handleUploadAndGenerate}>
+            <input type="file" accept="image/*" onChange={handleFileChange} />
+
+            <div style={{ marginTop: 8 }}>
+              <button type="button" onClick={handleConfirmPreview} disabled={!selectedFile}>
+                Preview & Confirm
+              </button>
+
+              <button type="submit" disabled={loading || !confirmed}>
+                {loading ? "Processing..." : "Upload & Generate Report"}
+              </button>
+            </div>
+          </form>
+        </>
+      )}
+
+      {/* Preview Section */}
+      {previewUrl && (
+        <div className="image-preview">
+          <h4>Preview</h4>
+          <img src={previewUrl} alt="Preview" />
+          <p>{selectedFile?.name}</p>
+          <p>{confirmed ? "✅ Confirmed — ready to upload" : "Click 'Preview & Confirm' to lock this image"}</p>
+        </div>
+      )}
+
+      {/* RESULT + PDF */}
       {result && (
         <div className="result-box">
           <h4>Prediction Result:</h4>
           <p><strong>Prediction:</strong> {result.prediction}</p>
-          <p><strong>Confidence:</strong> {result.confidence}</p>
+          <p><strong>Confidence:</strong> {result.confidence}%</p>
+
+          {/* PDF Download Button */}
+          {report?.pdfPath && (
+            <a
+              href={`http://localhost:5000/uploads/${report.pdfPath}`}
+              target="_blank"
+              download
+              style={{
+                display: "inline-block",
+                marginTop: "10px",
+                padding: "10px 15px",
+                backgroundColor: "#059da8",
+                color: "white",
+                borderRadius: "8px",
+                textDecoration: "none",
+                fontWeight: "600"
+              }}
+            >
+              Download PDF
+            </a>
+          )}
         </div>
       )}
     </div>

@@ -4,7 +4,7 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-
+const path = require("path");
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/auth");
 const doctorAuthRoutes = require("./routes/doctorAuth");
@@ -16,7 +16,7 @@ const appointmentRoutes = require("./routes/appointmentroutes");
 const prescriptionRoutes = require("./routes/prescriptionRoutes");
 const prescriptionPatientRoutes = require("./routes/prescriptionPatient");
 const doctorAdminRoutes = require("./routes/doctorAdminRoutes");
-
+const reportRoutes = require("./routes/reportRoutes");
 
 const app = express();
 
@@ -106,6 +106,12 @@ console.log("Prescription routes mounted at /api/prescriptions");
 
 app.use("/api/doctor-admin", doctorAdminRoutes);
 console.log("Doctor admin routes mounted at /api/doctor-admin");
+
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // allow files to be served
+app.use("/api/reports", reportRoutes);
+console.log("Report routes mounted at /api/reports");
+
 // ===================== START SERVER =====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
