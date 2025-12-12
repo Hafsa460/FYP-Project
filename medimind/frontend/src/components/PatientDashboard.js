@@ -81,6 +81,13 @@ function PatientDashboard() {
                 <User className="me-2" size={16} /> Make an Appointment
               </Link>
             </li>
+<li className="nav-item">
+  <Link to="/my-reports" className="nav-link">
+    <FileText className="me-2" size={16} /> My Reports
+  </Link>
+</li>
+
+
             <li className="nav-item">
               <button
                 className="btn btn-link nav-link text-danger"
