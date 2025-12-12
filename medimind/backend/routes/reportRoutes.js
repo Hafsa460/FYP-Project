@@ -19,11 +19,9 @@ if (!fs.existsSync(tmpUploadDir)) fs.mkdirSync(tmpUploadDir);
 
 const upload = multer({
   dest: tmpUploadDir,
-  limits: { fileSize: 30 * 1024 * 1024 }, // 30MB (adjust)
+  limits: { fileSize: 30 * 1024 * 1024 }, 
 });
 
-// POST /api/reports/create
-// form-data: image (file), mrNo, doctorPno
 router.post("/create", upload.single("image"), async (req, res) => {
   try {
     const { mrNo, doctorPno } = req.body;
