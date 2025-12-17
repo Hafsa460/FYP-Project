@@ -1,0 +1,53 @@
+.profile-container {
+  max-width: 500px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.profile-container h2 {
+  color: #059da8;
+  margin-bottom: 20px;
+}
+
+.profile-container label {
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.profile-container input,
+.profile-container select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.profile-container button {
+  margin-top: 15px;
+  background: #059da8;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.profile-container hr {
+  margin: 25px 0;
+}
+
+.error {
+  color: red;
+  font-size: 0.85rem;
+  margin: 4px 0;
+}
+
+.success {
+  color: green;
+  font-size: 0.9rem;
+  margin: 6px 0;
+}
