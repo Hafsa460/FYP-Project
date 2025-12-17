@@ -27,8 +27,7 @@ import ViewPrescriptionPatient from "./components/ViewPrescriptionPatient";
 import VerifySuccess from "./components/VerifySuccess";
 import PrescriptionDetails from "./components/PrescriptionDetails";
 import PatientReports from "./components/PatientReports";
-
-
+import PatientProfileManagement from "./components/PatientProfileManagement";
 
 
 // Admins
@@ -78,6 +77,7 @@ function App() {
       <Route path="/testreport" element={<TestReport />} />
       <Route path="/verify-success" element={<VerifySuccess />} />
       <Route path="/my-reports" element={<PatientReports />} />
+      <Route path="/patient-profile" element={<PatientProfileManagement />} />
 
       {/* Admin */}
       <Route path="/adminLogin" element={<AdminLogin />} />
