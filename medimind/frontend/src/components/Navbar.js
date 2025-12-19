@@ -1,3 +1,4 @@
+// src/components/Navbar.js
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import coverimage from "../images/cover.png";
@@ -8,13 +9,12 @@ import "./Navbar.css";
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [showDropdown, setShowDropdown] = useState(false);
 
-  const [userType, setUserType] = useState(null); // "doctor", "patient", "admin"
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [userType, setUserType] = useState(null);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Detect logged-in user
     const doctor = JSON.parse(localStorage.getItem("doctor") || "null");
     const patient = JSON.parse(localStorage.getItem("patient") || "null");
     const admin = JSON.parse(localStorage.getItem("admin") || "null");
@@ -32,99 +32,103 @@ function Navbar() {
       setUserType(null);
       setUser(null);
     }
-  }, [location]); // run whenever route changes
 
-  // Choose profile icon based on gender
-  let profileIcon = maleProfile;
-  if (user?.gender?.toLowerCase() === "female") profileIcon = femaleProfile;
+    setShowDropdown(false);
+  }, [location.pathname]);
+
+  const profileIcon =
+    user?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile;
 
   const handleLogout = () => {
-    localStorage.removeItem("doctor");
-    localStorage.removeItem("doctorToken");
-    localStorage.removeItem("patient");
-    localStorage.removeItem("token");
-    localStorage.removeItem("admin");
-    localStorage.removeItem("adminToken");
+    localStorage.clear();
     setUserType(null);
     setUser(null);
-    navigate("/"); // return to landing
+    navigate("/");
   };
 
-  // Scroll to section helper
-  const handleScrollTo = (id) => {
-    if (location.pathname !== "/") {
-      navigate("/", { state: { scrollTo: id } });
-    } else {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  };
+  // ✅ FINAL SCROLL HANDLER (HASH BASED — STABLE)
+ const handleScrollTo = (id) => {
+  if (location.pathname !== "/") {
+    navigate("/#"+id); // navigate to landing page with hash
+  } else {
+    // on landing page: just set hash, useEffect handles scroll
+    window.location.hash = id;
+  }
+};
 
   return (
     <nav
       className="navbar navbar-expand-lg navbar-light bg-light px-4 shadow-sm"
-      style={{ paddingTop: "0.4rem", paddingBottom: "0.4rem", height: "80px" }}
+      style={{ height: "80px" }}
     >
+      {/* LOGO */}
       <div className="d-flex align-items-center">
-        <Link className="navbar-brand fw-bold text-primary d-flex align-items-center" to="/">
-          <img
-            src={coverimage}
-            alt="KRL Hospital"
-            className="me-2"
-            style={{ width: "80px", height: "80px", objectFit: "contain" }}
-          />
+        <Link className="navbar-brand d-flex align-items-center" to="/">
+          <img src={coverimage} alt="KRL Hospital" style={{ width: "80px" }} />
         </Link>
         <Link to="/" className="text-decoration-none">
-          <span className="text-teal">
-            <strong>KRL Hospital</strong>
-          </span>
+          <strong className="text-teal">KRL Hospital</strong>
         </Link>
       </div>
 
+      {/* LINKS */}
       <div className="ms-auto d-flex align-items-center gap-4">
-        {/* Navbar Links */}
-        <button className="nav-link text-teal btn btn-link" onClick={() => navigate("/")}>
+        <button
+          className="nav-link btn btn-link text-teal"
+          onClick={() => navigate("/")}
+        >
           Home
         </button>
-        <button className="nav-link text-teal btn btn-link" onClick={() => handleScrollTo("departments")}>
+
+        <button
+          className="nav-link btn btn-link text-teal"
+          onClick={() => handleScrollTo("departments")}
+        >
           Departments
         </button>
-        <button className="nav-link text-teal btn btn-link" onClick={() => handleScrollTo("doctors")}>
+
+        <button
+          className="nav-link btn btn-link text-teal"
+          onClick={() => handleScrollTo("doctors")}
+        >
           Doctors
         </button>
-        <button className="nav-link text-teal btn btn-link" onClick={() => handleScrollTo("contact")}>
-          Contact
-        </button>
 
-        {/* Login / Sign Up */}
+        <button
+          className="nav-link btn btn-link text-teal"
+          onClick={() => handleScrollTo("contact")}
+        >
+          About Us
+        </button>
+        <button
+  className="nav-link btn btn-link text-teal"
+  onClick={() => navigate("/help-support")}
+>
+  Help & Support
+</button>
+
+
+        {/* AUTH */}
         {!userType && (
-          <Link
-            to="/Login-option"
-            className="btn me-2 btn-teal text-teal btn-teal:hover"
-          >
+          <Link to="/Login-option" className="btn btn-teal">
             Login / Sign Up
           </Link>
         )}
 
-        {/* Profile icon + dropdown */}
         {userType && (
           <div className="position-relative">
             <img
               src={profileIcon}
               alt="Profile"
               className="rounded-circle"
-              style={{ width: "45px", height: "45px", cursor: "pointer" }}
-              onClick={() => setShowDropdown(!showDropdown)}
+              style={{ width: "45px", cursor: "pointer" }}
+              onClick={() => setShowDropdown((prev) => !prev)}
             />
+
             {showDropdown && (
-              <div
-                className="dropdown-menu dropdown-menu-end show"
-                style={{ position: "absolute", right: 0 }}
-              >
-                <p className="dropdown-item-text mb-0 text-center fw-bold">
-                  {user.name}
+              <div className="dropdown-menu dropdown-menu-end show">
+                <p className="dropdown-item-text fw-bold text-center">
+                  {user?.name}
                 </p>
                 <div className="dropdown-divider"></div>
                 <button className="dropdown-item" onClick={handleLogout}>
