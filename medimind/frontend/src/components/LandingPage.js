@@ -27,32 +27,6 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
 
 useEffect(() => {
-  let scrollTimer;
-
-  // ✅ Function to handle scrolling to an element
-  const scrollToElement = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  // ✅ Determine scroll target
-  let scrollId = null;
-  if (location.state?.scrollTo) {
-    scrollId = location.state.scrollTo;
-    // clear state after reading
-    window.history.replaceState(null, "");
-  } else if (window.location.hash) {
-    scrollId = window.location.hash.replace("#", "");
-  }
-
-  // ✅ Scroll after small delay to ensure elements exist
-  if (scrollId) {
-    scrollTimer = setTimeout(() => scrollToElement(scrollId), 200);
-  }
-
-  // ✅ Fetch all data
   const fetchData = async () => {
     try {
       const depRes = await fetch("http://localhost:5000/api/departments");
@@ -82,11 +56,8 @@ useEffect(() => {
   };
 
   fetchData();
+}, []);
 
-  return () => {
-    if (scrollTimer) clearTimeout(scrollTimer);
-  };
-}, [location.state?.scrollTo]);
 
 
   const pieData = resourceSummary
