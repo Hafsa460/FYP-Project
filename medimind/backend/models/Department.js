@@ -5,7 +5,8 @@ const departmentSchema = new mongoose.Schema({
   description: { type: String },
   doctors: { type: Number, default: 0 },
   nurses: { type: Number, default: 0 },
-  others: { type: Number, default: 0 }
+  staff: { type: Number, default: 0 }, 
+  rooms: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model("Department", departmentSchema);

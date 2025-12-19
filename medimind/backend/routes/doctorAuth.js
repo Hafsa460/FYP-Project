@@ -148,7 +148,6 @@ router.get("/:id", async (req, res) => {
 });
 
 // ======================= GET DOCTOR STATS =======================
-// ======================= GET DOCTOR STATS =======================
 router.get("/:id/stats", async (req, res) => {
   try {
     const doctorId = req.params.id;
