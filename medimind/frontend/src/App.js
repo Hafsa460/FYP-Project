@@ -9,6 +9,8 @@ import SignUp from "./components/SignUp";
 import LandingPage from "./components/LandingPage";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassowrd";
+import HelpAndSupport from "./components/HelpAndSupport";
+
 
 // Doctor (Neurologist) side
 import NeuroLayout from "./components/Neurologist/NeuroLayout";
@@ -27,8 +29,7 @@ import ViewPrescriptionPatient from "./components/ViewPrescriptionPatient";
 import VerifySuccess from "./components/VerifySuccess";
 import PrescriptionDetails from "./components/PrescriptionDetails";
 import PatientReports from "./components/PatientReports";
-
-
+import PatientProfileManagement from "./components/PatientProfileManagement";
 
 
 // Admins
@@ -55,6 +56,8 @@ function App() {
       <Route path="/login-doctor" element={<Login />} />
       <Route path="/login-patient" element={<LoginPatients />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/help-support" element={<HelpAndSupport />} />
+
 
       {/* Forgot/Reset Password */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -78,6 +81,7 @@ function App() {
       <Route path="/testreport" element={<TestReport />} />
       <Route path="/verify-success" element={<VerifySuccess />} />
       <Route path="/my-reports" element={<PatientReports />} />
+      <Route path="/patient-profile" element={<PatientProfileManagement />} />
 
       {/* Admin */}
       <Route path="/adminLogin" element={<AdminLogin />} />

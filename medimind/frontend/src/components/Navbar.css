@@ -1,5 +1,5 @@
 .text-teal {
-  color: #059da8;
+  color: #0a0a0a;
 }
 
 .btn-teal {
@@ -15,4 +15,9 @@
 
 .btn-teal:hover {
   background-color: #009999;
+}
+#departments,
+#doctors,
+#contact {
+  scroll-margin-top: 90px;
 }

@@ -1,10 +1,10 @@
-// routes/userRoutes.js
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-
+const bcrypt = require("bcrypt");
+const authMiddleware = require("../middleware/authMiddleware");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
@@ -106,6 +106,25 @@ router.post("/register", async (req, res) => {
       .json({ error: "Server error. Please try again later." });
   }
 });
+// Get current logged-in user
+router.get("/me", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.json({
+      name: user.name,
+      email: user.email,
+      dob: user.dob,
+      gender: user.gender,
+      mrNo: user.mrNo,
+    });
+  } catch (err) {
+    console.error("Error in /me:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 // VERIFY
 router.get("/verify/:token", async (req, res) => {
@@ -201,6 +220,162 @@ router.get("/search/:mrNo", async (req, res) => {
     res.json(patient);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// UPDATE PROFILE
+// UPDATE PROFILE (without password)
+router.put("/update-profile", authMiddleware, async (req, res) => {
+  try {
+    const { name, dob, gender } = req.body;
+    const user = await User.findById(req.user.id); // populated by middleware
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (name) user.name = name;
+    if (dob) user.dob = dob;
+    if (gender) user.gender = gender;
+
+    await user.save();
+    res.json({ message: "Profile updated successfully" }); // success message only
+  } catch (err) {
+    console.error("Profile update error:", err);
+    res.status(500).json({ error: "Profile update failed" });
+  }
+});
+
+// REQUEST EMAIL CHANGE
+router.post("/request-email-change", async (req, res) => {
+  try {
+    const { newEmail, mrNo } = req.body;
+
+    // 1. Validate inputs
+    if (!newEmail || !/^[^\s@]+@gmail\.com$/.test(newEmail)) {
+      return res.status(400).json({ error: "Valid Gmail is required." });
+    }
+    if (!mrNo) {
+      return res.status(400).json({ error: "MR No is required." });
+    }
+
+    // 2. Check if email already exists
+    const emailExists = await User.exists({ email: newEmail });
+    if (emailExists) {
+      return res.status(400).json({ error: "Email already in use." });
+    }
+
+    // 3. Find user
+    const user = await User.findOne({ mrNo });
+    if (!user) return res.status(404).json({ error: "Invalid MR No." });
+
+    // 4. Generate token
+    const token = crypto.randomBytes(32).toString("hex");
+    user.verificationToken = token;
+    user.verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    // 5. Send confirmation email (include newEmail in query)
+    const link = `${BACKEND_URL}/api/users/confirm-email/${token}?mrNo=${mrNo}&newEmail=${newEmail}`;
+    await transporter.sendMail({
+      to: newEmail,
+      subject: "Confirm Email Change",
+      html: `
+        <p>Hello ${user.name},</p>
+        <p>Click the button below to confirm your email change:</p>
+        <a href="${link}" style="padding:10px 16px;background:#059da8;color:white;border-radius:6px;text-decoration:none;">
+          Confirm Change
+        </a>
+        <p>This link will expire in 24 hours.</p>
+      `,
+    });
+
+    return res.json({ message: "Verification email sent successfully." });
+  } catch (err) {
+    console.error("Error in /request-email-change:", err);
+    return res.status(500).json({ error: "Server error. Please try again later." });
+  }
+});
+const validatePassword = (pwd) =>
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+    pwd
+  );
+
+// UPDATE PASSWORD
+router.put("/update-password", authMiddleware, async (req, res) => {
+  try {
+    const { password, confirmPassword } = req.body;
+
+    // 1️⃣ Check if passwords are provided
+    if (!password) return res.status(400).json({ error: "Password is required" });
+    if (!confirmPassword)
+      return res.status(400).json({ error: "Please confirm your password" });
+
+    // 2️⃣ Check if passwords match
+    if (password !== confirmPassword)
+      return res.status(400).json({ error: "Passwords do not match" });
+
+    // 3️⃣ Validate password strength
+    if (!validatePassword(password))
+      return res.status(400).json({
+        error:
+          "Password must be at least 8 characters, include uppercase, lowercase, number, and special character (@$!%*?&).",
+      });
+
+    // 4️⃣ Find user
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // 5️⃣ Hash password and save
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Password update error:", err);
+    res.status(500).json({ error: "Password update failed" });
+  }
+});
+// CONFIRM EMAIL CHANGE
+router.get("/confirm-email/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { mrNo, newEmail } = req.query;
+
+    if (!token || !mrNo || !newEmail) {
+      return res.status(400).send("Invalid request.");
+    }
+
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: Date.now() },
+      mrNo,
+    });
+
+    if (!user) {
+      return res.status(400).send("Invalid or expired token.");
+    }
+
+    // Update email
+    user.email = newEmail;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+
+    await user.save();
+
+    // Return updated user object
+    return res.status(200).json({
+      message: "Email updated successfully!",
+      user: {
+        name: user.name,
+        email: user.email,
+        dob: user.dob,
+        gender: user.gender,
+        mrNo: user.mrNo,
+      },
+    });
+  } catch (err) {
+    console.error("Error in /confirm-email:", err);
+    return res.status(500).send("Server error.");
   }
 });
 

@@ -86,6 +86,11 @@ function PatientDashboard() {
     <FileText className="me-2" size={16} /> My Reports
   </Link>
 </li>
+<li className="nav-item">
+  <Link to="/patient-profile" className="nav-link">
+    <User className="me-2" size={16} /> Profile Management
+  </Link>
+</li>
 
 
             <li className="nav-item">

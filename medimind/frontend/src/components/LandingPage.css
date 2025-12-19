@@ -156,7 +156,7 @@ a { text-decoration: none; }
   gap: 1rem;
 }
 @media(min-width: 900px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
-.chart-card { background: var(--card-bg); padding: 1rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(2,6,23,0.03); }
+.chart-card { background: var(--card-bg); padding: 1rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(2,6,23,0.03); }
 .chart-title { font-weight:700; margin-bottom: .6rem; }
 
 /* --------------------
@@ -238,4 +238,21 @@ html {
 
 .btn-primary-sm {
   margin-top: auto; /* push button to bottom */
+}
+.doc-avatar-img {
+  width: 4.25rem;
+  height: 4.25rem;
+  margin: 0 auto;
+  border-radius: 9999px;
+  object-fit: cover;
+  display: block;
+  background: #e6fffa;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+#departments,
+#doctors,
+#contact {
+  scroll-margin-top: 90px;
 }
