@@ -32,8 +32,10 @@ import PatientReports from "./components/PatientReports";
 import PatientProfileManagement from "./components/PatientProfileManagement";
 
 
-// Admins
-import AdminDashboard from "./components/PatientAdmin/AdminPage";
+// Patient Admin
+import PatientAdminLayout from "./components/PatientAdmin/PatientAdminLayout";
+import PatientAdminDashboard from "./components/PatientAdmin/PatientAdminDashboard";
+import PatientDetails from "./components/PatientAdmin/PatientDetails";
 import AdminLogin from "./components/AdminLogin";
 import Doctoradmin from "./components/DoctorAdmin";
 import Dptadmin from "./components/DptAdmin";
@@ -43,6 +45,7 @@ import Superadmin from "./components/SuperAdmin";
 import DoctorAdminLayout from "./components/DoctorAdmin/DoctorAdminLayout";
 import DoctorAdminDashboard from "./components/DoctorAdmin/DoctorAdminDashboard";
 import DoctorDetails from "./components/DoctorAdmin/DoctorDetails";
+import DoctorVerifySuccess from "./components/DoctorVerifySuccess";
 
 function App() {
   return (
@@ -80,15 +83,22 @@ function App() {
       <Route path="/prescription/:id" element={<PrescriptionDetails />} />
       <Route path="/testreport" element={<TestReport />} />
       <Route path="/verify-success" element={<VerifySuccess />} />
+      <Route path="/doctor-verify-success" element={<DoctorVerifySuccess />} />
       <Route path="/my-reports" element={<PatientReports />} />
       <Route path="/patient-profile" element={<PatientProfileManagement />} />
 
       {/* Admin */}
       <Route path="/adminLogin" element={<AdminLogin />} />
-      <Route path="/PatientAdmin/*" element={<AdminDashboard />} />
       <Route path="/department" element={<Dptadmin />} />
       <Route path="/super" element={<Superadmin />} />
       <Route path="/dctr" element={<Doctoradmin />} />
+
+      {/* Patient Admin */}
+      <Route path="/patient-admin" element={<PatientAdminLayout />}>
+        <Route index element={<PatientAdminDashboard />} />
+        <Route path="patients" element={<PatientDetails />} />
+        <Route path="patient/:id" element={<PatientDetails />} />
+      </Route>
 
       {/* Doctor Admin */}
       <Route path="/doctor-admin" element={<DoctorAdminLayout />}>
@@ -99,6 +109,9 @@ function App() {
 
         {/* Doctor Details page */}
         <Route path="doctor/:id" element={<DoctorDetails />} />
+
+        {/* Doctors list */}
+        <Route path="doctors" element={<DoctorDetails />} />
       </Route>
     </Routes>
   );

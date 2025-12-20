@@ -24,6 +24,8 @@ router.post("/login", async (req, res) => {
     const doctor = await Doctor.findOne({ pno });
     if (!doctor) return res.status(404).json({ message: "Doctor not found" });
 
+    if (!doctor.isVerified) return res.status(403).json({ message: "Account not verified. Please check your email." });
+
     const isMatch = await doctor.comparePassword(password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 

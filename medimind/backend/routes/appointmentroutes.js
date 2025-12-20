@@ -5,8 +5,23 @@ const User = require("../models/User");
 const Doctor = require("../models/Doctor");
 const DoctorLeave = require("../models/DoctorLeave");
 const authMiddleware = require("../middleware/auth");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
+
+// Middleware to verify admin token
+const verifyAdminToken = (req, res, next) => {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  if (!token) return res.status(401).json({ error: "Access denied. No token provided." });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.admin = decoded;
+    next();
+  } catch (err) {
+    res.status(400).json({ error: "Invalid token." });
+  }
+};
 
 /* ----------------------------------------
  📌 BOOK APPOINTMENT (STATUS ALWAYS SAVED)
@@ -183,6 +198,19 @@ router.put("/:appointmentId/status", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to update status" });
+  }
+});
+
+// Admin route to get all appointments
+router.get("/", verifyAdminToken, async (req, res) => {
+  try {
+    const appointments = await Appointment.find({})
+      .populate("doctorId", "name email")
+      .populate("patientId", "name email mrNo");
+    res.json(appointments);
+  } catch (err) {
+    console.error("Error fetching appointments:", err);
+    res.status(500).json({ error: "Failed to fetch appointments" });
   }
 });
 

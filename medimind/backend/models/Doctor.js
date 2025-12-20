@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const doctorSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  pno: { type: Number, required: true, unique: true },
+  pno: { type: Number, unique: true }, // Make unique but not required initially
   password: { type: String, required: true },
   department: { type: String, required: true },
 
@@ -16,7 +16,7 @@ const doctorSchema = new mongoose.Schema({
 
   leaveDays: [
     {
-      date: { type: String, required: true },
+      date: { type: String },
       reason: { type: String },
     },
   ],
@@ -30,6 +30,12 @@ const doctorSchema = new mongoose.Schema({
 
   // soft-delete flag
   active: { type: Boolean, default: true },
+
+  // Verification fields
+  isVerified: { type: Boolean, default: false },
+  verificationToken: String,
+  verificationTokenExpires: Date,
+  tempPassword: String, // Temporary storage for plain text password
 }, { timestamps: true });
 
 doctorSchema.pre("save", async function (next) {

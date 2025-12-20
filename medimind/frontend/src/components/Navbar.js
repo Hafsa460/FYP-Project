@@ -47,14 +47,10 @@ function Navbar() {
   };
 
   // ✅ FINAL SCROLL HANDLER (HASH BASED — STABLE)
- const handleScrollTo = (id) => {
-  if (location.pathname !== "/") {
-    navigate("/#"+id); // navigate to landing page with hash
-  } else {
-    // on landing page: just set hash, useEffect handles scroll
-    window.location.hash = id;
-  }
+const handleScrollTo = (id) => {
+  window.location.hash = id;
 };
+
 
   return (
     <nav
@@ -75,7 +71,7 @@ function Navbar() {
       <div className="ms-auto d-flex align-items-center gap-4">
         <button
           className="nav-link btn btn-link text-teal"
-          onClick={() => navigate("/")}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
           Home
         </button>
