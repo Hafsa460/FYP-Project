@@ -1,11 +1,11 @@
-// src/components/DoctorAdmin/DoctorAdminLayout.js
+// src/components/PatientAdmin/PatientAdminLayout.js
 import React, { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
+import "./PatientAdmin.css";
 import maleProfile from "../../images/male.png";
 import femaleProfile from "../../images/female.png";
-import "./DoctorAdmin.css";
 
-function DoctorAdminLayout() {
+function PatientAdminLayout() {
   const [showNotifications, setShowNotifications] = useState(true);
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,15 +20,17 @@ function DoctorAdminLayout() {
           return;
         }
 
-        const res = await fetch("http://localhost:5000/api/doctor-admin/me", {
+        // For patient admin, we can use the same admin auth endpoint
+        const res = await fetch("http://localhost:5000/api/admins/dashboard", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         const data = await res.json();
-        if (data.success) {
-          setAdmin(data.admin);
+        if (data.message) {
+          // Extract admin info from token or set default
+          setAdmin({ name: "Patient Admin", role: "patientAdmin", gender: "female" });
         } else {
-          console.error("Failed to fetch admin:", data.error);
+          console.error("Failed to fetch admin:", data.message);
           navigate("/adminLogin");
         }
       } catch (err) {
@@ -44,7 +46,8 @@ function DoctorAdminLayout() {
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminInfo");
+    localStorage.removeItem("adminRole");
+    localStorage.removeItem("adminName");
     navigate("/adminLogin");
   };
 
@@ -52,27 +55,23 @@ function DoctorAdminLayout() {
 
   return (
     <div className="admin-layout d-flex">
-
       {/* Sidebar */}
       <div className="sidebar p-3">
         <div className="admin-profile d-flex align-items-center mb-4">
           <img src={profileIcon} alt="Admin" className="profile-icon me-3" />
           <div className="admin-details fw-semibold">
-            {loading ? "Loading..." : admin ? `${admin.name}` : "Doctor Admin"}
+            {loading ? "Loading..." : admin ? `${admin.name}` : "Patient Admin"}
             <div className="text-muted small">ID: {admin?.id ?? "N/A"}</div>
-            <div className="text-muted small">Role: {admin?.role ?? "N/A"}</div>
+            <div className="text-muted small">Role: {admin?.role ?? "patientAdmin"}</div>
           </div>
         </div>
 
         <ul className="nav flex-column">
           <li className="nav-item">
-            <Link to="/doctor-admin" className="nav-link">Dashboard</Link>
+            <Link to="/patient-admin" className="nav-link">Dashboard</Link>
           </li>
           <li className="nav-item">
-            <Link to="doctors" className="nav-link">Manage Doctors</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/doctor-admin/notifications" className="nav-link">Notifications</Link>
+            <Link to="/patient-admin/patients" className="nav-link">Manage Patients</Link>
           </li>
           <li className="nav-item">
             <button className="btn btn-link nav-link text-danger" onClick={handleLogout}>Logout</button>
@@ -90,8 +89,8 @@ function DoctorAdminLayout() {
         <div className="notification-panel p-3">
           <h5>Notifications</h5>
           <ul>
-            <li>New doctor registered.</li>
-            <li>Report verified successfully.</li>
+            <li>New patient registered.</li>
+            <li>Patient verification completed.</li>
           </ul>
           <button className="btn btn-sm btn-outline-secondary mt-2" onClick={() => setShowNotifications(false)}>Hide</button>
         </div>
@@ -102,4 +101,4 @@ function DoctorAdminLayout() {
   );
 }
 
-export default DoctorAdminLayout;
+export default PatientAdminLayout;
