@@ -55,6 +55,11 @@ app.get("/", (req, res) => {
   res.send("✅ API is running");
 });
 
+// Test route for doctor-admin
+app.get("/api/doctor-admin/test", (req, res) => {
+  res.json({ success: true, message: "Doctor admin routes are working" });
+});
+
 
 
 // Prescriptions
