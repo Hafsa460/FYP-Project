@@ -16,11 +16,9 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { useLocation } from "react-router-dom";
 import "./LandingPage.css";
 
 export default function LandingPage() {
-  const location = useLocation(); // detect scroll request from Navbar
   const [departments, setDepartments] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [resourceSummary, setResourceSummary] = useState(null);

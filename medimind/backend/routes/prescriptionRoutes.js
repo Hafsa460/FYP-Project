@@ -4,6 +4,21 @@ const mongoose = require("mongoose");
 const Prescription = require("../models/Prescription");
 const User = require("../models/User");
 const Doctor = require("../models/Doctor");
+const jwt = require("jsonwebtoken");
+
+// Middleware to verify admin token
+const verifyAdminToken = (req, res, next) => {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  if (!token) return res.status(401).json({ error: "Access denied. No token provided." });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.admin = decoded;
+    next();
+  } catch (err) {
+    res.status(400).json({ error: "Invalid token." });
+  }
+};
 
 // 🔹 Generate unique 8-digit PR No
 async function generatePRNo() {
@@ -86,6 +101,19 @@ router.post("/add", async (req, res) => {
   } catch (err) {
     console.error("❌ Error adding prescription:", err);
     res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Admin route to get all prescriptions
+router.get("/", verifyAdminToken, async (req, res) => {
+  try {
+    const prescriptions = await Prescription.find({})
+      .populate("doctor", "name email")
+      .populate("patient", "name mrNo");
+    res.json(prescriptions);
+  } catch (err) {
+    console.error("❌ Error fetching prescriptions:", err);
+    res.status(500).json({ error: "Failed to fetch prescriptions" });
   }
 });
 
