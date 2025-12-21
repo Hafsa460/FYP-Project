@@ -30,6 +30,8 @@ import VerifySuccess from "./components/VerifySuccess";
 import PrescriptionDetails from "./components/PrescriptionDetails";
 import PatientReports from "./components/PatientReports";
 import PatientProfileManagement from "./components/PatientProfileManagement";
+import MyAppointments from "./components/MyAppointments";
+
 
 
 // Patient Admin
@@ -86,6 +88,9 @@ function App() {
       <Route path="/doctor-verify-success" element={<DoctorVerifySuccess />} />
       <Route path="/my-reports" element={<PatientReports />} />
       <Route path="/patient-profile" element={<PatientProfileManagement />} />
+      <Route path="/PatientDashboard/my-appointments" element={<MyAppointments />} />
+
+
 
       {/* Admin */}
       <Route path="/adminLogin" element={<AdminLogin />} />

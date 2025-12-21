@@ -29,12 +29,15 @@ const verifyAdminToken = (req, res, next) => {
 /* ----------------------------------------
  📌 GET PATIENT APPOINTMENTS
 ---------------------------------------- */
+
 router.get("/patient/:patientId", async (req, res) => {
   try {
     const { patientId } = req.params;
 
-    const appointments = await Appointment.find({ patientId })
-      .select("doctorId patientId date time status createdAt updatedAt") // ✅ include status
+    const appointments = await Appointment.find({
+      patientId: new mongoose.Types.ObjectId(patientId),
+    })
+      .select("doctorId patientId date time status pdf createdAt")
       .populate("doctorId", "name department");
 
     res.json(appointments);
@@ -43,6 +46,7 @@ router.get("/patient/:patientId", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 /* ----------------------------------------
  📌 GET ALL APPOINTMENTS FOR A DOCTOR
@@ -185,7 +189,7 @@ router.post("/book", authMiddleware, async (req, res) => {
     console.log(Appointment.schema.paths.status);
 
     let { doctorId, date, time } = req.body;
-    const patientId = req.user.id;
+    const patientId = new mongoose.Types.ObjectId(req.user.id);
 
     // Normalize date
     date = new Date(date);
@@ -233,6 +237,11 @@ router.post("/book", authMiddleware, async (req, res) => {
 
     // Generate PDF
     const pdfPath = await generateAppointmentPDF(populatedAppointment);
+
+      // save pdf path
+      appointment.pdf = pdfPath;
+      await appointment.save();
+
 
     // Final response
     res.status(201).json({
