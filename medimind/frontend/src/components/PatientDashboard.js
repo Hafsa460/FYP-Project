@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link, Routes, Route, useNavigate } from "react-router-dom";
-import { ClipboardList, FileText, LogOut, User, Bell } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ClipboardList, FileText, LogOut, User, Bell, Calendar } from "lucide-react";
 import Navbar from "./Navbar";
 import "./PatientDashboard.css";
 
@@ -9,55 +9,71 @@ function PatientDashboard() {
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedPatient = localStorage.getItem("patient");
-    if (storedPatient) {
-      const parsed = JSON.parse(storedPatient);
-      setPatient(parsed);
+    const fetchData = async () => {
+      const storedPatient = localStorage.getItem("patient");
+      const token = localStorage.getItem("token");
 
-      const patientId = parsed._id || parsed.id || parsed.mrNo;
+      if (!storedPatient) {
+        navigate("/login-patient");
+        return;
+      }
+
+      const parsedPatient = JSON.parse(storedPatient);
+      setPatient(parsedPatient);
+
+      const patientId = parsedPatient._id;
       if (!patientId) return;
 
-      // Fetch ALL appointments for patient
-      fetch(`http://localhost:5000/api/appointments/patient/${patientId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => setAppointments(data))
-        .catch((err) => console.error("Error fetching appointments:", err));
+      try {
+        // Fetch appointments
+        const apptRes = await fetch(`http://localhost:5000/api/appointments/patient/${patientId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!apptRes.ok) throw new Error("Failed to fetch appointments");
+        const apptData = await apptRes.json();
+        setAppointments(Array.isArray(apptData) ? apptData : []);
 
-      // Fetch ALL prescriptions for patient
-      fetch(`http://localhost:5000/api/prescriptions/my`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setPrescriptions(data);
-          } else {
-            setPrescriptions([]);
-          }
-        })
-        .catch((err) => console.error("Error fetching prescriptions:", err));
-    } else {
-      navigate("/");
-    }
+        // Fetch prescriptions
+       const presRes = await fetch(`http://localhost:5000/api/patient-prescriptions/patient/${patientId}`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
+        if (!presRes.ok) throw new Error("Failed to fetch prescriptions");
+        const presData = await presRes.json();
+        setPrescriptions(Array.isArray(presData) ? presData : []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [navigate]);
 
-  if (!patient) {
-    return <div className="p-4">Loading patient data...</div>;
-  }
   const handleLogout = () => {
     localStorage.removeItem("patient");
+    localStorage.removeItem("token");
     navigate("/login-patient");
   };
+
+  if (loading) {
+    return <div className="p-4">Loading patient data...</div>;
+  }
+
+  if (!patient) {
+    return <div className="p-4">No patient data found.</div>;
+  }
+
   return (
     <>
       <Navbar />
@@ -81,17 +97,24 @@ function PatientDashboard() {
                 <User className="me-2" size={16} /> Make an Appointment
               </Link>
             </li>
-<li className="nav-item">
-  <Link to="/my-reports" className="nav-link">
-    <FileText className="me-2" size={16} /> My Reports
-  </Link>
-</li>
-<li className="nav-item">
-  <Link to="/patient-profile" className="nav-link">
-    <User className="me-2" size={16} /> Profile Management
-  </Link>
-</li>
 
+            <li className="nav-item">
+              <Link to="/my-reports" className="nav-link">
+                <FileText className="me-2" size={16} /> My Reports
+              </Link>
+            </li>
+
+            <li className="nav-item">
+              <Link to="/patient-profile" className="nav-link">
+                <User className="me-2" size={16} /> Profile Management
+              </Link>
+            </li>
+
+            <li className="nav-item">
+              <Link to="/PatientDashboard/my-appointments" className="nav-link">
+                <Calendar className="me-2" size={16} /> Appointments
+              </Link>
+            </li>
 
             <li className="nav-item">
               <button
@@ -135,7 +158,6 @@ function PatientDashboard() {
 
             {/* Bottom Grid */}
             <div className="bottom-grid mt-4">
-              {/* Appointment History */}
               <div className="chart-section small-card">
                 <div className="section-title">Upcoming Appointments</div>
                 {appointments.length > 0 ? (
@@ -143,8 +165,7 @@ function PatientDashboard() {
                     {appointments.map((appt) => (
                       <li key={appt._id}>
                         {appt.doctorId?.name} – {appt.doctorId?.department} –{" "}
-                        {new Date(appt.date).toLocaleDateString()} at{" "}
-                        {appt.time}
+                        {new Date(appt.date).toLocaleDateString()} at {appt.time}
                       </li>
                     ))}
                   </ul>

@@ -1,4 +1,4 @@
-// routes/reportRoutes.js
+// ========================= REPORT ROUTES (UPDATED – MRI + GRADCAM IN PDF) =========================
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
@@ -13,14 +13,10 @@ const User = require("../models/User");
 const Doctor = require("../models/Doctor");
 const Report = require("../models/Report");
 
-// storage for temporary upload
 const tmpUploadDir = path.join(__dirname, "..", "tmp_uploads");
 if (!fs.existsSync(tmpUploadDir)) fs.mkdirSync(tmpUploadDir);
 
-const upload = multer({
-  dest: tmpUploadDir,
-  limits: { fileSize: 30 * 1024 * 1024 }, 
-});
+const upload = multer({ dest: tmpUploadDir, limits: { fileSize: 30 * 1024 * 1024 } });
 
 router.post("/create", upload.single("image"), async (req, res) => {
   try {
@@ -28,107 +24,108 @@ router.post("/create", upload.single("image"), async (req, res) => {
     if (!req.file) return res.status(400).json({ success: false, message: "Image is required" });
     if (!mrNo || !doctorPno) return res.status(400).json({ success: false, message: "mrNo and doctorPno required" });
 
-    // find patient & doctor
     const patient = await User.findOne({ mrNo: Number(mrNo) });
     if (!patient) return res.status(404).json({ success: false, message: "Patient not found" });
 
     const doctor = await Doctor.findOne({ pno: Number(doctorPno) });
     if (!doctor) return res.status(404).json({ success: false, message: "Doctor not found" });
 
-    // Forward file to Flask prediction endpoint
+    // ---------- CALL FLASK ----------
     const flaskUrl = process.env.FLASK_PREDICT_URL || "http://127.0.0.1:5000/predict-stroke";
-
     const form = new FormData();
     form.append("image", fs.createReadStream(req.file.path), req.file.originalname);
 
     const flaskRes = await axios.post(flaskUrl, form, {
       headers: form.getHeaders(),
       maxContentLength: Infinity,
-      maxBodyLength: Infinity,
+      maxBodyLength: Infinity
     });
 
-    const pred = flaskRes.data || {};
-    // expected: { success: true, prediction: "Hemorrhage", confidence: 0.92 }
-    const label = pred.prediction || pred.label || "Unknown";
-    const confidence = typeof pred.confidence === "number" ? pred.confidence : (parseFloat(pred.confidence) || 0);
+    const { prediction, confidence } = flaskRes.data;
 
-    // create a case id
+    // ---------- CREATE CASE ----------
     const caseId = `CASE_${new Date().getFullYear()}_${uuidv4().split("-")[0]}`;
-
-    // prepare permanent storage
     const reportsDir = path.join(__dirname, "..", "uploads", "reports", caseId);
     fs.mkdirSync(reportsDir, { recursive: true });
 
-    // move temp file to permanent folder
-    const originalExt = path.extname(req.file.originalname) || ".png";
-    const savedFileName = `mri${originalExt}`;
-    const savedPath = path.join(reportsDir, savedFileName);
-    fs.renameSync(req.file.path, savedPath);
+    // ---------- SAVE MRI ----------
+    const ext = path.extname(req.file.originalname) || ".png";
+    const mriName = `mri${ext}`;
+    const mriPath = path.join(reportsDir, mriName);
+    fs.renameSync(req.file.path, mriPath);
 
-    // create PDF
+    // ---------- GENERATE PDF ----------
     const pdfPath = path.join(reportsDir, `${caseId}.pdf`);
     await generatePdf({
       pdfPath,
       caseId,
       patient,
       doctor,
-      imagePath: savedPath,
-      label,
-      confidence,
+      imagePath: mriPath,
+      label: prediction,
+      confidence
     });
 
-    // Save report doc (paths relative to /uploads)
+    // ---------- SAVE DB ----------
     const report = new Report({
       caseId,
       patient: patient._id,
       patientMrNo: patient.mrNo,
       doctor: doctor._id,
       doctorPno: doctor.pno,
-      images: [path.join("reports", caseId, savedFileName)],
-      prediction: { label, confidence },
-      pdfPath: path.join("reports", caseId, `${caseId}.pdf`),
+      images: [path.join("reports", caseId, mriName)],
+      prediction: { label: prediction, confidence },
+      pdfPath: path.join("reports", caseId, `${caseId}.pdf`)
     });
+
     await report.save();
 
-    // Return report data
     res.json({
       success: true,
       report: {
         id: report._id,
-        caseId: report.caseId,
+        caseId,
         images: report.images,
         prediction: report.prediction,
-        pdfPath: report.pdfPath,
-      },
+        pdfPath: report.pdfPath
+      }
     });
+
   } catch (err) {
-    console.error("Error in create report:", err);
-    // clean up tmp file if exists
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
-// GET /api/reports/patient/:mrNo  -> list reports for MR No
 router.get("/patient/:mrNo", async (req, res) => {
   try {
     const mrNo = Number(req.params.mrNo);
     const reports = await Report.find({ patientMrNo: mrNo }).sort({ createdAt: -1 });
     res.json({ success: true, reports });
-  } catch (err) {
-    console.error(err);
+  } catch {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
 module.exports = router;
 
-
-async function generatePdf({ pdfPath, caseId, patient, doctor, imagePath, label, confidence }) {
+// ========================= PDF GENERATOR =========================
+async function generatePdf({
+  pdfPath,
+  caseId,
+  patient,
+  doctor,
+  imagePath,
+  label,
+  confidence
+}) {
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({ autoFirstPage: false });
-      const writeStream = fs.createWriteStream(pdfPath);
+      const stream = fs.createWriteStream(pdfPath);
+      doc.pipe(stream);
+
+      // -------- PAGE 1 --------
+       const writeStream = fs.createWriteStream(pdfPath);
       doc.pipe(writeStream);
 
       // PAGE 1
@@ -218,40 +215,21 @@ doc.text(new Date().toLocaleDateString(), 400, rowY);
 
 doc.moveDown(2);
 
-      // ---- MRI IMAGE PAGE ----
+      // -------- PAGE 2: MRI --------
       doc.addPage();
-      doc.fontSize(16).text("MRI Scan Image", { align: "center", underline: true });
+      doc.fontSize(16).text("Original MRI Image", { align: "center", underline: true });
       doc.moveDown(1);
-
       if (fs.existsSync(imagePath)) {
-        try {
-          doc.image(imagePath, {
-            fit: [480, 480],
-            align: "center",
-            valign: "center",
-          });
-        } catch (err) {
-          console.log("Image insertion failed:", err.message);
-        }
-      } else {
-        doc.fontSize(14).text("Image not available.");
+        doc.image(imagePath, { fit: [480, 480], align: "center" });
       }
 
-      doc.moveDown(2);
-
-      // ---- FOOTER ----
-      doc.fontSize(10).text(
-        "This report was generated by the StrokeAI Detection System.\nIt supports clinical decisions but is not a final diagnosis.",
-        { align: "center" }
-      );
 
       doc.end();
+      stream.on("finish", resolve);
+      stream.on("error", reject);
 
-      writeStream.on("finish", resolve);
-      writeStream.on("error", reject);
     } catch (err) {
       reject(err);
     }
   });
 }
-

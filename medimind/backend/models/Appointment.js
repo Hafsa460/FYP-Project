@@ -27,6 +27,9 @@ const appointmentSchema = new mongoose.Schema(
       enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
+     pdf: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

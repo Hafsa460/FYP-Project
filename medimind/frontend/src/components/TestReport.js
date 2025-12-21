@@ -9,9 +9,11 @@ import {
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "./Navbar";
+
 const TestReport = () => {
   const [tests, setTests] = useState([]);
   const [patient, setPatient] = useState(null);
+  const [activeTab, setActiveTab] = useState("reports"); // ✅ TAB STATE
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -113,7 +115,7 @@ const TestReport = () => {
           <header className="bg-white p-3 rounded shadow-sm d-flex justify-content-between align-items-center mb-4">
             <div className="d-flex align-items-center">
               <LayoutGrid className="me-2 text-muted" size={20} />
-              <span className="text-muted">Test History</span>
+              <span className="text-muted">Patient Records</span>
             </div>
             <div className="d-flex align-items-center">
               <div className="position-relative">
@@ -123,7 +125,7 @@ const TestReport = () => {
                 />
                 <input
                   type="text"
-                  placeholder="Search test record"
+                  placeholder="Search record"
                   className="form-control ps-5"
                   style={{ width: "220px" }}
                 />
@@ -131,39 +133,97 @@ const TestReport = () => {
             </div>
           </header>
 
-          {/* Test Records */}
-          <div className="row g-4">
-            {tests.map((test) => (
-              <div className="col-md-6" key={test.id}>
-                <div className="card shadow-sm p-3 h-100">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <h5 className="mb-0 text-primary d-flex align-items-center">
-                      <ClipboardList className="me-2" size={20} />
-                      {test.testName}
-                    </h5>
-                    <small className="text-muted d-flex align-items-center">
-                      <Calendar className="me-1" size={14} /> {test.date}
-                    </small>
-                  </div>
-                  <p className="mb-1 text-muted">
-                    Status:{" "}
-                    <strong
-                      className={
-                        test.status === "Completed"
-                          ? "text-success"
-                          : "text-warning"
-                      }
-                    >
-                      {test.status}
-                    </strong>
-                  </p>
-                  <p className="text-muted mb-0">
-                    Result: <em>{test.result}</em>
-                  </p>
-                </div>
-              </div>
-            ))}
+          {/* ---------------- TABS ---------------- */}
+          <div className="bg-white rounded shadow-sm p-2 mb-4">
+            <div className="d-flex gap-3">
+              <button
+                className={`btn ${
+                  activeTab === "reports"
+                    ? "btn-primary"
+                    : "btn-outline-primary"
+                }`}
+                onClick={() => setActiveTab("reports")}
+              >
+                Reports
+              </button>
+
+              <button
+                className={`btn ${
+                  activeTab === "appointments"
+                    ? "btn-primary"
+                    : "btn-outline-primary"
+                }`}
+                onClick={() => setActiveTab("appointments")}
+              >
+                Appointments
+              </button>
+
+              <button
+                className={`btn ${
+                  activeTab === "prescriptions"
+                    ? "btn-primary"
+                    : "btn-outline-primary"
+                }`}
+                onClick={() => setActiveTab("prescriptions")}
+              >
+                Prescriptions
+              </button>
+            </div>
           </div>
+
+          {/* ---------------- TAB CONTENT ---------------- */}
+
+          {/* REPORTS */}
+          {activeTab === "reports" && (
+            <div className="row g-4">
+              {tests.map((test) => (
+                <div className="col-md-6" key={test.id}>
+                  <div className="card shadow-sm p-3 h-100">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <h5 className="mb-0 text-primary d-flex align-items-center">
+                        <ClipboardList className="me-2" size={20} />
+                        {test.testName}
+                      </h5>
+                      <small className="text-muted d-flex align-items-center">
+                        <Calendar className="me-1" size={14} /> {test.date}
+                      </small>
+                    </div>
+                    <p className="mb-1 text-muted">
+                      Status:{" "}
+                      <strong
+                        className={
+                          test.status === "Completed"
+                            ? "text-success"
+                            : "text-warning"
+                        }
+                      >
+                        {test.status}
+                      </strong>
+                    </p>
+                    <p className="text-muted mb-0">
+                      Result: <em>{test.result}</em>
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* APPOINTMENTS */}
+          {activeTab === "appointments" && (
+            <div className="bg-white p-4 rounded shadow-sm text-muted">
+              <h5>Appointments</h5>
+              <p>No appointments available.</p>
+            </div>
+          )}
+
+          {/* PRESCRIPTIONS */}
+          {activeTab === "prescriptions" && (
+            <div className="bg-white p-4 rounded shadow-sm text-muted">
+              <h5>Prescriptions</h5>
+              <p>No prescriptions available.</p>
+            </div>
+          )}
         </main>
       </div>
     </>

@@ -30,6 +30,8 @@ import VerifySuccess from "./components/VerifySuccess";
 import PrescriptionDetails from "./components/PrescriptionDetails";
 import PatientReports from "./components/PatientReports";
 import PatientProfileManagement from "./components/PatientProfileManagement";
+import MyAppointments from "./components/MyAppointments";
+
 
 
 // Patient Admin
@@ -40,7 +42,7 @@ import AdminLogin from "./components/AdminLogin";
 import Doctoradmin from "./components/DoctorAdmin";
 import Dptadmin from "./components/DptAdmin";
 import Superadmin from "./components/SuperAdmin";
-
+import PatientSetPassword from "./components/PatientAdmin/SetPassword";
 // Doctor Admin Dashboard pages
 import DoctorAdminLayout from "./components/DoctorAdmin/DoctorAdminLayout";
 import DoctorAdminDashboard from "./components/DoctorAdmin/DoctorAdminDashboard";
@@ -86,6 +88,9 @@ function App() {
       <Route path="/doctor-verify-success" element={<DoctorVerifySuccess />} />
       <Route path="/my-reports" element={<PatientReports />} />
       <Route path="/patient-profile" element={<PatientProfileManagement />} />
+      <Route path="/PatientDashboard/my-appointments" element={<MyAppointments />} />
+
+
 
       {/* Admin */}
       <Route path="/adminLogin" element={<AdminLogin />} />
@@ -98,8 +103,9 @@ function App() {
         <Route index element={<PatientAdminDashboard />} />
         <Route path="patients" element={<PatientDetails />} />
         <Route path="patient/:id" element={<PatientDetails />} />
+        
       </Route>
-
+        <Route path="set-password/:token" element={<PatientSetPassword/>} />
       {/* Doctor Admin */}
       <Route path="/doctor-admin" element={<DoctorAdminLayout />}>
         <Route index element={<DoctorAdminDashboard />} />

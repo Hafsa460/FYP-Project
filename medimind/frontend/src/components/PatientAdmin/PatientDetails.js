@@ -17,6 +17,8 @@ export default function PatientDetails() {
     email: "",
     dob: "",
     gender: "",
+    password: "",
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
   const [dialog, setDialog] = useState({ show: false, type: "", message: "" });
@@ -26,10 +28,7 @@ export default function PatientDetails() {
   const showDialog = (type, message) => {
     setDialog({ show: true, type, message });
   };
-
-  const closeDialog = () => {
-    setDialog({ show: false, type: "", message: "" });
-  };
+  const closeDialog = () => setDialog({ show: false, type: "", message: "" });
 
   /* ---------------- FETCH PATIENTS ---------------- */
   const fetchAllPatients = useCallback(async () => {
@@ -38,18 +37,27 @@ export default function PatientDetails() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (data.error) {
-        showDialog("error", data.error);
-        return;
-      }
+      if (data.error) return showDialog("error", data.error);
       setPatients(data);
     } catch (err) {
       showDialog("error", "Failed to fetch patients");
     }
   }, [token]);
 
+  // ✅ Correct useEffect for async
   useEffect(() => {
-    fetchAllPatients();
+    let isMounted = true; // optional flag to prevent state updates if unmounted
+
+    const fetchData = async () => {
+      await fetchAllPatients();
+    };
+
+    fetchData();
+
+    return () => {
+      // Cleanup if needed in future (e.g., cancel subscriptions)
+      isMounted = false;
+    };
   }, [fetchAllPatients]);
 
   /* ---------------- FILTER ---------------- */
@@ -70,47 +78,81 @@ export default function PatientDetails() {
     if (errors[name]) setErrors({ ...errors, [name]: "" });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrors({});
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setErrors({});
 
-    const newErrors = {};
-    if (!formData.name) newErrors.name = "Name required";
-    if (!/^[^\s@]+@gmail\.com$/.test(formData.email))
-      newErrors.email = "Valid Gmail required";
-    if (!formData.gender) newErrors.gender = "Gender required";
+  const newErrors = {};
+  if (!formData.name) newErrors.name = "Name required";
+  if (!/^[^\s@]+@gmail\.com$/.test(formData.email))
+    newErrors.email = "Valid Gmail required";
+  if (!formData.gender) newErrors.gender = "Gender required";
+  if (!formData.dob) newErrors.dob = "Date of Birth required";
+  if (!formData.password) newErrors.password = "Password required";
+  if (formData.password !== formData.confirmPassword)
+    newErrors.confirmPassword = "Passwords do not match";
 
-    if (Object.keys(newErrors).length) {
-      setErrors(newErrors);
-      return;
-    }
+  if (Object.keys(newErrors).length) {
+    setErrors(newErrors);
+    return;
+  }
 
-    try {
-      const res = await fetch("http://localhost:5000/api/adminpatient/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
+  // Calculate age from DOB
+  const birthDate = new Date(formData.dob);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+
+  try {
+    const res = await fetch("http://localhost:5000/api/adminpatient/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ ...formData, age }),
+    });
+
+    const data = await res.json();
+
+    if (data.message) {
+      showDialog("success", data.message);
+      setFormData({
+        name: "",
+        email: "",
+        dob: "",
+        gender: "",
+        password: "",
+        confirmPassword: "",
       });
-
-      const data = await res.json();
-
-      if (data.message) {
-        showDialog(
-          "success",
-          "Patient added successfully. Set-password email sent."
-        );
-        setFormData({ name: "", email: "", dob: "", gender: "" });
-        fetchAllPatients();
-      } else {
-        showDialog("error", data.error);
-      }
-    } catch {
-      showDialog("error", "Server error");
+      fetchAllPatients();
+    } else if (data.error === "Patient already exists (verified)") {
+      // Email already registered
+      showDialog("error", "Email already registered.");
+    } else if (data.error === "Patient exists but unverified") {
+      // Resend verification
+      showDialog(
+        "success",
+        "Patient email exists but not verified. Verification email resent."
+      );
+      setFormData({
+        name: "",
+        email: "",
+        dob: "",
+        gender: "",
+        password: "",
+        confirmPassword: "",
+      });
+      fetchAllPatients();
+    } else {
+      showDialog("error", data.error);
     }
-  };
+  } catch {
+    showDialog("error", "Server error");
+  }
+};
+
 
   /* ---------------- SINGLE PATIENT VIEW ---------------- */
   if (id) {
@@ -147,9 +189,7 @@ export default function PatientDetails() {
           </div>
         </div>
 
-        <button onClick={() => navigate("/patient-admin")}>
-          Back to Patients
-        </button>
+        <button onClick={() => navigate("/patient-admin")}>Back to Patients</button>
       </div>
     );
   }
@@ -236,7 +276,6 @@ export default function PatientDetails() {
 
       {activeTab === "manage" && (
         <form onSubmit={handleSubmit} className="patient-details">
-
           <div className="form-group">
             <label>Name</label>
             <input name="name" value={formData.name} onChange={handleFormChange} />
@@ -252,6 +291,7 @@ export default function PatientDetails() {
           <div className="form-group">
             <label>DOB</label>
             <input type="date" name="dob" value={formData.dob} onChange={handleFormChange} />
+            {errors.dob && <span className="error">{errors.dob}</span>}
           </div>
 
           <div className="form-group">
@@ -262,6 +302,28 @@ export default function PatientDetails() {
               <option>Female</option>
             </select>
             {errors.gender && <span className="error">{errors.gender}</span>}
+          </div>
+
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleFormChange}
+            />
+            {errors.password && <span className="error">{errors.password}</span>}
+          </div>
+
+          <div className="form-group">
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleFormChange}
+            />
+            {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
           </div>
 
           <button type="submit">Add Patient</button>

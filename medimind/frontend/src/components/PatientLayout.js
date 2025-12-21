@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { User, FileText, Bell } from "lucide-react";
+import { Calendar } from "lucide-react";
 import Navbar from "./Navbar";
 import "./PatientDashboard.css";
 
@@ -71,6 +72,12 @@ function PatientLayout() {
                 <FileText className="me-2" size={16} /> Reports
               </Link>
             </li>
+            <li className="nav-item">
+  <Link to="/PatientDashboard/my-appointments" className="nav-link">
+    <Calendar className="me-2" size={16} /> Appointments
+  </Link>
+</li>
+
             <li className="nav-item">
               <button
                 className="btn btn-link nav-link text-danger"
