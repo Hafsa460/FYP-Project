@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import "./Appointment.css";
+
 function Appointment() {
   const [doctors, setDoctors] = useState([]);
   const [bookedSlots, setBookedSlots] = useState([]);
@@ -15,32 +16,30 @@ function Appointment() {
     time: "",
   });
   const [message, setMessage] = useState("");
+  const [pdfUrl, setPdfUrl] = useState(null); // ✅ Added PDF state
   const navigate = useNavigate();
 
   // 🔹 Fetch doctors list
-  // 🔹 Fetch doctors list
-useEffect(() => {
-  const fetchDoctors = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/doctors");
-      const data = await res.json();
-      console.log("Doctors API response:", data);
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/doctors");
+        const data = await res.json();
+        console.log("Doctors API response:", data);
 
-      // handle both cases: array OR {success, doctors}
-      if (Array.isArray(data)) {
-        setDoctors(data);
-      } else if (data.success && Array.isArray(data.doctors)) {
-        setDoctors(data.doctors);
-      } else {
-        setDoctors([]);
+        if (Array.isArray(data)) {
+          setDoctors(data);
+        } else if (data.success && Array.isArray(data.doctors)) {
+          setDoctors(data.doctors);
+        } else {
+          setDoctors([]);
+        }
+      } catch (err) {
+        console.error("Error fetching doctors:", err);
       }
-    } catch (err) {
-      console.error("Error fetching doctors:", err);
-    }
-  };
-  fetchDoctors();
-}, []);
-
+    };
+    fetchDoctors();
+  }, []);
 
   // 🔹 Fetch booked slots for selected doctor & date
   useEffect(() => {
@@ -64,7 +63,6 @@ useEffect(() => {
     fetchAppointments();
   }, [formData.doctorId, formData.date]);
 
-  // 🔹 Submit appointment
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -93,9 +91,17 @@ useEffect(() => {
       );
 
       const result = await response.json();
-      if (response.ok) {
-        setMessage("✅ Appointment booked successfully!");
-        setTimeout(() => navigate("/appointment"), 1500);
+if (response.ok) {
+  setMessage("✅ Appointment booked successfully!");
+
+  if (result.pdf) {
+    const fullPdfUrl = `http://localhost:5000${result.pdf}`;
+    setPdfUrl(fullPdfUrl);
+    window.open(fullPdfUrl, "_blank"); // ✅ auto-open PDF
+  }
+    // Optional: reset form after booking
+        setFormData({ doctorId: "", date: null, time: "" });
+
       } else {
         setMessage(result.error || "Failed to book appointment.");
       }
@@ -238,6 +244,29 @@ useEffect(() => {
                 Book Appointment
               </button>
             </form>
+
+            {/* 🔹 PDF Preview & Download */}
+            {pdfUrl && (
+              <div className="mt-4 card p-3 shadow-sm">
+                <h5>Appointment PDF</h5>
+                <iframe
+                  src={pdfUrl}
+                  title="Appointment PDF"
+                  width="100%"
+                  height="400px"
+                  style={{ border: "1px solid #ccc" }}
+                />
+                <a
+                  href={pdfUrl}
+                  download
+                  className="btn btn-primary mt-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download PDF
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>

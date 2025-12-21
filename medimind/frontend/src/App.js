@@ -40,7 +40,7 @@ import AdminLogin from "./components/AdminLogin";
 import Doctoradmin from "./components/DoctorAdmin";
 import Dptadmin from "./components/DptAdmin";
 import Superadmin from "./components/SuperAdmin";
-
+import PatientSetPassword from "./components/PatientAdmin/SetPassword";
 // Doctor Admin Dashboard pages
 import DoctorAdminLayout from "./components/DoctorAdmin/DoctorAdminLayout";
 import DoctorAdminDashboard from "./components/DoctorAdmin/DoctorAdminDashboard";
@@ -98,8 +98,9 @@ function App() {
         <Route index element={<PatientAdminDashboard />} />
         <Route path="patients" element={<PatientDetails />} />
         <Route path="patient/:id" element={<PatientDetails />} />
+        
       </Route>
-
+        <Route path="set-password/:token" element={<PatientSetPassword/>} />
       {/* Doctor Admin */}
       <Route path="/doctor-admin" element={<DoctorAdminLayout />}>
         <Route index element={<DoctorAdminDashboard />} />

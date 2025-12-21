@@ -114,7 +114,7 @@ const handleScrollTo = (id) => {
         {userType && (
           <div className="position-relative">
             <img
-              src={profileIcon}
+              src={femaleProfile}
               alt="Profile"
               className="rounded-circle"
               style={{ width: "45px", cursor: "pointer" }}

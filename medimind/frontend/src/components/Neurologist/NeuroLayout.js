@@ -76,7 +76,7 @@ if (apptData.success) setAppointments(apptData.appointments);
         {/* Sidebar */}
         <div className="sidebar p-3">
           <div className="doctor-profile d-flex align-items-center mb-4">
-            <img src={profileIcon} alt="Doctor" className="profile-icon me-3" />
+            <img src={femaleProfile} alt="Doctor" className="profile-icon me-3" />
             <div className="doctor-name fw-semibold">
               {loading ? "Loading..." : doctor ? doctor.name : "Not Found"}
             </div>
@@ -147,7 +147,8 @@ if (apptData.success) setAppointments(apptData.appointments);
                   </li>
                 ))
               ) : (
-                <li>No upcoming appointments</li>
+                <li>1 pending appointment
+                </li>
               )}
             </ul>
             <button
