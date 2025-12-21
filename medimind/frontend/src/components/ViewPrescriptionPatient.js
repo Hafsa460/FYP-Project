@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import "./Prescription.css";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -14,9 +16,7 @@ function ViewPrescriptionPatient() {
       try {
         const token = localStorage.getItem("token");
         const res = await fetch(`${API_URL}/api/patient-prescriptions/my`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const data = await res.json();
@@ -42,12 +42,74 @@ function ViewPrescriptionPatient() {
     setSelectedPrescription(null);
   };
 
+  const handleDownloadPDF = (prescription) => {
+    if (!prescription) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Title: Centered
+    doc.setFontSize(16);
+    doc.text("Prescription Details", pageWidth / 2, 20, { align: "center" });
+
+    doc.setFontSize(12);
+
+    // PR No (Left) and Date (Right)
+    doc.text(`PR No: ${prescription.prNo}`, 14, 30);
+    doc.text(
+      `Date: ${new Date(prescription.date).toLocaleDateString()}`,
+      pageWidth - 14,
+      30,
+      { align: "right" }
+    );
+
+    // Doctor (Left), MR No (Right)
+    doc.text(`Doctor: ${prescription.doctor?.name || "N/A"}`, 14, 40);
+    doc.text(
+      `MR No: ${prescription.patient?.mrNo || ""}`,
+      pageWidth - 14,
+      40,
+      { align: "right" }
+    );
+
+    // Patient Name (Left), Age (Right)
+    doc.text(
+      `Patient Name: ${prescription.patient?.name || ""}`,
+      14,
+      50
+    );
+    doc.text(`Age: ${prescription.patient?.age || ""}`, pageWidth - 14, 50, {
+      align: "right",
+    });
+
+    // Gender (Left)
+    doc.text(`Gender: ${prescription.patient?.gender || ""}`, 14, 60);
+
+    // Centered Details
+    const details = [
+      `Diagnosis: ${prescription.diagnosis || "N/A"}`,
+      `Prescription: ${prescription.prescription || "N/A"}`,
+      `Follow Up: ${prescription.followUp || "N/A"}`,
+      `Test Recommendation: ${prescription.testRecommendation || "N/A"}`,
+      `Clinical Summary: ${prescription.clinicalSummary || "N/A"}`,
+      `Investigation: ${prescription.investigation || "N/A"}`,
+    ];
+
+    let startY = 75;
+    doc.setFontSize(12);
+    details.forEach((line) => {
+      doc.text(line, pageWidth / 2, startY, { align: "center" });
+      startY += 10;
+    });
+
+    doc.save(`Prescription_${prescription.prNo}.pdf`);
+  };
+
   return (
     <>
       <Navbar />
       <div className="vp-container p-4">
         <h4 className="vp-title mb-4">My Prescriptions</h4>
-
         {error && <div className="alert alert-danger mb-3">{error}</div>}
 
         {selectedPrescription ? (
@@ -57,8 +119,7 @@ function ViewPrescriptionPatient() {
               <div className="vp-row-between mb-2">
                 <strong>PR No: {selectedPrescription.prNo}</strong>
                 <span>
-                  Date:{" "}
-                  {new Date(selectedPrescription.date).toLocaleDateString()}
+                  Date: {new Date(selectedPrescription.date).toLocaleDateString()}
                 </span>
               </div>
               <div className="vp-detail">
@@ -66,32 +127,34 @@ function ViewPrescriptionPatient() {
               </div>
               <hr />
               <div className="vp-detail">
-                <strong>Diagnosis:</strong>{" "}
-                {selectedPrescription.diagnosis || "N/A"}
+                <strong>Diagnosis:</strong> {selectedPrescription.diagnosis || "N/A"}
               </div>
               <div className="vp-detail">
-                <strong>Prescription:</strong>{" "}
-                {selectedPrescription.prescription || "N/A"}
+                <strong>Prescription:</strong> {selectedPrescription.prescription || "N/A"}
               </div>
               <div className="vp-detail">
-                <strong>Follow Up:</strong>{" "}
-                {selectedPrescription.followUp || "N/A"}
+                <strong>Follow Up:</strong> {selectedPrescription.followUp || "N/A"}
               </div>
               <div className="vp-detail">
-                <strong>Test Recommendation:</strong>{" "}
-                {selectedPrescription.testRecommendation || "N/A"}
+                <strong>Test Recommendation:</strong> {selectedPrescription.testRecommendation || "N/A"}
               </div>
               <div className="vp-detail">
-                <strong>Clinical Summary:</strong>{" "}
-                {selectedPrescription.clinicalSummary || "N/A"}
+                <strong>Clinical Summary:</strong> {selectedPrescription.clinicalSummary || "N/A"}
               </div>
               <div className="vp-detail">
-                <strong>Investigation:</strong>{" "}
-                {selectedPrescription.investigation || "N/A"}
+                <strong>Investigation:</strong> {selectedPrescription.investigation || "N/A"}
               </div>
-              <button onClick={handleGoBack} className="vp-btn-back mt-3">
-                ← Go Back
-              </button>
+              <div className="mt-3">
+                <button onClick={handleGoBack} className="vp-btn-back me-2">
+                  ← Go Back
+                </button>
+                <button
+                  onClick={() => handleDownloadPDF(selectedPrescription)}
+                  className="vp-btn-download"
+                >
+                  Download PDF
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -115,9 +178,15 @@ function ViewPrescriptionPatient() {
                       <td>
                         <button
                           onClick={() => handleViewDetails(p)}
-                          className="vp-btn-details"
+                          className="vp-btn-details me-2"
                         >
                           View Details
+                        </button>
+                        <button
+                          onClick={() => handleDownloadPDF(p)}
+                          className="vp-btn-details me-2 mt-2"
+                        >
+                          Download PDF
                         </button>
                       </td>
                     </tr>

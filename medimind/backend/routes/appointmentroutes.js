@@ -6,9 +6,8 @@ const Doctor = require("../models/Doctor");
 const DoctorLeave = require("../models/DoctorLeave");
 const authMiddleware = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
-
+const generateAppointmentPDF = require("./generateAppointmentPDF"); // adjust path
 const router = express.Router();
-
 // Middleware to verify admin token
 const verifyAdminToken = (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
@@ -26,53 +25,19 @@ const verifyAdminToken = (req, res, next) => {
 /* ----------------------------------------
  📌 BOOK APPOINTMENT (STATUS ALWAYS SAVED)
 ---------------------------------------- */
-router.post("/book", authMiddleware, async (req, res) => {
-  console.log("📌 BODY RECEIVED:", req.body);
-  console.log("📌 USER FROM TOKEN:", req.user);
-
-  try {
-    console.log(Appointment.schema.paths.status);
-    let { doctorId, date, time } = req.body;
-    const patientId = req.user.id;
-
-    date = new Date(date);
-
-    const leave = await DoctorLeave.findOne({ doctorId, date });
-    if (leave) return res.status(400).json({ error: "Doctor is on leave" });
-
-    const doctorConflict = await Appointment.findOne({ doctorId, date, time });
-    if (doctorConflict) return res.status(400).json({ error: "Doctor already booked" });
-
-    const patientConflict = await Appointment.findOne({ patientId, date, time });
-    if (patientConflict) return res.status(400).json({ error: "You already booked this slot" });
-
-    const appointment = await Appointment.create({
-      doctorId,
-      patientId,
-      date,
-      time,
-      status: "Pending", // always save
-    });
-
-    await User.findByIdAndUpdate(patientId, { $push: { appointments: appointment._id } });
-    await Doctor.findByIdAndUpdate(doctorId, { $push: { appointments: appointment._id } });
-
-    res.status(201).json({ message: "Appointment booked", appointment });
-  } catch (err) {
-    console.error("Error booking appointment:", err);
-    res.status(500).json({ error: "Failed to book appointment" });
-  }
-});
 
 /* ----------------------------------------
  📌 GET PATIENT APPOINTMENTS
 ---------------------------------------- */
+
 router.get("/patient/:patientId", async (req, res) => {
   try {
     const { patientId } = req.params;
 
-    const appointments = await Appointment.find({ patientId })
-      .select("doctorId patientId date time status createdAt updatedAt") // ✅ include status
+    const appointments = await Appointment.find({
+      patientId: new mongoose.Types.ObjectId(patientId),
+    })
+      .select("doctorId patientId date time status pdf createdAt")
       .populate("doctorId", "name department");
 
     res.json(appointments);
@@ -81,6 +46,7 @@ router.get("/patient/:patientId", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 /* ----------------------------------------
  📌 GET ALL APPOINTMENTS FOR A DOCTOR
@@ -162,9 +128,9 @@ router.get("/doctor/:doctorId/waiting", async (req, res) => {
     const { doctorId } = req.params;
 
     const appointments = await Appointment.find({
-      doctorId,
-      status: "waiting",
-    })
+    doctorId,
+    status: "Pending"
+  })
       .sort({ date: 1, time: 1 })
       .populate("patientId", "name");
 
@@ -211,6 +177,81 @@ router.get("/", verifyAdminToken, async (req, res) => {
   } catch (err) {
     console.error("Error fetching appointments:", err);
     res.status(500).json({ error: "Failed to fetch appointments" });
+  }
+});
+
+router.post("/book", authMiddleware, async (req, res) => {
+  console.log("📌 BODY RECEIVED:", req.body);
+  console.log("📌 USER FROM TOKEN:", req.user);
+
+  try {
+    // Debug schema status
+    console.log(Appointment.schema.paths.status);
+
+    let { doctorId, date, time } = req.body;
+    const patientId = new mongoose.Types.ObjectId(req.user.id);
+
+    // Normalize date
+    date = new Date(date);
+
+    // Doctor leave check
+    const leave = await DoctorLeave.findOne({ doctorId, date });
+    if (leave) {
+      return res.status(400).json({ error: "Doctor is on leave" });
+    }
+
+    // Doctor slot conflict
+    const doctorConflict = await Appointment.findOne({ doctorId, date, time });
+    if (doctorConflict) {
+      return res.status(400).json({ error: "Doctor already booked" });
+    }
+
+    // Patient slot conflict
+    const patientConflict = await Appointment.findOne({ patientId, date, time });
+    if (patientConflict) {
+      return res.status(400).json({ error: "You already booked this slot" });
+    }
+
+    // Create appointment
+    const appointment = await Appointment.create({
+      doctorId,
+      patientId,
+      date,
+      time,
+      status: "Pending", // enum-safe
+    });
+
+    // Update user & doctor
+    await User.findByIdAndUpdate(patientId, {
+      $push: { appointments: appointment._id },
+    });
+
+    await Doctor.findByIdAndUpdate(doctorId, {
+      $push: { appointments: appointment._id },
+    });
+
+    // Populate for PDF
+    const populatedAppointment = await Appointment.findById(appointment._id)
+      .populate("patientId", "name mrNo age gender")
+      .populate("doctorId", "name department");
+
+    // Generate PDF
+    const pdfPath = await generateAppointmentPDF(populatedAppointment);
+
+      // save pdf path
+      appointment.pdf = pdfPath;
+      await appointment.save();
+
+
+    // Final response
+    res.status(201).json({
+      message: "Appointment booked successfully",
+      appointment: populatedAppointment,
+      pdf: pdfPath,
+    });
+  } catch (err) {
+    console.error("Error booking appointment:", err);
+    res.status(500).json({ error: "Failed to book appointment" });
   }
 });
 

@@ -120,11 +120,16 @@ function VerifyReports() {
       {patient && (
         <>
           <div className="patient-card">
-            <p><strong>Name:</strong> {patient.name}</p>
-            <p><strong>MR No:</strong> {patient.mrNo}</p>
-            <p><strong>Age:</strong> {patient.age}</p>
-            <p><strong>Gender:</strong> {patient.gender}</p>
-          </div>
+  <div className="row">
+    <p><strong>Name:</strong> {patient.name}</p>
+    <p><strong>MR No:</strong> {patient.mrNo}</p>
+  </div>
+  <div className="row">
+    <p><strong>Gender:</strong> {patient.gender}</p>
+    <p><strong>Age:</strong> {patient.age}</p>
+  </div>
+</div>
+
 
           {/* Only show upload form if patient is found */}
           <form className="verify-reports-form" onSubmit={handleUploadAndGenerate}>
@@ -158,8 +163,6 @@ function VerifyReports() {
         <div className="result-box">
           <h4>Prediction Result:</h4>
           <p><strong>Prediction:</strong> {result.prediction}</p>
-          <p><strong>Confidence:</strong> {result.confidence}%</p>
-
           {/* PDF Download Button */}
           {report?.pdfPath && (
             <a

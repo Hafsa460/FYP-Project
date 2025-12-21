@@ -1,65 +1,80 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from tensorflow.keras.models import load_model
-from tensorflow.keras.applications.resnet50 import preprocess_input
-from tensorflow.keras.preprocessing import image
+import torch
+import torch.nn as nn
+from torchvision import models
 import numpy as np
-import os
 import uuid
+import os
+from PIL import Image
 
 app = Flask(__name__)
+CORS(app)
 
-CORS(app, resources={r"/predict-stroke": {"origins": "http://localhost:3000"}})
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-MODEL_PATH = "resnet_stroke_classifier_finetuned_20251121_172312.h5"
-print("\n🔄 Loading Stroke Classification Model...")
-model = load_model(MODEL_PATH)
-print("✅ Model loaded successfully!\n")
+# ---------------- MODELS ----------------
+stage1_model = models.resnet50(pretrained=False)
+stage1_model.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
+stage1_model.fc = nn.Linear(stage1_model.fc.in_features, 2)
+stage1_model.load_state_dict(torch.load("best_stage1_model.pth", map_location=device))
+stage1_model.to(device).eval()
 
-def prepare_image(img_path):
-    img = image.load_img(img_path, target_size=(224, 224))
-    img_array = image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = preprocess_input(img_array)
-    return img_array
+stage2_model = models.resnet50(pretrained=False)
+stage2_model.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
+stage2_model.fc = nn.Linear(stage2_model.fc.in_features, 2)
+stage2_model.load_state_dict(torch.load("best_stage2_model.pth", map_location=device))
+stage2_model.to(device).eval()
 
+CLASS_MAP = {0: "Hemorrhagic", 1: "Ischemic", 2: "Normal"}
+
+# ---------------- UTILS ----------------
+def load_tensor(path):
+    img = Image.open(path).convert("L").resize((224, 224))
+    img = np.array(img) / 255.0
+    tensor = torch.tensor(img).unsqueeze(0).unsqueeze(0).float().to(device)
+    return tensor
+
+# ---------------- API ----------------
 @app.route("/predict-stroke", methods=["POST"])
-def predict_stroke():
-    # No file received
-    if "image" not in request.files:
-        return jsonify({"success": False, "message": "No image uploaded"}), 400
-
-    file = request.files["image"]
-
-    # Generate unique filename
-    temp_name = f"temp_{uuid.uuid4().hex}.jpg"
-    file_path = os.path.join(temp_name)
-    file.save(file_path)
-
+def predict():
+    img_path = None
     try:
-        img_ready = prepare_image(file_path)
-        prediction = model.predict(img_ready)[0][0]
+        if "image" not in request.files:
+            return jsonify({"success": False, "message": "No image provided"}), 400
 
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        file = request.files["image"]
+        img_path = f"tmp_{uuid.uuid4().hex}.png"
+        file.save(img_path)
 
-        result = "Stroke" if prediction >= 0.5 else "Non-Stroke"
+        x = load_tensor(img_path)
+
+        # -------- Stage 1 --------
+        out1 = stage1_model(x)
+        p1 = torch.argmax(out1, dim=1).item()
+
+        if p1 == 1:  # Ischemic
+            final = 1
+            confidence = torch.softmax(out1, dim=1)[0, 1].item()
+        else:
+            # -------- Stage 2 --------
+            out2 = stage2_model(x)
+            p2 = torch.argmax(out2, dim=1).item()
+            final = 0 if p2 == 0 else 2
+            confidence = torch.softmax(out2, dim=1)[0, p2].item()
 
         return jsonify({
             "success": True,
-            "prediction": result,
-            "confidence": round(float(prediction), 4)
+            "prediction": CLASS_MAP[final],
+            "confidence": confidence
         }), 200
 
     except Exception as e:
-        if os.path.exists(file_path):
-            os.remove(file_path)
         return jsonify({"success": False, "error": str(e)}), 500
 
-
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"message": "Stroke Prediction API Running"}), 200
+    finally:
+        if img_path and os.path.exists(img_path):
+            os.remove(img_path)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
