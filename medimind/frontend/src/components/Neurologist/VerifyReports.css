@@ -1,26 +1,30 @@
-/* Container */
 .verify-reports-container {
-  max-width: 500px;
-  margin: 30px auto;
-  padding: 25px;
+  max-width: calc(100% - 60px); /* almost full width minus some padding */
+  width: 100%;
+  margin: 40px auto;
+  padding: 30px 40px;
   background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
 
 /* Heading */
 .verify-reports-container h3 {
   text-align: center;
   color: #059da8;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
+  font-size: 28px;
 }
 
 /* Form */
 .verify-reports-form {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  flex-direction: row; /* side-by-side for desktop */
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 /* File input */
@@ -29,12 +33,20 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   cursor: pointer;
+  flex: 1;
+}
+
+/* Buttons container inside form */
+.verify-reports-form > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* Buttons */
 .verify-reports-form button {
   padding: 12px 20px;
-  background-color: #059da8;;
+  background-color: #059da8;
   color: #fff;
   font-size: 16px;
   font-weight: 600;
@@ -45,7 +57,7 @@
 }
 
 .verify-reports-form button:hover {
-  background-color: #059da8;;
+  background-color: #047d86;
 }
 
 .verify-reports-form button:disabled {
@@ -55,37 +67,70 @@
 
 /* Image Preview */
 .image-preview {
-  margin-top: 15px;
+  margin-top: 25px;
   text-align: center;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: #f9f9f9;
 }
 
 .image-preview img {
   max-width: 100%;
-  max-height: 250px;
+  max-height: 400px;
   border-radius: 8px;
-  border: 1px solid #ccc;
   object-fit: contain;
 }
 
+/* Container */
+
+.patient-card {
+  border: 1px solid #059da8;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #f1f8ff;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* reduce space between rows */
+  width: 100%;
+}
+
+.patient-card .row {
+  display: flex;
+  justify-content: flex-start;
+  gap: 40px; /* horizontal space between fields */
+  flex-wrap: wrap;
+}
+
+.patient-card .row p {
+  margin: 0;
+  font-size: 16px;
+  flex: 1 1 45%; /* roughly half the row width */
+  min-width: 150px;
+}
+
+
+
 /* Result Box */
 .result-box {
-  margin-top: 25px;
-  padding: 20px;
-  border: 2px solid #059da8;;
+  margin-top: 30px;
+  padding: 25px;
+  border: 2px solid #059da8;
   border-radius: 12px;
   background-color: #f1f8ff;
   color: #333;
 }
 
 .result-box h4 {
-  margin-bottom: 10px;
-  color: #059da8;;
-  font-size: 18px;
+  margin-bottom: 12px;
+  color: #059da8;
+  font-size: 20px;
   font-weight: 600;
 }
 
 .result-box p {
-  margin: 6px 0;
+  margin: 8px 0;
   font-size: 16px;
   font-weight: 500;
 }
@@ -94,23 +139,27 @@
 .error-message {
   color: #dc3545;
   font-weight: 600;
-  margin-top: 15px;
+  margin-top: 20px;
   text-align: center;
 }
-/* Make search input match file input style */
+
+/* Search Form */
+.search-form {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
 .search-form input[type="text"] {
-  width: 100%;
+  flex: 1;
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  margin-bottom: 10px;
   font-size: 16px;
 }
 
-/* Make Search Patient button match other teal buttons */
 .search-form button {
-  padding: 12px 20px;
-  width: 100%;
+  padding: 12px 25px;
   background-color: #059da8;
   color: #fff;
   font-size: 16px;
@@ -122,5 +171,22 @@
 }
 
 .search-form button:hover {
+  background-color: #047d86;
+}
+
+/* PDF Download */
+.result-box a {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 18px;
+  background-color: #059da8;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.result-box a:hover {
   background-color: #047d86;
 }
