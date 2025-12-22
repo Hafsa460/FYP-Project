@@ -45,18 +45,29 @@ async function generatePdf({
       doc.text(`Uploaded By: Dr. ${doctor.name}`, rightX);
 
       // AI Analysis Table
-      doc.moveDown(6);
-      doc.fontSize(14).text("AI Analysis Result", 50, doc.y, { underline: true });
-      doc.moveDown(0.8);
+doc.moveDown(6);
+doc.fontSize(14).text("AI Analysis Result", 50, doc.y, { underline: true });
+doc.moveDown(0.8);
 
-      const score = `${(Number(confidence) * 100).toFixed(2)}%`;
-      const rowY = doc.y;
-      doc.fontSize(12).text("Brain MRI", 50, rowY);
-      doc.text(label, 180, rowY);
-      doc.text(score, 300, rowY);
-      doc.text(new Date().toLocaleDateString(), 400, rowY);
+// ---- Table Headers ----
+const tableTop = doc.y;
+doc.fontSize(12).text("Scan Name", 50, tableTop);
+doc.text("Result", 250, tableTop); // adjusted X
+doc.text("Date", 400, tableTop);   // adjusted X
 
-      doc.moveDown(2);
+doc.moveDown(0.5);
+
+// ---- Divider line ----
+doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+doc.moveDown(0.5);
+
+// ---- Table row ----
+const rowY = doc.y;
+doc.fontSize(12).text("Brain MRI", 50, rowY);
+doc.text(label, 250, rowY);
+doc.text(new Date().toLocaleDateString(), 400, rowY);
+
+doc.moveDown(2);
 
       // Doctor Feedback section
       doc.fontSize(14).text("Doctor Feedback", 50, doc.y, { underline: true });
