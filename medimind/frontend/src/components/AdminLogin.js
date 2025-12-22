@@ -28,8 +28,7 @@ export default function AdminLogin() {
 
       // ✅ Role-based redirection
       if (res.data.role === "doctorAdmin") navigate("/doctor-admin");
-      else if (res.data.role === "patientAdmin")
-        navigate("/patient-admin");
+      else if (res.data.role === "patientAdmin") navigate("/patient-admin");
       else if (res.data.role === "departmentAdmin") navigate("/department");
       else if (res.data.role === "superAdmin") navigate("/super");
     } catch (err) {
@@ -45,7 +44,14 @@ export default function AdminLogin() {
       <div className="login-container shadow-lg row w-100">
         {/* Left Image Section */}
         <div className="col-md-6 image-section">
-          <img src={coverimage} alt="Admin Login" className="img-fluid" />
+          <a href="/dash">
+            <img
+              src={coverimage}
+              alt="Login"
+              className="img-fluid"
+              style={{ cursor: "pointer" }}
+            />
+          </a>
         </div>
 
         {/* Right Form Section */}
