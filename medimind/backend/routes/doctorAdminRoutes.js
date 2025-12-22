@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcryptjs");
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ const transporter = nodemailer.createTransport({
 // Generate unique PNO
 async function generateUniquePno() {
   while (true) {
-    const pno = Math.floor(100000 + Math.random() * 900000);
+    const pno = Math.floor(1000000 + Math.random() * 9000000);
     const exists = await Doctor.exists({ pno });
     if (!exists) return pno;
   }
@@ -253,12 +254,12 @@ router.post("/doctor", async (req, res) => {
     const pno = await generateUniquePno();
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
-
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newDoc = new Doctor({
       name,
       email,
       pno,
-      password,
+      password: hashedPassword,
       department,
       designation,
       gender,
@@ -266,30 +267,32 @@ router.post("/doctor", async (req, res) => {
       workingHours: workingHours || { start: "08:00", end: "14:00" },
       isVerified: false,
       verificationToken,
-      verificationTokenExpires,
-      tempPassword: password, // Store plain text temporarily
+      verificationTokenExpires, // Store plain text temporarily
     });
 
     await newDoc.save();
 
     // Send verification email
-    const verifyLink = `${BACKEND_URL}/api/doctor-admin/verify/${verificationToken}`;
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Confirm your doctor registration",
-      html: `
-        <p>Hi ${name},</p>
-        <p>Click the button below to confirm your registration:</p>
-        <p>
-          <a href="${verifyLink}" style="display:inline-block;padding:10px 18px;background:#0d9488;color:#fff;border-radius:6px;text-decoration:none;">
-            Confirm Registration
-          </a>
-        </p>
-        <p>This link expires in 24 hours.</p>
-        <p>Please keep this information secure.</p>
-      `,
-    });
+    const setPasswordLink = `${FRONTEND_URL}/doctor-set-password/${verificationToken}`;
+
+await transporter.sendMail({
+  from: process.env.EMAIL_USER,
+  to: email,
+  subject: "Set your password to activate doctor account",
+  html: `
+    <p>Hi ${name},</p>
+    <p>Your doctor account has been created.</p>
+    <p>Please set your password to activate your account:</p>
+    <p>
+      <a href="${setPasswordLink}"
+         style="display:inline-block;padding:12px 20px;background:#059da8;color:#fff;border-radius:6px;text-decoration:none;">
+        Set Password
+      </a>
+    </p>
+    <p>This link expires in 24 hours.</p>
+  `,
+});
+
 
     res.json({ success: true, doctor: { ...newDoc.toObject(), password: undefined }, message: "Doctor added and verification email sent" });
   } catch (err) {
@@ -374,143 +377,69 @@ router.post("/doctor/:id/reactivate", async (req, res) => {
   }
 });
 
-// notifications unchanged
-router.get("/notifications", async (req, res) => {
-  const check = await requireAdmin(req, res);
-  if (check.error) return res.status(check.status).json({ error: check.error });
-
-  try {
-    const now = new Date();
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const todaysAppointments = await Appointment.find({
-      date: { $gte: startOfDay },
-    })
-      .sort({ date: 1 })
-      .limit(10)
-      .populate("doctorId", "name")
-      .populate("patientId", "name")
-      .lean();
-
-    const notifications = [];
-
-    todaysAppointments.forEach((a) => {
-      notifications.push({
-        type: "appointment",
-        message: `${a.patientId?.name || "Patient"} has appointment with Dr. ${a.doctorId?.name || ""} on ${new Date(a.date).toLocaleDateString()} ${a.time}`,
-        createdAt: a.date,
-      });
-    });
-
-    notifications.push({
-      type: "info",
-      message: "No pending doctor edit requests (placeholder)",
-      createdAt: new Date(),
-    });
-
-    res.json({ success: true, notifications });
-  } catch (err) {
-    console.error("notifications error:", err);
-    res.status(500).json({ success: false, error: "Server error" });
-  }
-});
-
 router.get("/me", async (req, res) => {
   const check = await requireAdmin(req, res);
   if (check.error) return res.status(check.status).json({ success: false, error: check.error });
 
   res.json({ success: true, admin: check.admin });
 });
-
-// VERIFY DOCTOR
-router.get("/verify/:token", async (req, res) => {
+router.post("/set-password/:token", async (req, res) => {
   try {
     const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ error: "Password required" });
+    }
+
+    const strongPassword =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!strongPassword.test(password)) {
+      return res.status(400).json({
+        error:
+          "Password must be 8+ chars with uppercase, lowercase, number & special char",
+      });
+    }
+
     const doctor = await Doctor.findOne({
       verificationToken: token,
       verificationTokenExpires: { $gt: Date.now() },
     });
 
     if (!doctor) {
-      return res.status(400).send("Invalid or expired token.");
+      return res.status(400).json({ error: "Invalid or expired link" });
     }
 
+    doctor.password = await bcrypt.hash(password, 10);
     doctor.isVerified = true;
     doctor.verificationToken = undefined;
     doctor.verificationTokenExpires = undefined;
+
     await doctor.save();
 
-    // Send PNO email
+    // ✅ SEND FINAL ACTIVATION EMAIL WITH PNO
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: doctor.email,
-      subject: "Your doctor account is active — Login credentials inside",
+      subject: "Your doctor account is activated",
       html: `
         <p>Hi ${doctor.name},</p>
-        <p>Your account has been verified successfully.</p>
+        <p>Your account has been successfully activated.</p>
         <p><strong>Your login credentials:</strong></p>
         <p><strong>PNO:</strong> ${doctor.pno}</p>
-        <p><strong>Password:</strong> ${doctor.tempPassword}</p>
         <p>You can now log in using your PNO and password.</p>
         <p>Please keep this information secure.</p>
       `,
     });
 
-    // Clear temporary password after sending email
-    doctor.tempPassword = undefined;
-    await doctor.save();
-
-    // Redirect to frontend
-    return res.redirect(
-      302,
-      `${FRONTEND_URL}/doctor-verify-success?pno=${doctor.pno}`
-    );
-  } catch (err) {
-    console.error("Error in /verify:", err);
-    return res.status(500).send("Server error.");
-  }
-});
-
-// RESEND VERIFICATION FOR DOCTOR
-router.post("/resend-verification", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
-    }
-
-    const doctor = await Doctor.findOne({ email });
-    if (!doctor) {
-      return res.status(404).json({ error: "Doctor not found" });
-    }
-    if (doctor.isVerified) {
-      return res.status(400).json({ error: "Doctor already verified" });
-    }
-
-    // Generate new token
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-    doctor.verificationToken = verificationToken;
-    doctor.verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
-    await doctor.save();
-
-    // Send email
-    const verifyLink = `${BACKEND_URL}/api/doctor-admin/verify/${verificationToken}`;
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Confirm your doctor registration (Resend)",
-      html: `
-        <p>Click here to confirm your account:</p>
-        <p><a href="${verifyLink}">${verifyLink}</a></p>
-      `,
+    return res.json({
+      success: true,
+      message: "Password set successfully. Account activated.",
     });
-
-    return res.json({ message: "Verification email resent successfully." });
   } catch (err) {
-    console.error("Error in /resend-verification:", err);
-    return res.status(500).json({ error: "Server error. Please try again later." });
+    console.error("Set password error:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

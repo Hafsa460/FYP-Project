@@ -33,7 +33,7 @@ function NeuroLayout() {
 
           // Fetch upcoming appointments for this doctor
    const apptRes = await fetch(
-  `http://localhost:5000/api/doctors/${data.doctor._id}/upcoming`,
+  `http://localhost:5000/api/doctor-auth/${data.doctor._id}/upcoming`,
   { headers: { Authorization: `Bearer ${token}` } }
 );
 
@@ -88,12 +88,19 @@ if (apptData.success) setAppointments(apptData.appointments);
                 Appointment Schedule
               </Link>
             </li>
-            <li className="nav-item">
-              <Link to="/neuro-dashboard/verify-reports" className="nav-link">
-                Verify Test Reports
-              </Link>
-            </li>
+            {doctor?.department?.toLowerCase() === "neurology" && (
+  <li className="nav-item">
+    <Link to="/neuro-dashboard/verify-reports" className="nav-link">
+      Verify Test Reports
+    </Link>
+  </li>
+)}
 
+                              <li className="nav-item">
+                    <Link to="/neuro-dashboard/profile-management" className="nav-link">
+                      Profile Management
+                    </Link>
+                  </li>
             <li className="nav-item">
               <button
                 className="btn btn-link nav-link d-flex justify-content-between align-items-center"
@@ -114,6 +121,7 @@ if (apptData.success) setAppointments(apptData.appointments);
                       View Prescriptions
                     </Link>
                   </li>
+
                 </ul>
               )}
             </li>

@@ -48,7 +48,7 @@ import DoctorAdminLayout from "./components/DoctorAdmin/DoctorAdminLayout";
 import DoctorAdminDashboard from "./components/DoctorAdmin/DoctorAdminDashboard";
 import DoctorDetails from "./components/DoctorAdmin/DoctorDetails";
 import DoctorVerifySuccess from "./components/DoctorVerifySuccess";
-
+import DoctorSetPassword from "./components/DoctorAdmin/DoctorSetPassword";
 function App() {
   return (
     <Routes>
@@ -118,7 +118,10 @@ function App() {
 
         {/* Doctors list */}
         <Route path="doctors" element={<DoctorDetails />} />
+        
+
       </Route>
+      <Route path="/doctor-set-password/:token" element={<DoctorSetPassword />} />
     </Routes>
   );
 }
