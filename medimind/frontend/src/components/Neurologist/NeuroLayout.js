@@ -76,7 +76,7 @@ if (apptData.success) setAppointments(apptData.appointments);
         {/* Sidebar */}
         <div className="sidebar p-3">
           <div className="doctor-profile d-flex align-items-center mb-4">
-            <img src={femaleProfile} alt="Doctor" className="profile-icon me-3" />
+            <img src={doctor?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile} alt="Doctor" className="profile-icon me-3" />
             <div className="doctor-name fw-semibold">
               {loading ? "Loading..." : doctor ? doctor.name : "Not Found"}
             </div>
