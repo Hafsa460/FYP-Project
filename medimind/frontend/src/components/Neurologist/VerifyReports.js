@@ -12,6 +12,9 @@ function VerifyReports() {
   const [error, setError] = useState(null);
   const [confirmed, setConfirmed] = useState(false);
   const [report, setReport] = useState(null);
+  const [feedback, setFeedback] = useState("");
+  const [feedbackMsg, setFeedbackMsg] = useState("");
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   const storedDoc = (() => {
     try { return JSON.parse(localStorage.getItem("doctor")); } catch (e) { return null; }
@@ -26,6 +29,9 @@ function VerifyReports() {
     setSelectedFile(null);
     setPreviewUrl(null);
     setResult(null);
+    setFeedback("");
+    setFeedbackMsg("");
+    setFeedbackSubmitted(false);
 
     if (!mrNoInput) return setError("Enter MR No");
 
@@ -49,6 +55,9 @@ function VerifyReports() {
     setError(null);
     setConfirmed(false);
     setReport(null);
+    setFeedback("");
+    setFeedbackMsg("");
+    setFeedbackSubmitted(false);
 
     if (file) setPreviewUrl(URL.createObjectURL(file));
     else setPreviewUrl(null);
@@ -61,85 +70,128 @@ function VerifyReports() {
     setError(null);
   }
 
-  async function handleUploadAndGenerate(e) {
-    e.preventDefault();
-    setError(null);
+  // ------------------- After report upload -------------------
+async function handleUploadAndGenerate(e) {
+  e.preventDefault();
+  setError(null);
 
-    if (!confirmed) return setError("Please confirm the upload first");
+  if (!confirmed) return setError("Please confirm the upload first");
 
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("image", selectedFile);
-      formData.append("mrNo", patient.mrNo);
-      formData.append("doctorPno", doctorPno);
+  setLoading(true);
+  try {
+    const formData = new FormData();
+    formData.append("image", selectedFile);
+    formData.append("mrNo", patient.mrNo);
+    formData.append("doctorPno", doctorPno);
 
-      const res = await fetch("http://localhost:5000/api/reports/create", {
-        method: "POST",
-        body: formData,
-      });
+    const res = await fetch("http://localhost:5000/api/reports/create", {
+      method: "POST",
+      body: formData,
+    });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Upload failed");
+    const data = await res.json();
+    if (!res.ok || !data.report) throw new Error(data.message || "Upload failed");
 
-      setReport(data.report);
-      setResult({
-        prediction: data.report.prediction.label,
-        confidence: (data.report.prediction.confidence * 100).toFixed(2),
-      });
+    // ⚡ Fix: Map backend 'id' to frontend '_id'
+    setReport({
+      ...data.report,
+      _id: data.report.id,
+    });
 
-    } catch (err) {
-      setError(err.message || "Error uploading");
-    } finally {
-      setLoading(false);
-      setConfirmed(false);
-    }
+    setResult({
+      prediction: data.report.prediction.label,
+      confidence: (data.report.prediction.confidence * 100).toFixed(2),
+    });
+
+    // Reset feedback for new report
+    setFeedback("");
+    setFeedbackMsg("");
+    setFeedbackSubmitted(false);
+
+  } catch (err) {
+    setError(err.message || "Error uploading");
+  } finally {
+    setLoading(false);
+    setConfirmed(false);
   }
+}
+
+// ------------------- Submit feedback -------------------
+async function submitFeedback() {
+  if (!report?._id) {
+    setFeedbackMsg("❌ Cannot submit feedback: Report not available");
+    return;
+  }
+  if (!doctorPno) {
+    setFeedbackMsg("❌ Cannot submit feedback: Doctor info missing");
+    return;
+  }
+  if (!feedback) {
+    setFeedbackMsg("❌ Select a feedback option first");
+    return;
+  }
+
+  try {
+    const payload = {
+      aiReportID: report._id,
+      result: feedback,
+      givenBy: doctorPno,
+    };
+
+    const res = await fetch("http://localhost:5000/api/feedback/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to submit");
+
+    setFeedbackMsg("✅ Feedback submitted successfully");
+    setFeedbackSubmitted(true);
+  } catch (err) {
+    console.error("Feedback submission error:", err);
+    setFeedbackMsg("❌ Failed to submit feedback");
+  }
+}
 
   return (
     <div className="verify-reports-container">
       <h3>Verify Test Reports</h3>
 
-      {/* STEP 1: MR SEARCH BOX ONLY */}
-      {/* Hide search form once patient is found */}
-{!patient && (
-  <form className="search-form" onSubmit={searchPatient}>
-    <input
-      type="text"
-      placeholder="Search MR No (e.g. 123456)"
-      value={mrNoInput}
-      onChange={(e) => setMrNoInput(e.target.value)}
-    />
-    <button type="submit">Search Patient</button>
-  </form>
-)}
+      {!patient && (
+        <form className="search-form" onSubmit={searchPatient}>
+          <input
+            type="text"
+            placeholder="Search MR No (e.g. 123456)"
+            value={mrNoInput}
+            onChange={(e) => setMrNoInput(e.target.value)}
+          />
+          <button type="submit">Search Patient</button>
+        </form>
+      )}
 
       {error && <p className="error-message">{error}</p>}
 
-      {/* STEP 2: SHOW PATIENT INFO + ENABLE IMAGE SECTION */}
       {patient && (
         <>
           <div className="patient-card">
-  <div className="row">
-    <p><strong>Name:</strong> {patient.name}</p>
-    <p><strong>MR No:</strong> {patient.mrNo}</p>
-  </div>
-  <div className="row">
-    <p><strong>Gender:</strong> {patient.gender}</p>
-    <p><strong>Age:</strong> {patient.age}</p>
-  </div>
-</div>
+            <div className="row">
+              <p><strong>Name:</strong> {patient.name}</p>
+              <p><strong>MR No:</strong> {patient.mrNo}</p>
+            </div>
+            <div className="row">
+              <p><strong>Gender:</strong> {patient.gender}</p>
+              <p><strong>Age:</strong> {patient.age}</p>
+            </div>
+          </div>
 
-
-          {/* Only show upload form if patient is found */}
           <form className="verify-reports-form" onSubmit={handleUploadAndGenerate}>
             <input type="file" accept="image/*" onChange={handleFileChange} />
-
             <div style={{ marginTop: 8 }}>
               <button type="button" onClick={handleConfirmPreview} disabled={!selectedFile}>
                 Preview & Confirm
               </button>
-
               <button type="submit" disabled={loading || !confirmed}>
                 {loading ? "Processing..." : "Upload & Generate Report"}
               </button>
@@ -148,7 +200,6 @@ function VerifyReports() {
         </>
       )}
 
-      {/* Preview Section */}
       {previewUrl && (
         <div className="image-preview">
           <h4>Preview</h4>
@@ -158,12 +209,10 @@ function VerifyReports() {
         </div>
       )}
 
-      {/* RESULT + PDF */}
       {result && (
         <div className="result-box">
           <h4>Prediction Result:</h4>
           <p><strong>Prediction:</strong> {result.prediction}</p>
-          {/* PDF Download Button */}
           {report?.pdfPath && (
             <a
               href={`http://localhost:5000/uploads/${report.pdfPath}`}
@@ -185,6 +234,25 @@ function VerifyReports() {
           )}
         </div>
       )}
+
+      {/* Only show feedback section after report is uploaded */}
+      {report && (
+  <div className="feedback-box">
+    <h4>Doctor Feedback</h4>
+    <select value={feedback} onChange={(e) => setFeedback(e.target.value)}>
+      <option value="">Select feedback</option>
+      <option value={result?.prediction}>Correct</option>
+      <option value="Incorrect Diagnosis">Incorrect Diagnosis</option>
+    </select>
+
+    <button onClick={submitFeedback} disabled={!feedback || feedbackSubmitted}>
+      Submit Feedback
+    </button>
+
+    {feedbackMsg && <p>{feedbackMsg}</p>}
+  </div>
+)}
+
     </div>
   );
 }

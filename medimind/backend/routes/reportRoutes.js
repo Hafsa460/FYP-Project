@@ -108,7 +108,6 @@ router.get("/patient/:mrNo", async (req, res) => {
 
 module.exports = router;
 
-// ========================= PDF GENERATOR =========================
 async function generatePdf({
   pdfPath,
   caseId,
@@ -116,7 +115,8 @@ async function generatePdf({
   doctor,
   imagePath,
   label,
-  confidence
+  confidence,
+  doctorFeedback // NEW
 }) {
   return new Promise((resolve, reject) => {
     try {
@@ -124,105 +124,61 @@ async function generatePdf({
       const stream = fs.createWriteStream(pdfPath);
       doc.pipe(stream);
 
-      // -------- PAGE 1 --------
-       const writeStream = fs.createWriteStream(pdfPath);
-      doc.pipe(writeStream);
-
       // PAGE 1
       doc.addPage({ size: "A4", margin: 50 });
 
-      // ---- HEADER WITH LOGO ----
-      const logoPath = path.join(__dirname, "..", "uploads", "logo.png"); // place logo.png in /uploads
-      if (fs.existsSync(logoPath)) {
-        doc.image(logoPath, 50, 40, { width: 60 });
-      }
+      const logoPath = path.join(__dirname, "..", "uploads", "logo.png");
+      if (fs.existsSync(logoPath)) doc.image(logoPath, 50, 40, { width: 60 });
 
-      doc
-        .fontSize(22)
-        .text("KRL HOSPITAL ISLAMABAD", 120, 50, { align: "left" });
+      doc.fontSize(22).text("KRL HOSPITAL ISLAMABAD", 120, 50, { align: "left" });
+      doc.fontSize(12).text("Diagnostic Imaging Center\nTel: 051-1234567\n\n", 120, 78);
 
-      doc
-        .fontSize(12)
-        .text("Diagnostic Imaging Center", 120, 78)
-        .text("Tel: 051-1234567\n\n");
+      doc.fontSize(12).text(`Case ID: ${caseId}`, 50, doc.y);
 
-      doc.moveDown(2);
+      // Patient & Scan info
+      const leftX = 50, rightX = 300, startY = doc.y + 20;
+      doc.fontSize(14).text("Patient Details", leftX, startY, { underline: true });
+      doc.fontSize(14).text("Scan Information", rightX, startY, { underline: true });
 
-      // ---- CASE ID ----
-      doc.fontSize(12).text(`Case ID: ${caseId}`, 50, doc.y, { align: "left" });
-
-      doc.moveDown(2);
-
-      // ---- SIDE-BY-SIDE TABLE ----
-      const leftX = 50;
-      const rightX = 300;
-      const startY = doc.y;
-
-      // Title Row
-      doc
-        .fontSize(14)
-        .text("Patient Details", leftX, startY, { underline: true });
-
-      doc
-        .fontSize(14)
-        .text("Scan Information", rightX, startY, { underline: true },);
-
-      doc.moveDown(1);
-
-      const y2 = doc.y;
-
-      // LEFT column – Patient
+      const y2 = doc.y + 5;
       doc.fontSize(12).text(`Name: ${patient.name}`, leftX, y2);
       doc.text(`MR No: ${patient.mrNo}`, leftX);
       if (patient.age) doc.text(`Age: ${patient.age}`, leftX);
       if (patient.gender) doc.text(`Gender: ${patient.gender}`, leftX);
 
-      // RIGHT column – Scan Info
       doc.text(`Scan Name: Brain MRI`, rightX, y2);
       doc.text(`Scan Date: ${new Date().toLocaleDateString()}`, rightX);
       doc.text(`Uploaded By: Dr. ${doctor.name}`, rightX);
 
-// ---- extra spacing before AI table ----
-doc.moveDown(6);
+      // AI Analysis Table
+      doc.moveDown(6);
+      doc.fontSize(14).text("AI Analysis Result", 50, doc.y, { underline: true });
+      doc.moveDown(0.8);
 
-// ---- AI ANALYSIS TABLE ----
-doc.fontSize(14).text("AI Analysis Result", 50, doc.y, { underline: true, align: "left" });
-doc.moveDown(0.8);
+      const score = `${(Number(confidence) * 100).toFixed(2)}%`;
+      const rowY = doc.y;
+      doc.fontSize(12).text("Brain MRI", 50, rowY);
+      doc.text(label, 180, rowY);
+      doc.text(score, 300, rowY);
+      doc.text(new Date().toLocaleDateString(), 400, rowY);
 
-// Table Headers
-let tableTop = doc.y;
-doc.fontSize(12);
+      doc.moveDown(2);
 
-doc.text("Scan Name", 50, tableTop);
-doc.text("Result", 180, tableTop);
-doc.text("Score", 300, tableTop);
-doc.text("Date", 400, tableTop);
+      // Doctor Feedback section
+      doc.fontSize(14).text("Doctor Feedback", 50, doc.y, { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(12).text(
+        doctorFeedback ? doctorFeedback : "Not submitted yet",
+        { align: "left" }
+      );
 
-doc.moveDown(0.5);
-
-// Divider
-doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-doc.moveDown(0.5);
-
-// Table row (aligned)
-const score = `${(Number(confidence) * 100).toFixed(2)}%`;
-
-const rowY = doc.y;
-doc.text("Brain MRI", 50, rowY);
-doc.text(label, 180, rowY);
-doc.text(score, 300, rowY);
-doc.text(new Date().toLocaleDateString(), 400, rowY);
-
-doc.moveDown(2);
-
-      // -------- PAGE 2: MRI --------
+      // PAGE 2: MRI
       doc.addPage();
       doc.fontSize(16).text("Original MRI Image", { align: "center", underline: true });
       doc.moveDown(1);
       if (fs.existsSync(imagePath)) {
         doc.image(imagePath, { fit: [480, 480], align: "center" });
       }
-
 
       doc.end();
       stream.on("finish", resolve);

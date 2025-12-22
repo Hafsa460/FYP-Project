@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
 
 const feedbackSchema = new mongoose.Schema({
-  _id: String,
-  aiReportID: String,
-  result: String,
-  givenBy: String,
-});
+  report: { type: mongoose.Schema.Types.ObjectId, ref: "Report", required: true },
+  result: { type: String, required: true },
+  givenBy: { type: String, required: true },
+}, { timestamps: true });
 
-module.exports = mongoose.model("FeedBack", feedbackSchema);
+module.exports = mongoose.models.Feedback || mongoose.model("Feedback", feedbackSchema);
