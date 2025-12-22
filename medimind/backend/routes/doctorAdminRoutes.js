@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-const bcrypt = require("bcryptjs");
 
 const router = express.Router();
 
@@ -254,12 +253,11 @@ router.post("/doctor", async (req, res) => {
     const pno = await generateUniquePno();
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
-    const hashedPassword = await bcrypt.hash(password, 10);
     const newDoc = new Doctor({
       name,
       email,
       pno,
-      password: hashedPassword,
+      password,
       department,
       designation,
       gender,
@@ -411,7 +409,7 @@ router.post("/set-password/:token", async (req, res) => {
       return res.status(400).json({ error: "Invalid or expired link" });
     }
 
-    doctor.password = await bcrypt.hash(password, 10);
+    doctor.password = password;
     doctor.isVerified = true;
     doctor.verificationToken = undefined;
     doctor.verificationTokenExpires = undefined;
