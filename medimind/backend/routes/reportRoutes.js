@@ -1,4 +1,3 @@
-// ========================= REPORT ROUTES (UPDATED – MRI + GRADCAM IN PDF) =========================
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
@@ -174,8 +173,6 @@ doc.text(label, 250, rowY);
 doc.text(new Date().toLocaleDateString(), 400, rowY);
 
 doc.moveDown(2);
-
-      // Doctor Feedback section
       doc.fontSize(14).text("Doctor Feedback", 50, doc.y, { underline: true });
       doc.moveDown(0.5);
       doc.fontSize(12).text(
