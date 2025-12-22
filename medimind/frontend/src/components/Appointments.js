@@ -19,7 +19,6 @@ function Appointment() {
   const [pdfUrl, setPdfUrl] = useState(null); // ✅ Added PDF state
   const navigate = useNavigate();
 
-  // 🔹 Fetch doctors list
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
@@ -27,17 +26,25 @@ function Appointment() {
         const data = await res.json();
         console.log("Doctors API response:", data);
 
+        let doctorsList = [];
+
         if (Array.isArray(data)) {
-          setDoctors(data);
+          doctorsList = data;
         } else if (data.success && Array.isArray(data.doctors)) {
-          setDoctors(data.doctors);
-        } else {
-          setDoctors([]);
+          doctorsList = data.doctors;
         }
+
+        // ✅ FILTER: only active & verified doctors
+        const filteredDoctors = doctorsList.filter(
+          (doc) => doc.active === true && doc.isVerified === true
+        );
+
+        setDoctors(filteredDoctors);
       } catch (err) {
         console.error("Error fetching doctors:", err);
       }
     };
+
     fetchDoctors();
   }, []);
 
@@ -91,17 +98,16 @@ function Appointment() {
       );
 
       const result = await response.json();
-if (response.ok) {
-  setMessage("✅ Appointment booked successfully!");
+      if (response.ok) {
+        setMessage("✅ Appointment booked successfully!");
 
-  if (result.pdf) {
-    const fullPdfUrl = `http://localhost:5000${result.pdf}`;
-    setPdfUrl(fullPdfUrl);
-    window.open(fullPdfUrl, "_blank"); // ✅ auto-open PDF
-  }
-    // Optional: reset form after booking
+        if (result.pdf) {
+          const fullPdfUrl = `http://localhost:5000${result.pdf}`;
+          setPdfUrl(fullPdfUrl);
+          window.open(fullPdfUrl, "_blank"); // ✅ auto-open PDF
+        }
+        // Optional: reset form after booking
         setFormData({ doctorId: "", date: null, time: "" });
-
       } else {
         setMessage(result.error || "Failed to book appointment.");
       }
