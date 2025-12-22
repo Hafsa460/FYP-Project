@@ -14,7 +14,7 @@
 a { text-decoration: none; }
 
 /* page root */
-.landing-root { background: var(--bg); color: #0f172a; padding-top: 80px; }
+.landing-root { background: var(--bg); color: #0f172a; }
 
 /* --------------------
    Hero
