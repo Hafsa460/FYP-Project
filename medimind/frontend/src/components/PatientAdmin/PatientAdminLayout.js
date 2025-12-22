@@ -51,14 +51,12 @@ function PatientAdminLayout() {
     navigate("/adminLogin");
   };
 
-  const profileIcon = admin?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile;
-
   return (
     <div className="admin-layout d-flex">
       {/* Sidebar */}
       <div className="sidebar p-3">
         <div className="admin-profile d-flex align-items-center mb-4">
-          <img src={profileIcon} alt="Admin" className="profile-icon me-3" />
+          <img src={admin?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile} alt="Admin" className="profile-icon me-3" />
           <div className="admin-details fw-semibold">
             {loading ? "Loading..." : admin ? `${admin.name}` : "Patient Admin"}
             <div className="text-muted small">ID: {admin?.id ?? "N/A"}</div>
@@ -72,6 +70,9 @@ function PatientAdminLayout() {
           </li>
           <li className="nav-item">
             <Link to="/patient-admin/patients" className="nav-link">Manage Patients</Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/patient-admin/departments" className="nav-link">Manage Departments</Link>
           </li>
           <li className="nav-item">
             <button className="btn btn-link nav-link text-danger" onClick={handleLogout}>Logout</button>
