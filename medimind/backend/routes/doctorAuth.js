@@ -134,6 +134,56 @@ res.json({
     res.status(500).json({ success: false, error: "Invalid token" });
   }
 });
+// ======================= UPDATE DOCTOR PROFILE =======================
+router.put("/me/update-profile", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token)
+      return res.status(401).json({ success: false, message: "No token provided" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const { name, gender, oldPassword, password } = req.body;
+
+    const doctor = await Doctor.findById(decoded.id);
+    if (!doctor)
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+
+    // ✅ Update name & gender
+    if (name) doctor.name = name;
+    if (gender) doctor.gender = gender;
+
+    // 🔐 Password update requires old password
+    if (password) {
+      if (!oldPassword) {
+        return res.json({
+          success: false,
+          message: "Old password is required",
+        });
+      }
+
+      const isMatch = await doctor.comparePassword(oldPassword);
+      if (!isMatch) {
+        return res.json({
+          success: false,
+          message: "Old password is incorrect",
+        });
+      }
+
+      doctor.password = password; // hashed via pre-save
+    }
+
+    await doctor.save();
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+    });
+  } catch (error) {
+    console.error("Profile update error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
 
 // ======================= GET DOCTOR BY ID =======================
 router.get("/:id", async (req, res) => {
@@ -224,5 +274,7 @@ router.get("/:id/prescriptions", async (req, res) => {
     res.status(500).json({ success: false, error: "Server error" });
   }
 });
+
+
 
 module.exports = router;

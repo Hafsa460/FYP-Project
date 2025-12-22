@@ -83,7 +83,7 @@ function PrescriptionDetails() {
           {prescription.clinicalSummary || "N/A"}
         </p>
         <p>
-          <strong>Inveggggggggstigation:</strong> {prescription.investigation || "N/A"}
+          <strong>Investigation:</strong> {prescription.investigation || "N/A"}
         </p>
         <p>
           <strong>Prescription:</strong> {prescription.prescription || "N/A"}

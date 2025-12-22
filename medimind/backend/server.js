@@ -17,7 +17,7 @@ const prescriptionRoutes = require("./routes/prescriptionRoutes");
 const prescriptionPatientRoutes = require("./routes/prescriptionPatient");
 const doctorAdminRoutes = require("./routes/doctorAdminRoutes");
 const reportRoutes = require("./routes/reportRoutes");
-
+const feedbackRoutes = require("./routes/feedbackRoutes");
 const app = express();
 
 // Frontend URL from .env or default
@@ -117,6 +117,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // allow f
 app.use("/api/reports", reportRoutes);
 console.log("Report routes mounted at /api/reports");
 
+
+app.use("/api/feedback", feedbackRoutes);
+console.log("Feedback routes mounted at /api/feedback");
 // ===================== START SERVER =====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

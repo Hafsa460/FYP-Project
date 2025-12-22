@@ -84,20 +84,6 @@ function DoctorAdminLayout() {
       <div className="content p-4 flex-grow-1">
         <Outlet />
       </div>
-
-      {/* Notification Panel */}
-      {showNotifications ? (
-        <div className="notification-panel p-3">
-          <h5>Notifications</h5>
-          <ul>
-            <li>New doctor registered.</li>
-            <li>Report verified successfully.</li>
-          </ul>
-          <button className="btn btn-sm btn-outline-secondary mt-2" onClick={() => setShowNotifications(false)}>Hide</button>
-        </div>
-      ) : (
-        <button className="btn btn-sm btn-info show-btn" onClick={() => setShowNotifications(true)}>Show Notifications</button>
-      )}
     </div>
   );
 }
