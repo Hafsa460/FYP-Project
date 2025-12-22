@@ -49,6 +49,7 @@ import DoctorAdminDashboard from "./components/DoctorAdmin/DoctorAdminDashboard"
 import DoctorDetails from "./components/DoctorAdmin/DoctorDetails";
 import DoctorVerifySuccess from "./components/DoctorVerifySuccess";
 import DoctorSetPassword from "./components/DoctorAdmin/DoctorSetPassword";
+import DepartmentManagement from "./components/PatientAdmin/DepartmentManagement";
 function App() {
   return (
     <Routes>
@@ -103,7 +104,7 @@ function App() {
         <Route index element={<PatientAdminDashboard />} />
         <Route path="patients" element={<PatientDetails />} />
         <Route path="patient/:id" element={<PatientDetails />} />
-        
+        <Route path="departments" element={<DepartmentManagement />} />
       </Route>
         <Route path="set-password/:token" element={<PatientSetPassword/>} />
       {/* Doctor Admin */}
