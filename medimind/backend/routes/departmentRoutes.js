@@ -35,4 +35,19 @@ router.get("/summary/resources", async (req, res) => {
   }
 });
 
+// POST create a new department
+router.post("/", async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    if (!name) {
+      return res.status(400).json({ message: "Department name is required" });
+    }
+    const department = new Department({ name, description });
+    await department.save();
+    res.status(201).json(department);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;

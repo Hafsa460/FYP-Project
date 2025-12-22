@@ -74,6 +74,9 @@ function PatientAdminLayout() {
             <Link to="/patient-admin/patients" className="nav-link">Manage Patients</Link>
           </li>
           <li className="nav-item">
+            <Link to="/patient-admin/departments" className="nav-link">Manage Departments</Link>
+          </li>
+          <li className="nav-item">
             <button className="btn btn-link nav-link text-danger" onClick={handleLogout}>Logout</button>
           </li>
         </ul>
