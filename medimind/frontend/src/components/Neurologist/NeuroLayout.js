@@ -72,7 +72,7 @@ if (apptData.success) setAppointments(apptData.appointments);
   return (
     <>
       <Navbar />
-      <div className="neuro-dashboard d-flex">
+      <div className={`neuro-dashboard d-flex ${showNotifications ? "with-notifications" : ""}`}>
         {/* Sidebar */}
         <div className="sidebar p-3">
           <div className="doctor-profile d-flex align-items-center mb-4">
@@ -138,8 +138,16 @@ if (apptData.success) setAppointments(apptData.appointments);
         </div>
 
         {/* Main Content */}
-        <div className="content p-4 flex-grow-1">
+        <div className="content p-4 flex-grow-1 position-relative">
           <Outlet />
+          {!showNotifications && (
+            <button
+              className="btn btn-sm btn-info show-btn"
+              onClick={() => setShowNotifications(true)}
+            >
+              Show Notifications
+            </button>
+          )}
         </div>
 
         {/* Notification Panel */}
@@ -166,14 +174,7 @@ if (apptData.success) setAppointments(apptData.appointments);
               Hide
             </button>
           </div>
-        ) : (
-          <button
-            className="btn btn-sm btn-info show-btn"
-            onClick={() => setShowNotifications(true)}
-          >
-            Show Notifications
-          </button>
-        )}
+        ) : null}
       </div>
     </>
   );
