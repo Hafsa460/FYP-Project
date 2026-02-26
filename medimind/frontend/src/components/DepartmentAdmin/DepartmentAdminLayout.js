@@ -1,15 +1,19 @@
-// src/components/PatientAdmin/PatientAdminLayout.js
 import React, { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import "./PatientAdmin.css";
+import "../PatientAdmin/PatientAdmin.css";
 import maleProfile from "../../images/male.png";
 import femaleProfile from "../../images/female.png";
 
-function PatientAdminLayout() {
+function DepartmentAdminLayout() {
   const [showNotifications, setShowNotifications] = useState(true);
+  const [notifications, setNotifications] = useState([]);
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const notify = (msg) => {
+    setNotifications((prev) => [{ id: Date.now(), text: msg }, ...prev]);
+  };
 
   useEffect(() => {
     const fetchAdmin = async () => {
@@ -20,17 +24,13 @@ function PatientAdminLayout() {
           return;
         }
 
-        // For patient admin, we can use the same admin auth endpoint
         const res = await fetch("http://localhost:5000/api/admins/dashboard", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         const data = await res.json();
         if (data.message) {
-          // Extract admin info from token or set default
-          setAdmin({ name: "Patient Admin", role: "patientAdmin", gender: "female" });
+          setAdmin({ name: "Department Admin", role: "deptAdmin", gender: "female" });
         } else {
-          console.error("Failed to fetch admin:", data.message);
           navigate("/adminLogin");
         }
       } catch (err) {
@@ -53,26 +53,22 @@ function PatientAdminLayout() {
 
   return (
     <div className={`admin-layout d-flex ${showNotifications ? "with-notifications" : ""}`}>
-      {/* Sidebar */}
       <div className="sidebar p-3">
         <div className="admin-profile d-flex align-items-center mb-4">
           <img src={admin?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile} alt="Admin" className="profile-icon me-3" />
           <div className="admin-details fw-semibold">
-            {loading ? "Loading..." : admin ? `${admin.name}` : "Patient Admin"}
+            {loading ? "Loading..." : admin ? `${admin.name}` : "Department Admin"}
             <div className="text-muted small">ID: {admin?.id ?? "N/A"}</div>
-            <div className="text-muted small">Role: {admin?.role ?? "patientAdmin"}</div>
+            <div className="text-muted small">Role: {admin?.role ?? "deptAdmin"}</div>
           </div>
         </div>
 
         <ul className="nav flex-column">
           <li className="nav-item">
-            <Link to="/patient-admin" className="nav-link">Dashboard</Link>
+            <Link to="/dept-admin" className="nav-link">Dashboard</Link>
           </li>
           <li className="nav-item">
-            <Link to="/patient-admin/patients" className="nav-link">Manage Patients</Link>
-          </li>
-          <li className="nav-item">
-            {/* Departments moved to Department Admin portal */}
+            <Link to="/dept-admin/departments" className="nav-link">Manage Departments</Link>
           </li>
           <li className="nav-item">
             <button className="btn btn-link nav-link text-danger" onClick={handleLogout}>Logout</button>
@@ -80,21 +76,20 @@ function PatientAdminLayout() {
         </ul>
       </div>
 
-      {/* Main Content */}
       <div className="content p-4 flex-grow-1 position-relative">
-        <Outlet />
+        <Outlet context={{ notify }} />
         {!showNotifications && (
           <button className="btn btn-sm btn-info show-btn" onClick={() => setShowNotifications(true)}>Show Notifications</button>
         )}
       </div>
 
-      {/* Notification Panel */}
       {showNotifications ? (
         <div className="notification-panel p-3">
           <h5>Notifications</h5>
           <ul>
-            <li>New patient registered.</li>
-            <li>Patient verification completed.</li>
+            {notifications.map((n) => (
+              <li key={n.id}>{n.text}</li>
+            ))}
           </ul>
           <button className="btn btn-sm btn-outline-secondary mt-2" onClick={() => setShowNotifications(false)}>Hide</button>
         </div>
@@ -103,4 +98,4 @@ function PatientAdminLayout() {
   );
 }
 
-export default PatientAdminLayout;
+export default DepartmentAdminLayout;

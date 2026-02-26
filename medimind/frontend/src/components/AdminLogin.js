@@ -29,7 +29,7 @@ export default function AdminLogin() {
       // ✅ Role-based redirection
       if (res.data.role === "doctorAdmin") navigate("/doctor-admin");
       else if (res.data.role === "patientAdmin") navigate("/patient-admin");
-      else if (res.data.role === "departmentAdmin") navigate("/department");
+      else if (res.data.role === "departmentAdmin") navigate("/dept-admin");
       else if (res.data.role === "superAdmin") navigate("/super");
     } catch (err) {
       console.error("Login error:", err.response?.data);

@@ -38,17 +38,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  dbName: "hospital", // Force database to "hospital"
-})
-  .then(() => console.log("✅ MongoDB connected to 'hospital' database"))
+
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);
-    process.exit(1); // Exit if DB connection fails
+    process.exit(1);
   });
+
 
 // Health check route
 app.get("/", (req, res) => {

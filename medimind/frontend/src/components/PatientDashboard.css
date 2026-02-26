@@ -192,7 +192,7 @@
 /* TOGGLE BUTTON */
 .show-btn {
   position: absolute;
-  top: 1rem;
+  bottom: 1rem;
   right: 1rem;
   background-color: #059da8;
   color: white;
