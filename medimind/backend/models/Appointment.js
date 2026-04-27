@@ -21,7 +21,6 @@ const appointmentSchema = new mongoose.Schema(
       required: true,
     },
 
-    // 🔥 THIS WAS MISSING
     status: {
       type: String,
       enum: ["Pending", "Approved", "Rejected"],

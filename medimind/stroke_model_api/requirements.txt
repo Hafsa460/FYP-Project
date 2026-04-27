@@ -2,3 +2,6 @@ flask
 tensorflow
 pillow
 numpy
+torch
+torchvision
+torchaudio

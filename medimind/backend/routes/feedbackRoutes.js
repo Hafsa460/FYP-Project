@@ -16,7 +16,6 @@ router.post("/add", async (req, res) => {
       return res.status(400).json({ message: "Missing fields" });
     }
 
-    // Save feedback
     const feedback = new Feedback({
       report: aiReportID,
       result,
@@ -24,7 +23,6 @@ router.post("/add", async (req, res) => {
     });
     await feedback.save();
 
-    // Fetch report to update PDF
     const report = await Report.findById(aiReportID).populate("patient doctor");
     if (report) {
       const pdfPath = path.join(__dirname, "..", "uploads", report.pdfPath);

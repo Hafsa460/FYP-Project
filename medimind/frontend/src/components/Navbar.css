@@ -16,3 +16,32 @@
 .btn-teal:hover {
   background-color: #009999;
 }
+
+/* =========================================================
+   📱 RESPONSIVE DESIGN
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .btn-teal {
+    font-size: 1.1rem;
+    padding: 12px 28px;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 768px) {
+  .btn-teal {
+    font-size: 1rem;
+    padding: 10px 20px;
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-teal {
+    font-size: 0.9rem;
+    padding: 8px 14px;
+    min-width: 80px;
+    border-radius: 8px;
+  }
+}

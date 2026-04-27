@@ -1,50 +1,162 @@
 /* GENERAL LAYOUT */
 .neuro-dashboard {
   display: flex;
-  height: 100vh;
-  background-color: #97dadf; /* soft teal background */
+  flex-direction: row;
+  min-height: 100vh;
+  background-color: #97dadf;
   font-family: "Segoe UI", sans-serif;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* SIDEBAR TOGGLE BUTTON */
+.sidebar-toggle {
+  display: none;
+  position: absolute;
+  top: 85px;
+  left: 10px;
+  z-index: 1100;
+  background-color: #059da8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+  background-color: #007f89;
 }
 
 /* SIDEBAR */
 .sidebar {
   color: white;
-  min-width: 250px;
+  width: 280px;
+  min-width: 280px;
+  background: linear-gradient(135deg, #4ba8b8 0%, #5bc0de 100%);
   border-top-right-radius: 12px;
   border-bottom-right-radius: 12px;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.closed {
+  width: 70px;
+  min-width: 70px;
+  padding: 1rem 0.5rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.sidebar.closed .doctor-profile {
+  display: none;
+}
+
+.sidebar.closed .nav-link {
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+  width: auto;
+  margin-bottom: 0.75rem;
+}
+
+.sidebar.closed .nav-link svg {
+  margin: 0 !important;
+}
+
+.sidebar.closed .text-danger {
+  display: none;
 }
 
 .sidebar .nav-link {
-  padding: 0.5rem 0;
+  padding: 0.75rem 0.5rem;
   font-weight: 500;
   display: flex;
   align-items: center;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: 0.2s ease;
+  margin-bottom: 0.5rem;
 }
 
 .sidebar .nav-link:hover {
-  background-color: #7bbcc1;
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
 }
 
 .sidebar .text-danger {
-  background-color: #fbfbfb;
+  background-color: #d73d3d;
+  color: white;
+  padding: 0.75rem 0.5rem;
+  border-radius: 6px;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.sidebar .text-danger:hover {
+  background-color: #b93030;
+  transform: translateX(4px);
+}
+
+/* NOTIFICATION TOGGLE */
+.notification-toggle {
+  display: none;
+  position: absolute;
+  top: 85px;
+  right: 10px;
+  z-index: 1100;
+  background-color: #059da8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.notification-toggle:hover {
+  background-color: #007f89;
 }
 
 /* PROFILE */
 .doctor-profile {
   margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  transition: 0.3s ease;
 }
 
 .doctor-name {
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  color: white;
 }
 
 /* CONTENT */
 .content {
   padding: 2rem;
-  background-color: #e0f7fa; /* soft blue section */
-  flex-grow: 1;
+  background-color: #e0f7fa;
+  flex: 1;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+/* Main content wrapper */
+.main-content {
+  width: 100%;
+  padding: 2rem;
+  background-color: #e0f7fa;
   overflow-y: auto;
 }
 
@@ -166,41 +278,384 @@
 
 /* NOTIFICATIONS */
 .notification-panel {
-  width: 300px;
+  width: 280px;
+  min-width: 280px;
   background: #ffffff;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
   box-shadow: -2px 2px 6px rgba(0, 0, 0, 0.08);
+  overflow-y: auto;
+  border-left: 3px solid #059da8;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-panel.closed {
+  width: 70px;
+  min-width: 70px;
+  padding: 1rem 0.5rem;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.notification-panel.closed h5 {
+  display: none;
+}
+
+.notification-panel.closed ul {
+  display: none;
 }
 
 .notification-panel h5 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #059da8;
   margin-bottom: 1rem;
+  font-weight: bold;
+  transition: 0.3s ease;
+  display: flex;
+  align-items: center;
 }
 
 .notification-panel ul {
   padding-left: 1rem;
+  margin: 0;
 }
 
 .notification-panel li {
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  color: #333;
+  line-height: 1.4;
 }
 
-/* TOGGLE BUTTON */
-.show-btn {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  background-color: #059da8;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 0.5rem 1rem;
+/* =========================================================
+   📱 RESPONSIVE DESIGN
+   ========================================================= */
+
+/* Tablet & Desktop with small screens (max 1200px) */
+@media (max-width: 1200px) {
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+  }
+
+  .sidebar.closed {
+    width: 70px;
+    min-width: 70px;
+  }
+
+  .notification-panel {
+    width: 240px;
+    min-width: 240px;
+  }
+
+  .notification-panel.closed {
+    width: 70px;
+    min-width: 70px;
+  }
+
+  .content {
+    padding: 1.5rem;
+  }
 }
 
-.show-btn:hover {
-  background-color: #009999;
+/* Tablet (max 1024px) */
+@media (max-width: 1024px) {
+  .sidebar-toggle {
+    display: block;
+  }
+
+  .notification-toggle {
+    display: block;
+  }
+
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    padding: 1rem 0.75rem;
+  }
+
+  .sidebar.closed {
+    width: 70px;
+    min-width: 70px;
+    padding: 1rem 0.5rem;
+  }
+
+  .doctor-profile {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .notification-panel {
+    width: 220px;
+    min-width: 220px;
+    padding: 1rem;
+  }
+
+  .notification-panel.closed {
+    width: 70px;
+    min-width: 70px;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .content {
+    padding: 1.2rem;
+  }
+
+  .top-section {
+    padding: 1rem;
+  }
+
+  .top-section .fw-bold {
+    font-size: 1.1rem;
+  }
+
+  .card-grid {
+    gap: 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .chart-section {
+    max-height: 300px;
+  }
+}
+
+/* Mobile (max 768px) */
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: block;
+  }
+
+  .notification-toggle {
+    display: block;
+  }
+
+  .sidebar {
+    width: 200px;
+    min-width: 200px;
+    padding: 1rem 0.5rem;
+  }
+
+  .sidebar.closed {
+    width: 70px;
+    min-width: 70px;
+  }
+
+  .doctor-profile {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .doctor-name {
+    font-size: 1rem;
+  }
+
+  .sidebar .nav-link {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .sidebar .text-danger {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  .notification-panel {
+    width: 200px;
+    min-width: 200px;
+    padding: 1rem 0.75rem;
+  }
+
+  .notification-panel.closed {
+    width: 70px;
+    min-width: 70px;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .notification-panel h5 {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .notification-panel li {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+
+  .top-section {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .top-section .fw-bold {
+    font-size: 1rem;
+  }
+
+  .top-section .text-muted {
+    font-size: 0.75rem;
+  }
+
+  .card {
+    padding: 0.75rem;
+    flex: 1 1 calc(50% - 0.375rem);
+  }
+
+  .card-grid {
+    gap: 0.5rem;
+  }
+
+  .card .fw-bold {
+    font-size: 0.85rem;
+  }
+
+  .card .fs-4 {
+    font-size: 1.2rem;
+  }
+
+  .chart-section {
+    min-width: auto;
+    max-height: 250px;
+    padding: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 0.95rem;
+  }
+
+  .appointment-card {
+    padding: 0.5rem;
+  }
+}
+
+/* Extra Small (max 480px) */
+@media (max-width: 480px) {
+  .neuro-dashboard {
+    flex-wrap: wrap;
+  }
+
+  .sidebar-toggle {
+    top: 75px;
+    left: 5px;
+    padding: 6px 8px;
+  }
+
+  .notification-toggle {
+    top: 75px;
+    right: 5px;
+    padding: 6px 8px;
+  }
+
+  .sidebar {
+    width: 160px;
+    min-width: 160px;
+    padding: 0.75rem 0.4rem;
+  }
+
+  .sidebar.closed {
+    width: 70px;
+    min-width: 70px;
+  }
+
+  .doctor-profile {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .doctor-name {
+    font-size: 0.9rem;
+  }
+
+  .sidebar .nav-link {
+    padding: 0.5rem 0.3rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .sidebar .text-danger {
+    padding: 0.5rem 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .notification-panel {
+    width: 160px;
+    min-width: 160px;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .notification-panel.closed {
+    width: 70px;
+    min-width: 70px;
+  }
+
+  .notification-panel h5 {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .notification-panel li {
+    font-size: 0.7rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .content {
+    padding: 0.75rem;
+  }
+
+  .top-section {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .top-section .fw-bold {
+    font-size: 0.95rem;
+  }
+
+  .top-section .text-muted {
+    font-size: 0.7rem;
+  }
+
+  .d-flex {
+    flex-direction: column;
+  }
+
+  .card {
+    padding: 0.65rem;
+    flex: 1 1 100%;
+  }
+
+  .card-grid {
+    gap: 0.4rem;
+  }
+
+  .card .fw-bold {
+    font-size: 0.8rem;
+  }
+
+  .card .fs-4 {
+    font-size: 1.1rem;
+  }
+
+  .chart-section {
+    max-height: 200px;
+    padding: 0.65rem;
+  }
+
+  .section-title {
+    font-size: 0.9rem;
+  }
+
+  .appointment-card {
+    padding: 0.4rem;
+  }
 }
