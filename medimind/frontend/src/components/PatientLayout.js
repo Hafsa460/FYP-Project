@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { User, FileText, Bell } from "lucide-react";
-import { Calendar } from "lucide-react";
+import { User, FileText, Bell, Menu, X } from "lucide-react";
 import Navbar from "./Navbar";
 import "./PatientDashboard.css";
 
+const formatDate = (value) => {
+  const date = new Date(value);
+  return isNaN(date) ? "" : date.toLocaleDateString("en-GB");
+};
+
 function PatientLayout() {
   const [showNotifications, setShowNotifications] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [notificationsOpen, setNotificationsOpen] = useState(true);
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [reports, setReports] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,6 +38,22 @@ function PatientLayout() {
       .then((res) => res.json())
       .then((data) => setAppointments(data || []))
       .catch((err) => console.error(err));
+
+    // Fetch prescriptions for notifications
+    fetch(`http://localhost:5000/api/patient-prescriptions/patient/${patientId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setPrescriptions(data || []))
+      .catch((err) => console.error(err));
+
+    // Fetch reports for notifications
+    fetch(`http://localhost:5000/api/reports/patient/${parsed.mrNo}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setReports(data.reports || []))
+      .catch((err) => console.error(err));
   }, [navigate]);
 
   const handleLogout = () => {
@@ -44,8 +68,26 @@ function PatientLayout() {
     <>
       <Navbar />
       <div className="neuro-dashboard d-flex">
+        {/* Sidebar Toggle Button */}
+        <button
+          className="sidebar-toggle"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          title={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
+        >
+          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {/* Notification Toggle Button */}
+        <button
+          className="notification-toggle"
+          onClick={() => setNotificationsOpen(!notificationsOpen)}
+          title={notificationsOpen ? "Hide Notifications" : "Show Notifications"}
+        >
+          {notificationsOpen ? <X size={24} /> : <Bell size={24} />}
+        </button>
+
         {/* Sidebar */}
-        <div className="sidebar p-3">
+        <div className={`sidebar p-3 ${sidebarOpen ? "open" : "closed"}`}>
           <div className="doctor-profile d-flex align-items-center mb-4">
             <User className="me-3 text-primary" size={32} />
             <div className="doctor-name fw-semibold">{patient.name}</div>
@@ -53,30 +95,49 @@ function PatientLayout() {
 
           <ul className="nav flex-column">
             <li className="nav-item">
-              <Link to="/PatientDashboard" className="nav-link">
+              <Link
+                to="/PatientDashboard"
+                className="nav-link"
+                onClick={() => {
+                  if (window.innerWidth <= 768) setSidebarOpen(false);
+                }}
+              >
                 <FileText className="me-2" size={16} /> Dashboard
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/PatientDashboard/appointment" className="nav-link">
+              <Link
+                to="/PatientDashboard/patient-records"
+                className="nav-link"
+                onClick={() => {
+                  if (window.innerWidth <= 768) setSidebarOpen(false);
+                }}
+              >
+                <FileText className="me-2" size={16} /> Patient Records
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                to="/PatientDashboard/appointment"
+                className="nav-link"
+                onClick={() => {
+                  if (window.innerWidth <= 768) setSidebarOpen(false);
+                }}
+              >
                 <User className="me-2" size={16} /> Make Appointment
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/PatientDashboard/view-prescriptions" className="nav-link">
-                <FileText className="me-2" size={16} /> Prescriptions
+              <Link
+                to="/PatientDashboard/profile"
+                className="nav-link"
+                onClick={() => {
+                  if (window.innerWidth <= 768) setSidebarOpen(false);
+                }}
+              >
+                <User className="me-2" size={16} /> Profile Management
               </Link>
             </li>
-            <li className="nav-item">
-              <Link to="/PatientDashboard/my-reports" className="nav-link">
-                <FileText className="me-2" size={16} /> Reports
-              </Link>
-            </li>
-            <li className="nav-item">
-  <Link to="/PatientDashboard/my-appointments" className="nav-link">
-    <Calendar className="me-2" size={16} /> Appointments
-  </Link>
-</li>
 
             <li className="nav-item">
               <button
@@ -95,41 +156,48 @@ function PatientLayout() {
         </div>
 
         {/* Notifications */}
-        {showNotifications && (
-          <div className="notification-panel p-3">
-            <h5>
-              <Bell className="me-2" size={18} />
-              Notifications
-            </h5>
-            <ul>
-              {appointments.length > 0 ? (
-                appointments.slice(0, 5).map((appt, index) => (
-                  <li key={appt._id}>
-                    Appointment {index + 1}:{" "}
-                    {new Date(appt.date).toLocaleDateString()} at {appt.time}{" "}
-                    with {appt.doctorId?.name} ({appt.doctorId?.department})
-                  </li>
+        <div className={`notification-panel p-3 ${notificationsOpen ? "open" : "closed"}`}>
+          <h5>
+            <Bell className="me-2" size={18} />
+            Notifications
+          </h5>
+          <ul>
+            {(() => {
+              const notifications = [];
+
+              // Add appointment notifications
+              appointments.slice(0, 3).forEach((appt, index) => {
+                notifications.push(
+                  `Appointment ${index + 1}: ${new Date(appt.date).toLocaleDateString()} at ${appt.time} with ${appt.doctorId?.name} (${appt.doctorId?.department})`
+                );
+              });
+
+              // Add prescription notifications
+              prescriptions.slice(0, 3).forEach((pres, index) => {
+                const date = formatDate(pres.date || pres.createdAt);
+                notifications.push(
+                  `Prescription ${index + 1}:  Issued by ${pres.doctor?.name || "Unknown Doctor" } for ${pres.patient?.name || "patient"} on ${date || "Date unavailable"}`
+                );
+              });
+
+              // Add report notifications
+              reports.slice(0, 3).forEach((report, index) => {
+                const date = formatDate(report.createdAt || report.date);
+                notifications.push(
+                  `Report ${index + 1}:  Verified by ${report.doctor?.name || "Unknown Doctor" } for ${report.patient?.name || "patient"} on ${date || "Date unavailable"}`
+                );
+              });
+
+              return notifications.length > 0 ? (
+                notifications.map((notif, index) => (
+                  <li key={index}>{notif}</li>
                 ))
               ) : (
-                <li>No upcoming appointments</li>
-              )}
-            </ul>
-            <button
-              className="btn btn-sm btn-outline-secondary mt-2"
-              onClick={() => setShowNotifications(false)}
-            >
-              Hide
-            </button>
-          </div>
-        )}
-        {!showNotifications && (
-          <button
-            className="btn btn-sm btn-info show-btn"
-            onClick={() => setShowNotifications(true)}
-          >
-            Show Notifications
-          </button>
-        )}
+                <li>No new notifications</li>
+              );
+            })()}
+          </ul>
+        </div>
       </div>
     </>
   );

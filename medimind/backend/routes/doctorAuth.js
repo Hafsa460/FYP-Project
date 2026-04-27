@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const Doctor = require("../models/Doctor");
 const Appointment = require("../models/Appointment");
 const Prescription = require("../models/Prescription");
+const Report = require("../models/Report");
 const User = require("../models/User"); // ✅ For gender stats
 
 // ======================= LOGIN =======================
@@ -271,6 +272,19 @@ router.get("/:id/prescriptions", async (req, res) => {
     res.json({ success: true, prescriptions });
   } catch (err) {
     console.error("Error fetching prescriptions:", err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
+router.get("/:id/reports", async (req, res) => {
+  try {
+    const doctorId = req.params.id;
+    const reports = await Report.find({ doctor: doctorId })
+      .populate("patient", "name mrNo")
+      .sort({ createdAt: -1 });
+    res.json({ success: true, reports });
+  } catch (err) {
+    console.error("Error fetching reports:", err);
     res.status(500).json({ success: false, error: "Server error" });
   }
 });

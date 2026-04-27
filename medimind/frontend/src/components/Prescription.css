@@ -104,3 +104,135 @@
   background: #059da8;
   color: white;
 }
+
+/* =========================================================
+   📱 RESPONSIVE DESIGN
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .vp-container {
+    padding: 20px;
+    margin: 20px auto;
+  }
+
+  .vp-title {
+    font-size: 1.5rem;
+  }
+
+  .vp-table th,
+  .vp-table td {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .vp-btn-details {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .vp-container {
+    border-radius: 8px;
+    padding: 15px;
+    max-width: 100%;
+    margin: 15px 10px;
+  }
+
+  .vp-title {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+
+  .vp-table {
+    font-size: 0.85rem;
+  }
+
+  .vp-table th {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  .vp-table td {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  .vp-btn-details {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .vp-detail {
+    font-size: 0.9rem;
+  }
+
+  .vp-row-between {
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .vp-container {
+    padding: 12px;
+    margin: 12px 8px;
+    border-radius: 6px;
+  }
+
+  .vp-title {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .vp-table {
+    font-size: 0.75rem;
+  }
+
+  .vp-table th {
+    padding: 6px;
+    font-size: 0.7rem;
+  }
+
+  .vp-table td {
+    padding: 6px;
+    font-size: 0.7rem;
+  }
+
+  .vp-btn-details {
+    padding: 3px 6px;
+    font-size: 0.65rem;
+    width: 100%;
+  }
+
+  .card {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .card-title {
+    font-size: 0.9rem;
+  }
+
+  .vp-detail {
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+  }
+
+  .vp-row-between {
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+  }
+
+  .vp-btn-back {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+}

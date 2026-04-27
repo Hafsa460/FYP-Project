@@ -6,11 +6,18 @@ import femaleProfile from "../../images/female.png";
 import "./NeuroDashboard.css";
 
 function NeuroLayout() {
+  const formatDate = (value) => {
+    const date = new Date(value);
+    return isNaN(date) ? "" : date.toLocaleDateString("en-GB");
+  };
+
   const [showNotifications, setShowNotifications] = useState(true);
   const [prescriptionOpen, setPrescriptionOpen] = useState(false);
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState([]); // ✅ Store upcoming appointments
+  const [prescriptions, setPrescriptions] = useState([]); // ✅ Store recent prescriptions
+  const [reports, setReports] = useState([]); // ✅ Store recent reports
   const navigate = useNavigate();
 
   // Fetch logged-in doctor
@@ -45,6 +52,22 @@ if (!apptRes.ok) {
 
 const apptData = await apptRes.json();
 if (apptData.success) setAppointments(apptData.appointments);
+
+          // Fetch recent prescriptions by this doctor
+          const presRes = await fetch(
+            `http://localhost:5000/api/doctor-auth/${data.doctor._id}/prescriptions`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          const presData = await presRes.json();
+          if (presData.success) setPrescriptions(presData.prescriptions.slice(-5)); // Last 5
+
+          // Fetch recent reports by this doctor
+          const reportRes = await fetch(
+            `http://localhost:5000/api/doctor-auth/${data.doctor._id}/reports`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          const reportData = await reportRes.json();
+          if (reportData.success) setReports(reportData.reports.slice(0, 5)); // Last 5
 
         } else {
           navigate("/login-doctor");
@@ -155,17 +178,41 @@ if (apptData.success) setAppointments(apptData.appointments);
           <div className="notification-panel p-3">
             <h5>Notifications</h5>
             <ul>
-              {appointments.length > 0 ? (
-                appointments.slice(0, 5).map((appt) => (
-                  <li key={appt._id}>
-                    Appointment: {new Date(appt.date).toLocaleDateString()} at{" "}
-                    {appt.time} with {appt.patientId?.name || "Unknown Patient"}
-                  </li>
-                ))
-              ) : (
-                <li>1 pending appointment
-                </li>
-              )}
+              {(() => {
+                const notifications = [];
+
+                // Add appointment notifications
+                appointments.slice(0, 3).forEach((appt, index) => {
+                  const date = formatDate(appt.date);
+                  notifications.push(
+                    `Appointment ${index + 1}: ${date || "Date unavailable"} at ${appt.time} with ${appt.patientId?.name || "Unknown Patient"}`
+                  );
+                });
+
+                // Add prescription notifications
+                prescriptions.slice(0, 3).forEach((pres, index) => {
+                  const date = formatDate(pres.date || pres.createdAt);
+                  notifications.push(
+                    `Prescription ${index + 1}: Issued by ${doctor?.name || "Unknown Doctor"} for ${pres.patient?.name || "Unknown Patient"} on ${date || "Date unavailable"}`
+                  );
+                });
+
+                // Add report notifications
+                reports.slice(0, 3).forEach((report, index) => {
+                  const date = formatDate(report.createdAt || report.date);
+                  notifications.push(
+                    `Report ${index + 1}: Verified by ${doctor?.name || "Unknown Doctor"} for ${report.patient?.name || "Unknown Patient"} on ${date || "Date unavailable"}`
+                  );
+                });
+
+                return notifications.length > 0 ? (
+                  notifications.map((notif, index) => (
+                    <li key={index}>{notif}</li>
+                  ))
+                ) : (
+                  <li>No new notifications</li>
+                );
+              })()}
             </ul>
             <button
               className="btn btn-sm btn-outline-secondary mt-2"

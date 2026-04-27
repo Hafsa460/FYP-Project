@@ -9,3 +9,26 @@
   height: 50px;
   font-size: large;
 }
+
+/* =========================================================
+   📱 RESPONSIVE DESIGN
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .btn {
+    height: 44px;
+    font-size: 1rem;
+  }
+
+  .leave-day {
+    background-color: #ffcccc !important;
+    color: #d00 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    height: 40px;
+    font-size: 0.9rem;
+  }
+}

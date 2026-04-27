@@ -11,6 +11,7 @@ const { v4: uuidv4 } = require("uuid");
 const User = require("../models/User");
 const Doctor = require("../models/Doctor");
 const Report = require("../models/Report");
+const { notifyPatientReport, notifyDoctorReport } = require("../utils/notificationService");
 
 const tmpUploadDir = path.join(__dirname, "..", "tmp_uploads");
 if (!fs.existsSync(tmpUploadDir)) fs.mkdirSync(tmpUploadDir);
@@ -79,6 +80,18 @@ router.post("/create", upload.single("image"), async (req, res) => {
 
     await report.save();
 
+    // Send notifications
+    await notifyPatientReport(patient, doctor, {
+      _id: report._id,
+      type: "Stroke Prediction Report",
+      date: new Date()
+    });
+    await notifyDoctorReport(doctor, patient, {
+      _id: report._id,
+      type: "Stroke Prediction Report",
+      date: new Date()
+    });
+
     res.json({
       success: true,
       report: {
@@ -98,7 +111,7 @@ router.post("/create", upload.single("image"), async (req, res) => {
 router.get("/patient/:mrNo", async (req, res) => {
   try {
     const mrNo = Number(req.params.mrNo);
-    const reports = await Report.find({ patientMrNo: mrNo }).sort({ createdAt: -1 });
+    const reports = await Report.find({ patientMrNo: mrNo }).populate("doctor", "name").populate("patient", "name").sort({ createdAt: -1 });
     res.json({ success: true, reports });
   } catch {
     res.status(500).json({ success: false, message: "Server error" });

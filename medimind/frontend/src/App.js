@@ -23,6 +23,8 @@ import NeuroDashboard from "./components/Neurologist/NeuroDashboard";
 
 // Patient side
 import PatientDashboard from "./components/PatientDashboard";
+import PatientLayout from "./components/PatientLayout";
+import PatientRecords from "./components/PatientRecords";
 import Appointment from "./components/Appointments";
 import TestReport from "./components/TestReport";
 import ViewPrescriptionPatient from "./components/ViewPrescriptionPatient";
@@ -78,17 +80,23 @@ function App() {
         <Route path="profile-management" element={<ProfileManagement />} />
       </Route>
 
-      {/* Patient */}
-      <Route path="/PatientDashboard" element={<PatientDashboard />} />
-      <Route path="/appointment" element={<Appointment />} />
-      <Route path="/view-prescriptionspatient" element={<ViewPrescriptionPatient />} />
+      {/* Patient Layout with nested routes */}
+      <Route path="/PatientDashboard" element={<PatientLayout />}>
+        <Route index element={<PatientDashboard />} />
+        <Route path="patient-records" element={<PatientRecords />} />
+        <Route path="appointment" element={<Appointment />} />
+        <Route path="view-prescriptions" element={<ViewPrescriptionPatient />} />
+        <Route path="my-reports" element={<PatientReports />} />
+        <Route path="my-appointments" element={<MyAppointments />} />
+        <Route path="profile" element={<PatientProfileManagement />} />
+      </Route>
+
+      {/* Additional Patient Routes for backward compatibility */}
       <Route path="/prescription/:id" element={<PrescriptionDetails />} />
       <Route path="/testreport" element={<TestReport />} />
       <Route path="/verify-success" element={<VerifySuccess />} />
       <Route path="/doctor-verify-success" element={<DoctorVerifySuccess />} />
-      <Route path="/my-reports" element={<PatientReports />} />
-      <Route path="/patient-profile" element={<PatientProfileManagement />} />
-      <Route path="/PatientDashboard/my-appointments" element={<MyAppointments />} />
+      <Route path="/view-prescriptionspatient" element={<ViewPrescriptionPatient />} />
 
 
 

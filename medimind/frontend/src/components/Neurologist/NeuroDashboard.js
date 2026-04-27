@@ -81,21 +81,24 @@ function NeuroDashboard() {
 
   return (
     <div className="main-content">
-      <div className="doctor-card d-flex align-items-center mb-4 p-3 shadow-sm rounded">
-<img
-  src={femaleProfile}
-  alt="Doctor"
-  className="profile-icon me-3"
-/>
+      <div className="doctor-card d-flex align-items-center justify-content-between mb-4 p-3 shadow-sm rounded">
+        <div className="d-flex align-items-center">
+          <img
+            src={femaleProfile}
+            alt="Doctor"
+            className="profile-icon me-3"
+          />
 
-        <div>
-          <div className="fw-bold fs-5">{doctor.name}</div>
-          <div className="text-muted">{doctor.designation}</div>
-          <div className="text-muted">{doctor.department}</div>
-          <div className="text-secondary mt-1">
-            {stats.upcomingAppointments} upcoming appointments
+          <div>
+            <div className="fw-bold fs-5">{doctor.name}</div>
+            <div className="text-muted">{doctor.designation}</div>
+            <div className="text-muted">{doctor.department}</div>
+            <div className="text-secondary mt-1">
+              {stats.upcomingAppointments} upcoming appointments
+            </div>
           </div>
         </div>
+        {/* <NotificationPanel userType="doctor" /> */}
       </div>
 
       {/* Cards Section */}
