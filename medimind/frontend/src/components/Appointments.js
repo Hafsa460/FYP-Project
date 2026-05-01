@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
 import { Calendar } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -145,8 +144,6 @@ function Appointment() {
 
   return (
     <>
-      <Navbar />
-
       <div className="neuro-dashboard d-flex">
         <div className="content p-4 flex-grow-1">
           <div className="main-content">

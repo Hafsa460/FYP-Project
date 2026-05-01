@@ -55,11 +55,19 @@ function PatientRecords() {
         setPrescriptions(Array.isArray(prescriptionsData) ? prescriptionsData : (prescriptionsData?.data && Array.isArray(prescriptionsData.data) ? prescriptionsData.data : []));
 
         // Fetch Reports
-        const reportsRes = await fetch(`${API_URL}/api/reports/patient/${patient._id}`, {
+        const reportsRes = await fetch(`${API_URL}/api/reports/patient/${patient.mrNo}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const reportsData = await reportsRes.json();
-        setReports(Array.isArray(reportsData) ? reportsData : (reportsData?.data && Array.isArray(reportsData.data) ? reportsData.data : []));
+        setReports(
+          Array.isArray(reportsData)
+            ? reportsData
+            : Array.isArray(reportsData.reports)
+            ? reportsData.reports
+            : Array.isArray(reportsData.data)
+            ? reportsData.data
+            : []
+        );
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to load records. Please try again.");

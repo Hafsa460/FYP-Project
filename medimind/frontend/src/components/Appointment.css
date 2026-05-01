@@ -10,10 +10,11 @@
   font-size: large;
 }
 
-/* =========================================================
-   📱 RESPONSIVE DESIGN
-   ========================================================= */
-
+.content,
+.main-content {
+  overflow: visible !important;
+  height: auto !important;
+}
 @media (max-width: 768px) {
   .btn {
     height: 44px;

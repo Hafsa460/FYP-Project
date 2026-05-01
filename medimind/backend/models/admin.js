@@ -29,5 +29,4 @@ const adminSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// Prevent model overwrite
 module.exports = mongoose.models.Admin || mongoose.model("Admin", adminSchema);

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import { ClipboardList, FileText } from "lucide-react";
+import adminNotificationService from "../../services/AdminNotificationService";
 import "./PatientAdmin.css";
 import maleProfile from "../../images/male.png";
 import femaleProfile from "../../images/female.png";
@@ -8,6 +9,7 @@ import femaleProfile from "../../images/female.png";
 export default function PatientDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { admin } = useOutletContext() || {};
 
   const [patients, setPatients] = useState([]);
   const [search, setSearch] = useState("");
@@ -118,6 +120,8 @@ export default function PatientDetails() {
 
     if (data.message) {
       showDialog("success", data.message);
+      // Send notification
+      adminNotificationService.notifyPatientAdded(admin?.id, formData.name);
       setFormData({
         name: "",
         email: "",
