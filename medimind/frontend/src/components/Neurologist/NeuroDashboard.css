@@ -1,90 +1,341 @@
 .neuro-dashboard {
   display: flex;
-  height: 100vh;
+  min-height: calc(100vh - 80px);
   background-color: #e6ecec;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
 }
 
 .sidebar {
-  width: 250px;
-  background-color: #ffffff;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
-  padding: 20px;
+  width: 260px;
+  min-width: 260px;
+  background: #ffffff;
+  box-shadow: 2px 0 20px rgba(5, 157, 168, 0.12);
+  padding: 24px;
   display: flex;
   flex-direction: column;
+  border-top-right-radius: 24px;
+  border-bottom-right-radius: 24px;
+  overflow: hidden;
 }
 
 .sidebar .nav-link,
 .sidebar .btn-link.nav-link {
   font-size: 0.95rem;
-  font-weight: 500;
-  margin-bottom: 12px;
-  border-radius: 10px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  border-radius: 18px;
   color: #059da8;
-  padding: 10px 15px;
+  padding: 14px 18px;
   width: 100%;
-  background-color: #f8f9fa;
+  background-color: #f4feff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.2s ease,
+    box-shadow 0.25s ease;
   white-space: normal;
   word-break: break-word;
   text-decoration: none;
+  box-shadow: inset 0 0 0 1px rgba(5, 157, 168, 0.12);
 }
 
 .sidebar .nav-link:hover,
 .sidebar .btn-link.nav-link:hover {
-  background-color: #76ced4;
+  background-color: #059da8;
   color: #ffffff;
+  transform: translateX(2px);
+  box-shadow: 0 12px 24px rgba(5, 157, 168, 0.14);
 }
 
-.doctor-profile {
+.sidebar .nav-item ul {
+  padding-left: 0;
+  margin-top: 10px;
+}
+
+.sidebar .nav-item ul .nav-item {
+  margin-bottom: 10px;
+}
+
+.sidebar .nav-item ul .nav-link {
+  padding-left: 24px;
+  background-color: #e6fbfd;
+  border-radius: 16px;
+}
+
+.sidebar .nav-item ul .nav-link:hover {
+  background-color: #059da8;
+}
+
+.sidebar-header {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  gap: 1rem;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(5, 157, 168, 0.16);
 }
 
-.profile-icon {
-  width: 48px;
-  height: 48px;
+.sidebar-header .profile-icon {
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #059da8;
 }
 
+.sidebar-meta {
+  min-width: 0;
+}
+
 .doctor-name {
   font-size: 1rem;
+  color: #08425d;
+  margin: 0;
+}
+
+.doctor-role {
+  font-size: 0.88rem;
+  color: #5c7d8a;
+  margin-top: 0.25rem;
+}
+
+.sidebar-menu {
+  padding: 0 0.5rem;
+}
+
+.sidebar .nested-links {
+  margin-top: 0.75rem;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sidebar .nested-links .nav-link {
+  background-color: #e6fbfd;
+  color: #0a6170;
+  font-size: 0.95rem;
+  padding-left: 1rem;
+  border-radius: 16px;
+  border-color: rgba(5, 157, 168, 0.08);
+}
+
+.sidebar .nested-links .nav-link:hover,
+.sidebar .nested-links .nav-link:focus {
+  background-color: #d8f3f8;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 24px;
+  overflow-y: auto;
+  min-height: 0;
+  background-color: rgba(225, 245, 247, 0.95);
+}
+
+.main-content {
+  width: 100%;
+  min-height: 0;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 16px 40px rgba(8, 64, 75, 0.06);
+}
+
+.doctor-card {
+  background-color: #ffffff;
+  border-radius: 22px;
+  box-shadow: 0 15px 35px rgba(5, 157, 168, 0.08);
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.doctor-card .profile-icon {
+  width: 72px;
+  height: 72px;
+  border-width: 3px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 24px;
+}
+
+.card-grid .card {
+  background-color: #ffffff;
+  border-radius: 18px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 12px 28px rgba(5, 157, 168, 0.08);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.card-grid .card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 32px rgba(5, 157, 168, 0.12);
+}
+
+.card-grid .card .fw-bold {
+  color: #475569;
+  margin-bottom: 0.75rem;
+}
+
+.card-grid .card .fs-4 {
+  font-size: 2rem;
   color: #059da8;
 }
 
-.notification-panel {
-  width: 250px;
-  background-color: #fff;
-  border-left: 2px solid #76ced4;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
-  overflow-y: auto;
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  gap: 1rem;
+  align-items: stretch;
 }
 
-.notification-panel ul {
+.chart-section {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 22px;
+  box-shadow: 0 10px 24px rgba(5, 157, 168, 0.08);
+  min-height: 360px;
+  overflow: hidden;
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #059da8;
+  margin-bottom: 1rem;
+}
+
+.chart-section ul {
   list-style: none;
   padding: 0;
-  margin-top: 30px;
+  margin: 0;
+}
+
+.chart-section .d-flex {
+  gap: 0.85rem;
+}
+
+.chart-section li {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: #334155;
+  margin-bottom: 0.95rem;
+  font-weight: 500;
+}
+
+.chart-section li:last-child {
+  margin-bottom: 0;
+}
+
+.notification-panel {
+  position: relative;
+  width: 280px;
+  min-width: 280px;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(5, 157, 168, 0.12);
+  box-shadow: 0 10px 24px rgba(5, 157, 168, 0.08);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.notification-panel h5 {
+  font-size: 1.05rem;
+  color: #059da8;
+  margin-bottom: 1rem;
+  font-weight: 700;
 }
 
 .notification-panel li {
-  padding: 8px 0;
-  border-bottom: 1px solid #f1f1f1;
-  font-size: 0.95rem;
-  color: #333;
+  margin-bottom: 1rem;
+  color: #475569;
+  line-height: 1.6;
+  border-bottom: 1px solid #e6f6f8;
+  padding-bottom: 0.85rem;
+}
+
+.notification-panel li:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.notification-panel button {
+  width: 100%;
+  margin-top: 1.25rem;
 }
 
 .show-btn {
   position: absolute;
-  bottom: 10px;
-  right: 10px;
+  bottom: 20px;
+  right: 20px;
   z-index: 1000;
   color: #ffffff;
-  background-color: #1c99a0;
-  border-radius: 7%;
+  background-color: #059da8;
+  border-radius: 16px;
+  padding: 0.6rem 1rem;
+  border: none;
+}
+
+@media (max-width: 1200px) {
+  .sidebar,
+  .notification-panel {
+    width: 240px;
+    min-width: 240px;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .neuro-dashboard {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .sidebar,
+  .notification-panel {
+    width: 100%;
+    min-width: 100%;
+    border-radius: 24px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    padding: 20px 18px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
 }

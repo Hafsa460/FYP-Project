@@ -1,6 +1,19 @@
 import { useState, useEffect } from "react";
-import { ClipboardList, FileText, Users, CheckCircle, Clock } from "lucide-react";
-import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  ClipboardList,
+  FileText,
+  Users,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import "./NeuroDashboard.css";
 import maleProfile from "../../images/male.png";
 import femaleProfile from "../../images/female.png";
@@ -24,9 +37,12 @@ function NeuroDashboard() {
         const token = localStorage.getItem("doctorToken");
         if (!token) return;
 
-        const doctorRes = await fetch("http://localhost:5000/api/doctor-auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const doctorRes = await fetch(
+          "http://localhost:5000/api/doctor-auth/me",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
         const doctorData = await doctorRes.json();
         if (doctorData.success) {
           setDoctor(doctorData.doctor);
@@ -34,13 +50,13 @@ function NeuroDashboard() {
           // ✅ fetch doctor stats only after doctor is known
           const statsRes = await fetch(
             `http://localhost:5000/api/doctor-auth/${doctorData.doctor._id}/stats`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${token}` } },
           );
           const statsData = await statsRes.json();
 
           // ✅ Fetch appointment details for status counts
           const apptRes = await fetch(
-            `http://localhost:5000/api/appointments/doctor/${doctorData.doctor._id}`
+            `http://localhost:5000/api/appointments/doctor/${doctorData.doctor._id}`,
           );
           const apptData = await apptRes.json();
 
@@ -84,17 +100,26 @@ function NeuroDashboard() {
       <div className="doctor-card d-flex align-items-center justify-content-between mb-4 p-3 shadow-sm rounded">
         <div className="d-flex align-items-center">
           <img
-            src={femaleProfile}
+            src={
+              doctor.gender?.toLowerCase() === "female"
+                ? femaleProfile
+                : maleProfile
+            }
             alt="Doctor"
             className="profile-icon me-3"
           />
 
           <div>
-            <div className="fw-bold fs-5">{doctor.name}</div>
-            <div className="text-muted">{doctor.designation}</div>
-            <div className="text-muted">{doctor.department}</div>
-            <div className="text-secondary mt-1">
-              {stats.upcomingAppointments} upcoming appointments
+            <div className="fw-bold fs-5 mb-2">{doctor.name}</div>
+            <div className="mb-1">
+              <strong>Designation:</strong> {doctor.designation}
+            </div>
+            <div className="mb-1">
+              <strong>Department:</strong> {doctor.department}
+            </div>
+            <div className="mb-1">
+              <strong>Upcoming Appointments:</strong>{" "}
+              {stats.upcomingAppointments}
             </div>
           </div>
         </div>
@@ -157,31 +182,37 @@ function NeuroDashboard() {
 
         {/* Quick Insights */}
         <div className="chart-section small-card">
-          <div className="section-title">
-            <div className="block-section flex-grow-1 ms-3">
-              <div className="section-title">Quick Insights</div>
-              <ul>
-                <li>
-                  <ClipboardList size={16} className="me-2" />{" "}
-                  {stats.totalAppointments} total appointments handled
-                </li>
-                <li>
-                  <Clock size={16} className="me-2" />{" "}
-                  {stats.pendingAppointments} appointments pending
-                </li>
-                <li>
-                  <CheckCircle size={16} className="me-2" />{" "}
-                  {stats.completedAppointments} appointments completed
-                </li>
-                <li>
-                  <Users size={16} className="me-2" /> {stats.totalPatients}{" "}
-                  patients treated
-                </li>
-                <li>
-                  <FileText size={16} className="me-2" />{" "}
-                  {stats.totalPrescriptions} prescriptions written
-                </li>
-              </ul>
+          <div className="section-title">Quick Insights</div>
+          <div className="d-flex flex-column gap-3 mt-3">
+            <div className="d-flex align-items-center">
+              <ClipboardList size={18} className="me-3 text-primary" />
+              <span className="fw-medium">
+                {stats.totalAppointments} total appointments handled
+              </span>
+            </div>
+            <div className="d-flex align-items-center">
+              <Clock size={18} className="me-3 text-warning" />
+              <span className="fw-medium">
+                {stats.pendingAppointments} appointments pending
+              </span>
+            </div>
+            <div className="d-flex align-items-center">
+              <CheckCircle size={18} className="me-3 text-success" />
+              <span className="fw-medium">
+                {stats.completedAppointments} appointments completed
+              </span>
+            </div>
+            <div className="d-flex align-items-center">
+              <Users size={18} className="me-3 text-info" />
+              <span className="fw-medium">
+                {stats.totalPatients} patients treated
+              </span>
+            </div>
+            <div className="d-flex align-items-center">
+              <FileText size={18} className="me-3 text-secondary" />
+              <span className="fw-medium">
+                {stats.totalPrescriptions} prescriptions written
+              </span>
             </div>
           </div>
         </div>

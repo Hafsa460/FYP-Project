@@ -18,6 +18,9 @@ function Navbar() {
     const doctor = JSON.parse(localStorage.getItem("doctor") || "null");
     const patient = JSON.parse(localStorage.getItem("patient") || "null");
     const admin = JSON.parse(localStorage.getItem("admin") || "null");
+    const adminToken = localStorage.getItem("adminToken");
+    const adminRole = localStorage.getItem("adminRole");
+    const adminName = localStorage.getItem("adminName");
 
     if (doctor) {
       setUserType("doctor");
@@ -25,9 +28,14 @@ function Navbar() {
     } else if (patient) {
       setUserType("patient");
       setUser(patient);
-    } else if (admin) {
+    } else if (admin || adminToken) {
       setUserType("admin");
-      setUser(admin);
+      setUser(
+        admin || {
+          name: adminName || "Admin",
+          role: adminRole || "admin",
+        },
+      );
     } else {
       setUserType(null);
       setUser(null);
@@ -46,11 +54,24 @@ function Navbar() {
     navigate("/");
   };
 
-  // ✅ FINAL SCROLL HANDLER (HASH BASED — STABLE)
-const handleScrollTo = (id) => {
-  window.location.hash = id;
-};
+  const getDashboardRoute = () => {
+    if (userType === "doctor") return "/neuro-dashboard";
+    if (userType === "patient") return "/PatientDashboard";
+    if (userType === "admin") {
+      const adminRole = localStorage.getItem("adminRole");
+      if (adminRole === "doctorAdmin") return "/doctor-admin";
+      if (adminRole === "patientAdmin") return "/patient-admin";
+      if (adminRole === "departmentAdmin") return "/dept-admin";
+      if (adminRole === "superAdmin") return "/super";
+      return "/";
+    }
+    return "/";
+  };
 
+  // ✅ FINAL SCROLL HANDLER (HASH BASED — STABLE)
+  const handleScrollTo = (id) => {
+    window.location.hash = id;
+  };
 
   return (
     <nav
@@ -97,14 +118,18 @@ const handleScrollTo = (id) => {
           About Us
         </button>
         <button
-  className="nav-link btn btn-link text-teal"
-  onClick={() => navigate("/help-support")}
->
-  Help & Support
-</button>
+          className="nav-link btn btn-link text-teal"
+          onClick={() => navigate("/help-support")}
+        >
+          Help & Support
+        </button>
 
+        {userType && (
+          <Link to={getDashboardRoute()} className="btn btn-outline-teal">
+            Dashboard
+          </Link>
+        )}
 
-        {/* AUTH */}
         {!userType && (
           <Link to="/Login-option" className="btn btn-teal">
             Login / Sign Up
@@ -114,8 +139,8 @@ const handleScrollTo = (id) => {
         {userType && (
           <div className="position-relative">
             <img
-              src={femaleProfile}
-              alt="Profile"
+              src={profileIcon}
+              alt={user?.name ? `${user.name} profile` : "Profile"}
               className="rounded-circle"
               style={{ width: "45px", cursor: "pointer" }}
               onClick={() => setShowDropdown((prev) => !prev)}

@@ -39,36 +39,36 @@ function NeuroLayout() {
           setDoctor(data.doctor);
 
           // Fetch upcoming appointments for this doctor
-   const apptRes = await fetch(
-  `http://localhost:5000/api/doctor-auth/${data.doctor._id}/upcoming`,
-  { headers: { Authorization: `Bearer ${token}` } }
-);
+          const apptRes = await fetch(
+            `http://localhost:5000/api/doctor-auth/${data.doctor._id}/upcoming`,
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
 
-if (!apptRes.ok) {
-  console.error("Failed to fetch appointments:", apptRes.status);
-  setAppointments([]); // fallback
-  return;
-}
+          if (!apptRes.ok) {
+            console.error("Failed to fetch appointments:", apptRes.status);
+            setAppointments([]); // fallback
+            return;
+          }
 
-const apptData = await apptRes.json();
-if (apptData.success) setAppointments(apptData.appointments);
+          const apptData = await apptRes.json();
+          if (apptData.success) setAppointments(apptData.appointments);
 
           // Fetch recent prescriptions by this doctor
           const presRes = await fetch(
             `http://localhost:5000/api/doctor-auth/${data.doctor._id}/prescriptions`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${token}` } },
           );
           const presData = await presRes.json();
-          if (presData.success) setPrescriptions(presData.prescriptions.slice(-5)); // Last 5
+          if (presData.success)
+            setPrescriptions(presData.prescriptions.slice(-5)); // Last 5
 
           // Fetch recent reports by this doctor
           const reportRes = await fetch(
             `http://localhost:5000/api/doctor-auth/${data.doctor._id}/reports`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${token}` } },
           );
           const reportData = await reportRes.json();
           if (reportData.success) setReports(reportData.reports.slice(0, 5)); // Last 5
-
         } else {
           navigate("/login-doctor");
         }
@@ -95,35 +95,47 @@ if (apptData.success) setAppointments(apptData.appointments);
   return (
     <>
       <Navbar />
-      <div className={`neuro-dashboard d-flex ${showNotifications ? "with-notifications" : ""}`}>
+      <div
+        className={`neuro-dashboard d-flex ${showNotifications ? "with-notifications" : ""}`}
+      >
         {/* Sidebar */}
         <div className="sidebar p-3">
-          <div className="doctor-profile d-flex align-items-center mb-4">
-            <img src={doctor?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile} alt="Doctor" className="profile-icon me-3" />
-            <div className="doctor-name fw-semibold">
-              {loading ? "Loading..." : doctor ? doctor.name : "Not Found"}
+          <div className="sidebar-header">
+            <img src={profileIcon} alt="Doctor" className="profile-icon" />
+            <div className="sidebar-meta">
+              <div className="doctor-name fw-semibold">
+                {loading ? "Loading..." : doctor ? doctor.name : "Not Found"}
+              </div>
+              <div className="doctor-role text-muted">
+                {doctor?.designation || "Neurologist"}
+              </div>
             </div>
           </div>
 
-          <ul className="nav flex-column">
+          <ul className="nav flex-column sidebar-menu">
             <li className="nav-item">
-              <Link to="/neuro-dashboard/appointment-schedule" className="nav-link">
+              <Link
+                to="/neuro-dashboard/appointment-schedule"
+                className="nav-link"
+              >
                 Appointment Schedule
               </Link>
             </li>
             {doctor?.department?.toLowerCase() === "neurology" && (
-  <li className="nav-item">
-    <Link to="/neuro-dashboard/verify-reports" className="nav-link">
-      Verify Test Reports
-    </Link>
-  </li>
-)}
-
-                              <li className="nav-item">
-                    <Link to="/neuro-dashboard/profile-management" className="nav-link">
-                      Profile Management
-                    </Link>
-                  </li>
+              <li className="nav-item">
+                <Link to="/neuro-dashboard/verify-reports" className="nav-link">
+                  Verify Test Reports
+                </Link>
+              </li>
+            )}
+            <li className="nav-item">
+              <Link
+                to="/neuro-dashboard/profile-management"
+                className="nav-link"
+              >
+                Profile Management
+              </Link>
+            </li>
             <li className="nav-item">
               <button
                 className="btn btn-link nav-link d-flex justify-content-between align-items-center"
@@ -144,7 +156,6 @@ if (apptData.success) setAppointments(apptData.appointments);
                       View Prescriptions
                     </Link>
                   </li>
-
                 </ul>
               )}
             </li>
@@ -173,7 +184,6 @@ if (apptData.success) setAppointments(apptData.appointments);
           )}
         </div>
 
-        {/* Notification Panel */}
         {showNotifications ? (
           <div className="notification-panel p-3">
             <h5>Notifications</h5>
@@ -185,7 +195,7 @@ if (apptData.success) setAppointments(apptData.appointments);
                 appointments.slice(0, 3).forEach((appt, index) => {
                   const date = formatDate(appt.date);
                   notifications.push(
-                    `Appointment ${index + 1}: ${date || "Date unavailable"} at ${appt.time} with ${appt.patientId?.name || "Unknown Patient"}`
+                    `Appointment ${index + 1}: ${date || "Date unavailable"} at ${appt.time} with ${appt.patientId?.name || "Unknown Patient"}`,
                   );
                 });
 
@@ -193,15 +203,14 @@ if (apptData.success) setAppointments(apptData.appointments);
                 prescriptions.slice(0, 3).forEach((pres, index) => {
                   const date = formatDate(pres.date || pres.createdAt);
                   notifications.push(
-                    `Prescription ${index + 1}: Issued by ${doctor?.name || "Unknown Doctor"} for ${pres.patient?.name || "Unknown Patient"} on ${date || "Date unavailable"}`
+                    `Prescription ${index + 1}: Issued by ${doctor?.name || "Unknown Doctor"} for ${pres.patient?.name || "Unknown Patient"} on ${date || "Date unavailable"}`,
                   );
                 });
 
-                // Add report notifications
                 reports.slice(0, 3).forEach((report, index) => {
                   const date = formatDate(report.createdAt || report.date);
                   notifications.push(
-                    `Report ${index + 1}: Verified by ${doctor?.name || "Unknown Doctor"} for ${report.patient?.name || "Unknown Patient"} on ${date || "Date unavailable"}`
+                    `Report ${index + 1}: Verified by ${doctor?.name || "Unknown Doctor"} for ${report.patient?.name || "Unknown Patient"} on ${date || "Date unavailable"}`,
                   );
                 });
 
