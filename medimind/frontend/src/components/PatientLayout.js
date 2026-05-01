@@ -36,15 +36,30 @@ function PatientLayout() {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
       .then((res) => res.json())
-      .then((data) => setAppointments(data || []))
+      .then((data) =>
+        setAppointments(
+          Array.isArray(data)
+            ? data
+            : Array.isArray(data?.data)
+            ? data.data
+            : []
+        )
+      )
       .catch((err) => console.error(err));
 
-    // Fetch prescriptions for notifications
     fetch(`http://localhost:5000/api/patient-prescriptions/patient/${patientId}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
       .then((res) => res.json())
-      .then((data) => setPrescriptions(data || []))
+      .then((data) =>
+        setPrescriptions(
+          Array.isArray(data)
+            ? data
+            : Array.isArray(data?.data)
+            ? data.data
+            : []
+        )
+      )
       .catch((err) => console.error(err));
 
     // Fetch reports for notifications
@@ -52,7 +67,15 @@ function PatientLayout() {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
       .then((res) => res.json())
-      .then((data) => setReports(data.reports || []))
+      .then((data) =>
+        setReports(
+          Array.isArray(data)
+            ? data
+            : Array.isArray(data?.reports)
+            ? data.reports
+            : []
+        )
+      )
       .catch((err) => console.error(err));
   }, [navigate]);
 
@@ -164,16 +187,19 @@ function PatientLayout() {
           <ul>
             {(() => {
               const notifications = [];
+              const safeAppointments = Array.isArray(appointments) ? appointments : [];
+              const safePrescriptions = Array.isArray(prescriptions) ? prescriptions : [];
+              const safeReports = Array.isArray(reports) ? reports : [];
 
               // Add appointment notifications
-              appointments.slice(0, 3).forEach((appt, index) => {
+              safeAppointments.slice(0, 3).forEach((appt, index) => {
                 notifications.push(
                   `Appointment ${index + 1}: ${new Date(appt.date).toLocaleDateString()} at ${appt.time} with ${appt.doctorId?.name} (${appt.doctorId?.department})`
                 );
               });
 
               // Add prescription notifications
-              prescriptions.slice(0, 3).forEach((pres, index) => {
+              safePrescriptions.slice(0, 3).forEach((pres, index) => {
                 const date = formatDate(pres.date || pres.createdAt);
                 notifications.push(
                   `Prescription ${index + 1}:  Issued by ${pres.doctor?.name || "Unknown Doctor" } for ${pres.patient?.name || "patient"} on ${date || "Date unavailable"}`
@@ -181,7 +207,7 @@ function PatientLayout() {
               });
 
               // Add report notifications
-              reports.slice(0, 3).forEach((report, index) => {
+              safeReports.slice(0, 3).forEach((report, index) => {
                 const date = formatDate(report.createdAt || report.date);
                 notifications.push(
                   `Report ${index + 1}:  Verified by ${report.doctor?.name || "Unknown Doctor" } for ${report.patient?.name || "patient"} on ${date || "Date unavailable"}`

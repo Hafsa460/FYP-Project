@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
+import adminNotificationService from "../../services/AdminNotificationService";
 import "../PatientAdmin/PatientAdmin.css";
 
 export default function ManageDepartments() {
+  const { admin } = useOutletContext() || {};
   const [departments, setDepartments] = useState([]);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
@@ -12,6 +14,7 @@ export default function ManageDepartments() {
   const [rooms, setRooms] = useState(0);
   const [showAddModal, setShowAddModal] = useState(false);
   const [confirmData, setConfirmData] = useState(null);
+  const [editDept, setEditDept] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ show: false, id: null });
   const [error, setError] = useState("");
 
@@ -41,6 +44,23 @@ export default function ManageDepartments() {
     setDeleteDialog({ show: true, id });
   };
 
+  const handleEditClick = (dept) => {
+    setError("");
+    setEditDept({
+      id: dept._id || dept.id,
+      name: dept.name || "",
+      description: dept.description || "",
+      doctors: dept.doctors || 0,
+      nurses: dept.nurses || 0,
+      staff: dept.staff || 0,
+      rooms: dept.rooms || 0,
+    });
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditDept((prev) => ({ ...prev, [field]: value }));
+  };
+
   const handleConfirmAdd = async () => {
     try {
       const token = localStorage.getItem("adminToken");
@@ -61,6 +81,8 @@ export default function ManageDepartments() {
       });
       const data = await res.json();
       if (res.ok) {
+        // Send notification
+        adminNotificationService.notifyDepartmentAdded(admin?.id, confirmData.name);
         setName("");
         setDesc("");
         setDoctors(0);
@@ -81,10 +103,13 @@ export default function ManageDepartments() {
   const handleConfirmDelete = async () => {
     try {
       const token = localStorage.getItem("adminToken");
+      const deptToDelete = departments.find(d => d._id === deleteDialog.id || d.id === deleteDialog.id);
       await fetch(`http://localhost:5000/api/departments/${deleteDialog.id}`, {
         method: "DELETE",
         headers: { Authorization: token ? `Bearer ${token}` : undefined },
       });
+      // Send notification
+      adminNotificationService.notifyDepartmentDeleted(admin?.id, deptToDelete?.name || "Unknown");
       setDeleteDialog({ show: false, id: null });
       fetchDepts();
     } catch (err) {
@@ -138,6 +163,102 @@ export default function ManageDepartments() {
         </div>
       )}
 
+      {editDept && (
+        <div className="dialog-overlay">
+          <div className="dialog-box">
+            <h4>Edit Department</h4>
+            {error && <div className="alert alert-danger">{error}</div>}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const token = localStorage.getItem("adminToken");
+                const updateDepartment = async () => {
+                  try {
+                    const res = await fetch(`http://localhost:5000/api/departments/${editDept.id}`, {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: token ? `Bearer ${token}` : undefined,
+                      },
+                      body: JSON.stringify({
+                        name: editDept.name.trim(),
+                        description: editDept.description,
+                        doctors: Number(editDept.doctors) || 0,
+                        nurses: Number(editDept.nurses) || 0,
+                        staff: Number(editDept.staff) || 0,
+                        rooms: Number(editDept.rooms) || 0,
+                      }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                      setError(data?.message || "Failed to update department");
+                      return;
+                    }
+                    setEditDept(null);
+                    fetchDepts();
+                  } catch (err) {
+                    setError("Failed to update department");
+                  }
+                };
+                updateDepartment();
+              }}
+            >
+              <div className="form-group">
+                <label>Name</label>
+                <input
+                  value={editDept.name}
+                  onChange={(e) => handleEditChange("name", e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Description</label>
+                <input
+                  value={editDept.description}
+                  onChange={(e) => handleEditChange("description", e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label>Doctors</label>
+                <input
+                  value={editDept.doctors}
+                  onChange={(e) => handleEditChange("doctors", e.target.value.replace(/\D/g, ""))}
+                />
+              </div>
+              <div className="form-group">
+                <label>Nurses</label>
+                <input
+                  value={editDept.nurses}
+                  onChange={(e) => handleEditChange("nurses", e.target.value.replace(/\D/g, ""))}
+                />
+              </div>
+              <div className="form-group">
+                <label>Staff</label>
+                <input
+                  value={editDept.staff}
+                  onChange={(e) => handleEditChange("staff", e.target.value.replace(/\D/g, ""))}
+                />
+              </div>
+              <div className="form-group">
+                <label>Rooms</label>
+                <input
+                  value={editDept.rooms}
+                  onChange={(e) => handleEditChange("rooms", e.target.value.replace(/\D/g, ""))}
+                />
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button className="btn btn-secondary" onClick={() => setEditDept(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-success">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {confirmData && (
         <div className="dialog-overlay">
           <div className="dialog-box">
@@ -177,7 +298,8 @@ export default function ManageDepartments() {
                 <div className="d-name">{d.name}</div>
                 <div className="d-dept">{d.description}</div>
               </div>
-              <div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => handleEditClick(d)} className="btn btn-sm btn-primary">Edit</button>
                 <button onClick={() => handleDelete(d._id || d.id)} className="btn btn-sm btn-danger">Delete</button>
               </div>
             </div>
