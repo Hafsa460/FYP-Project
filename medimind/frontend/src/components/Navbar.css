@@ -17,6 +17,28 @@
   background-color: #009999;
 }
 
+.btn-outline-teal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #059da8;
+  background: transparent;
+  border: 2px solid #059da8;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  padding: 10px 20px;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.btn-outline-teal:hover {
+  color: #ffffff;
+  background: #059da8;
+  border-color: #059da8;
+}
+
 /* =========================================================
    📱 RESPONSIVE DESIGN
    ========================================================= */
@@ -44,4 +66,49 @@
     min-width: 80px;
     border-radius: 8px;
   }
+}
+
+.position-relative {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 180px;
+  padding: 0.5rem 0;
+  margin: 0;
+  border-radius: 0.85rem;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.12);
+  background-color: #ffffff;
+  z-index: 1100;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-item-text,
+.dropdown-item {
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+}
+
+.dropdown-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #eff6ff;
+}
+
+.dropdown-divider {
+  height: 1px;
+  margin: 0.25rem 0;
+  background: #e5e7eb;
 }
