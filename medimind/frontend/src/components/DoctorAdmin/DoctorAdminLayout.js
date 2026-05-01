@@ -3,10 +3,13 @@ import React, { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import maleProfile from "../../images/male.png";
 import femaleProfile from "../../images/female.png";
+import AdminNavbar from "../AdminNavbar";
+import adminNotificationService from "../../services/AdminNotificationService";
 import "./DoctorAdmin.css";
 
 function DoctorAdminLayout() {
   const [showNotifications, setShowNotifications] = useState(true);
+  const [notifications, setNotifications] = useState([]);
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -27,6 +30,9 @@ function DoctorAdminLayout() {
         const data = await res.json();
         if (data.success) {
           setAdmin(data.admin);
+          // Load stored notifications for this admin
+          const stored = adminNotificationService.getStoredNotifications(data.admin.id);
+          setNotifications(stored);
         } else {
           console.error("Failed to fetch admin:", data.error);
           navigate("/adminLogin");
@@ -42,6 +48,20 @@ function DoctorAdminLayout() {
     fetchAdmin();
   }, [navigate]);
 
+  // Subscribe to notifications
+  useEffect(() => {
+    if (!admin) return;
+    
+    const unsubscribe = adminNotificationService.subscribe((notification) => {
+      // Only add notifications for this admin
+      if (notification.adminId === admin.id) {
+        setNotifications(prev => [notification, ...prev]);
+      }
+    });
+
+    return unsubscribe;
+  }, [admin]);
+
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminInfo");
@@ -49,40 +69,63 @@ function DoctorAdminLayout() {
   };
 
   return (
-    <div className="admin-layout d-flex">
+    <>
+      <AdminNavbar adminInfo={admin} onLogout={handleLogout} />
+      <div className="admin-layout d-flex">
 
-      {/* Sidebar */}
-      <div className="sidebar p-3">
-        <div className="admin-profile d-flex align-items-center mb-4">
-          <img src={admin?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile} alt="Admin" className="profile-icon me-3" />
-          <div className="admin-details fw-semibold">
-            {loading ? "Loading..." : admin ? `${admin.name}` : "Doctor Admin"}
-            <div className="text-muted small">ID: {admin?.id ?? "N/A"}</div>
-            <div className="text-muted small">Role: {admin?.role ?? "N/A"}</div>
+        {/* Sidebar */}
+        <div className="sidebar p-3">
+          <div className="admin-profile d-flex align-items-center mb-4">
+            <img src={admin?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile} alt="Admin" className="profile-icon me-3" />
+            <div className="admin-details fw-semibold">
+              {loading ? "Loading..." : admin ? `${admin.name}` : "Doctor Admin"}
+              <div className="text-muted small">ID: {admin?.id ?? "N/A"}</div>
+              <div className="text-muted small">Role: {admin?.role ?? "N/A"}</div>
+            </div>
           </div>
+
+          <ul className="nav flex-column">
+            <li className="nav-item">
+              <Link to="/doctor-admin" className="nav-link">Dashboard</Link>
+            </li>
+            <li className="nav-item">
+              <Link to="doctors" className="nav-link">Manage Doctors</Link>
+            </li>
+            <li className="nav-item">
+              <Link to="/doctor-admin/notifications" className="nav-link">Notifications</Link>
+            </li>
+            <li className="nav-item">
+              <button className="btn btn-link nav-link text-danger" onClick={handleLogout}>Logout</button>
+            </li>
+          </ul>
         </div>
 
-        <ul className="nav flex-column">
-          <li className="nav-item">
-            <Link to="/doctor-admin" className="nav-link">Dashboard</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="doctors" className="nav-link">Manage Doctors</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/doctor-admin/notifications" className="nav-link">Notifications</Link>
-          </li>
-          <li className="nav-item">
-            <button className="btn btn-link nav-link text-danger" onClick={handleLogout}>Logout</button>
-          </li>
-        </ul>
-      </div>
+        {/* Main Content */}
+        <div className="content p-4 flex-grow-1 position-relative">
+          <Outlet context={{ notify: adminNotificationService.notify.bind(adminNotificationService), admin }} />
+          {!showNotifications && (
+            <button className="btn btn-sm btn-info show-btn" onClick={() => setShowNotifications(true)}>Show Notifications</button>
+          )}
+        </div>
 
-      {/* Main Content */}
-      <div className="content p-4 flex-grow-1">
-        <Outlet />
+        {/* Notification Panel */}
+        {showNotifications ? (
+          <div className="notification-panel p-3">
+            <h5>Notifications</h5>
+            <ul>
+              {notifications && notifications.length > 0 ? (
+                notifications.map((notif) => (
+                  <li key={notif.id}>{notif.message}</li>
+                ))
+              ) : (
+                <li>No notifications yet</li>
+              )}
+            </ul>
+            <button className="btn btn-sm btn-outline-secondary mt-2" onClick={() => setShowNotifications(false)}>Hide</button>
+          </div>
+        ) : null}
       </div>
-    </div>
+    </>
   );
 }
 

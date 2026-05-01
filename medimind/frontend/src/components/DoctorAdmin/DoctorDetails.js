@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import { ClipboardList, FileText, Users, CheckCircle, Clock } from "lucide-react";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import adminNotificationService from "../../services/AdminNotificationService";
 import "./DoctorAdmin.css";
 import maleProfile from "../../images/male.png";
 import femaleProfile from "../../images/female.png";
@@ -10,6 +11,7 @@ import femaleProfile from "../../images/female.png";
 export default function DoctorDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { admin } = useOutletContext() || {};
 
   const [stats, setStats] = useState(null);
   const [doctors, setDoctors] = useState([]);
@@ -132,6 +134,7 @@ export default function DoctorDetails() {
           const data = await res.json();
           if (data.success) {
             showDialog("success", "Doctor deactivated successfully!");
+            adminNotificationService.notifyDoctorDeleted(admin?.id, data.doctor?.name || "Unknown");
             fetchAllDoctors();
           } else {
             showDialog("error", data.error || "Failed to deactivate doctor");
@@ -163,6 +166,7 @@ export default function DoctorDetails() {
           const data = await res.json();
           if (data.success) {
             showDialog("success", "Doctor reactivated successfully!");
+            adminNotificationService.notifyDoctorUpdated(admin?.id, data.doctor?.name || "Unknown");
             fetchAllDoctors();
           } else {
             showDialog("error", data.error || "Failed to reactivate doctor");
@@ -223,6 +227,8 @@ export default function DoctorDetails() {
       const data = await res.json();
       if (data.success) {
         showDialog("success", "Doctor added and verification email sent!");
+        // Send notification
+        adminNotificationService.notifyDoctorAdded(admin?.id, formData.name);
         setFormData({
           name: "",
           email: "",

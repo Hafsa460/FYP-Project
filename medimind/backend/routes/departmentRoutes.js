@@ -50,4 +50,43 @@ router.post("/", async (req, res) => {
   }
 });
 
+// PUT update a department
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, doctors, nurses, staff, rooms } = req.body;
+    if (!name) {
+      return res.status(400).json({ message: "Department name is required" });
+    }
+    const updated = await Department.findByIdAndUpdate(
+      id,
+      {
+        name,
+        description,
+        doctors: Number(doctors) || 0,
+        nurses: Number(nurses) || 0,
+        staff: Number(staff) || 0,
+        rooms: Number(rooms) || 0,
+      },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ message: "Department not found" });
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// DELETE a department
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Department.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: "Department not found" });
+    res.json({ message: "Department deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
