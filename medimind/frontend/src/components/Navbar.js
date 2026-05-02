@@ -45,7 +45,7 @@ function Navbar() {
   }, [location.pathname]);
 
   const profileIcon =
-    user?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile;
+    user?.gender?.toLowerCase() === "male" ? maleProfile : femaleProfile;
 
   const handleLogout = () => {
     localStorage.clear();

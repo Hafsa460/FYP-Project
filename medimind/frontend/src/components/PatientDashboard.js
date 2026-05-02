@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
 import "./PatientDashboard.css";
-
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 function PatientDashboard() {
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
@@ -29,21 +36,27 @@ function PatientDashboard() {
 
       try {
         // Fetch appointments
-        const apptRes = await fetch(`http://localhost:5000/api/appointments/patient/${patientId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const apptRes = await fetch(
+          `http://localhost:5000/api/appointments/patient/${patientId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
         if (!apptRes.ok) throw new Error("Failed to fetch appointments");
         const apptData = await apptRes.json();
         setAppointments(Array.isArray(apptData) ? apptData : []);
 
         // Fetch prescriptions
-       const presRes = await fetch(`http://localhost:5000/api/patient-prescriptions/patient/${patientId}`, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
+        const presRes = await fetch(
+          `http://localhost:5000/api/patient-prescriptions/patient/${patientId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
         if (!presRes.ok) throw new Error("Failed to fetch prescriptions");
         const presData = await presRes.json();
@@ -68,52 +81,110 @@ function PatientDashboard() {
 
   return (
     <div className="main-content">
-            {/* Top Section */}
-            <div className="top-section mb-4">
-              <div className="d-flex align-items-center">
-                <User className="me-3 text-primary" size={40} />
-                <div>
-                  <div className="fw-bold">{patient.name}</div>
-                  <div className="text-muted">Age: {patient.age}</div>
-                  <div className="text-secondary">
-                    You have {appointments.length} appointments scheduled
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* TOP CARD (like doctor dashboard) */}
+      <div className="doctor-card d-flex align-items-center justify-content-between mb-4 p-3 shadow-sm rounded">
+  <div className="d-flex align-items-center">
+    <User size={60} className="me-3 text-primary" />
 
-            {/* Cards */}
-            <div className="card-grid mb-4">
-              <div className="card">
-                <div className="fw-bold">Appointments</div>
-                <div className="fs-4">{appointments.length}</div>
-              </div>
-              <div className="card">
-                <div className="fw-bold">Prescriptions</div>
-                <div className="fs-4">{prescriptions.length}</div>
-              </div>
-            </div>
+    <div>
+      <div className="fw-bold fs-5 mb-2">{patient.name}</div>
+      <div className="mb-1">
+        <strong>Age:</strong> {patient.age}
+      </div>
+      <div className="mb-1">
+        <strong>Upcoming Appointments:</strong>{" "}
+        {appointments.filter(a => a.status === "Pending").length}
+      </div>
+    </div>
+  </div>
+</div>
 
-            {/* Bottom Grid */}
-            <div className="bottom-grid mt-4">
-              <div className="chart-section small-card">
-                <div className="section-title">Upcoming Appointments</div>
-                {appointments.length > 0 ? (
-                  <ul>
-                    {appointments.map((appt) => (
-                      <li key={appt._id}>
-                        {appt.doctorId?.name} – {appt.doctorId?.department} –{" "}
-                        {new Date(appt.date).toLocaleDateString()} at {appt.time}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No upcoming appointments</p>
-                )}
-              </div>
-            </div>
+      {/* CARDS GRID */}
+      <div className="card-grid mb-4">
+        <div className="card">
+          <div className="fw-bold">Total Appointments</div>
+          <div className="fs-4">{appointments.length}</div>
+        </div>
+
+        <div className="card">
+          <div className="fw-bold">Pending Appointments</div>
+          <div className="fs-4 text-warning">
+            {appointments.filter((a) => a.status === "Pending").length}
           </div>
-    );
-  }
-  
-  export default PatientDashboard;
+        </div>
+
+        <div className="card">
+          <div className="fw-bold">Completed Appointments</div>
+          <div className="fs-4 text-success">
+            {appointments.filter((a) => a.status === "Completed").length}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="fw-bold">Prescriptions</div>
+          <div className="fs-4 text-primary">{prescriptions.length}</div>
+        </div>
+      </div>
+
+      {/* BOTTOM GRID */}
+      <div className="bottom-grid">
+        {/* PIE CHART */}
+        <div className="chart-section">
+          <div className="section-title">Appointment Status</div>
+
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={[
+                  {
+                    name: "Pending",
+                    value: appointments.filter((a) => a.status === "Pending")
+                      .length,
+                  },
+                  {
+                    name: "Completed",
+                    value: appointments.filter((a) => a.status === "Completed")
+                      .length,
+                  },
+                ]}
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                dataKey="value"
+              >
+                <Cell fill="#f59e0b" />
+                <Cell fill="#10b981" />
+              </Pie>
+
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* QUICK INSIGHTS */}
+        <div className="chart-section">
+          <div className="section-title">Quick Insights</div>
+
+          <div className="d-flex flex-column gap-3 mt-3">
+            <div>📋 {appointments.length} total appointments</div>
+
+            <div>
+              ⏳ {appointments.filter((a) => a.status === "Pending").length}{" "}
+              pending
+            </div>
+
+            <div>
+              ✅ {appointments.filter((a) => a.status === "Completed").length}{" "}
+              completed
+            </div>
+
+            <div>💊 {prescriptions.length} prescriptions received</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default PatientDashboard;

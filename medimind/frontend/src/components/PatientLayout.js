@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { User, FileText, Bell, Menu, X } from "lucide-react";
+import { User, FileText, Bell } from "lucide-react";
+import maleProfile from "../images/male.png";
+import femaleProfile from "../images/female.png";
 import Navbar from "./Navbar";
 import "./PatientDashboard.css";
 
@@ -10,7 +12,6 @@ const formatDate = (value) => {
 };
 
 function PatientLayout() {
-  const [showNotifications, setShowNotifications] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notificationsOpen, setNotificationsOpen] = useState(true);
   const [patient, setPatient] = useState(null);
@@ -27,6 +28,11 @@ function PatientLayout() {
     }
 
     const parsed = JSON.parse(storedPatient);
+    if (!parsed) {
+      navigate("/login-patient");
+      return;
+    }
+
     setPatient(parsed);
 
     const patientId = parsed._id || parsed.id || parsed.mrNo;
@@ -41,24 +47,27 @@ function PatientLayout() {
           Array.isArray(data)
             ? data
             : Array.isArray(data?.data)
-            ? data.data
-            : []
-        )
+              ? data.data
+              : [],
+        ),
       )
       .catch((err) => console.error(err));
 
-    fetch(`http://localhost:5000/api/patient-prescriptions/patient/${patientId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    })
+    fetch(
+      `http://localhost:5000/api/patient-prescriptions/patient/${patientId}`,
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      },
+    )
       .then((res) => res.json())
       .then((data) =>
         setPrescriptions(
           Array.isArray(data)
             ? data
             : Array.isArray(data?.data)
-            ? data.data
-            : []
-        )
+              ? data.data
+              : [],
+        ),
       )
       .catch((err) => console.error(err));
 
@@ -72,9 +81,9 @@ function PatientLayout() {
           Array.isArray(data)
             ? data
             : Array.isArray(data?.reports)
-            ? data.reports
-            : []
-        )
+              ? data.reports
+              : [],
+        ),
       )
       .catch((err) => console.error(err));
   }, [navigate]);
@@ -85,42 +94,29 @@ function PatientLayout() {
     navigate("/login-patient");
   };
 
-  if (!patient) return <div className="p-4">Loading patient data...</div>;
+  const profileIcon =
+    patient?.gender?.toLowerCase() === "male" ? maleProfile : femaleProfile;
 
   return (
     <>
       <Navbar />
-      <div className="neuro-dashboard d-flex">
-        {/* Sidebar Toggle Button */}
-        <button
-          className="sidebar-toggle"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          title={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-        >
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-
-        {/* Notification Toggle Button */}
-        <button
-          className="notification-toggle"
-          onClick={() => setNotificationsOpen(!notificationsOpen)}
-          title={notificationsOpen ? "Hide Notifications" : "Show Notifications"}
-        >
-          {notificationsOpen ? <X size={24} /> : <Bell size={24} />}
-        </button>
-
+      <div className="patient-dashboard d-flex">
         {/* Sidebar */}
         <div className={`sidebar p-3 ${sidebarOpen ? "open" : "closed"}`}>
           <div className="doctor-profile d-flex align-items-center mb-4">
-            <User className="me-3 text-primary" size={32} />
-            <div className="doctor-name fw-semibold">{patient.name}</div>
+            <img
+              src={profileIcon}
+              alt={patient?.name || "Patient"}
+              className="profile-icon me-3"
+            />
+            <div className="doctor-name fw-semibold">{patient?.name}</div>
           </div>
 
           <ul className="nav flex-column">
             <li className="nav-item">
               <Link
                 to="/PatientDashboard"
-                className="nav-link"
+                className="nav-link sidebar-link"
                 onClick={() => {
                   if (window.innerWidth <= 768) setSidebarOpen(false);
                 }}
@@ -131,7 +127,7 @@ function PatientLayout() {
             <li className="nav-item">
               <Link
                 to="/PatientDashboard/patient-records"
-                className="nav-link"
+                className="nav-link sidebar-link"
                 onClick={() => {
                   if (window.innerWidth <= 768) setSidebarOpen(false);
                 }}
@@ -142,7 +138,7 @@ function PatientLayout() {
             <li className="nav-item">
               <Link
                 to="/PatientDashboard/appointment"
-                className="nav-link"
+                className="nav-link sidebar-link"
                 onClick={() => {
                   if (window.innerWidth <= 768) setSidebarOpen(false);
                 }}
@@ -153,7 +149,7 @@ function PatientLayout() {
             <li className="nav-item">
               <Link
                 to="/PatientDashboard/profile"
-                className="nav-link"
+                className="nav-link sidebar-link"
                 onClick={() => {
                   if (window.innerWidth <= 768) setSidebarOpen(false);
                 }}
@@ -163,10 +159,7 @@ function PatientLayout() {
             </li>
 
             <li className="nav-item">
-              <button
-                className="btn btn-link nav-link text-danger"
-                onClick={handleLogout}
-              >
+              <button className="logout-btn" onClick={handleLogout}>
                 Logout
               </button>
             </li>
@@ -174,56 +167,78 @@ function PatientLayout() {
         </div>
 
         {/* Main Content */}
-        <div className="content p-4 flex-grow-1">
+        <div className="content p-4 flex-grow-1 position-relative">
           <Outlet context={{ patient, appointments }} />
+
+          {!notificationsOpen && (
+            <button
+              className="show-btn"
+              onClick={() => setNotificationsOpen(true)}
+            >
+              Show Notifications
+            </button>
+          )}
         </div>
 
         {/* Notifications */}
-        <div className={`notification-panel p-3 ${notificationsOpen ? "open" : "closed"}`}>
-          <h5>
-            <Bell className="me-2" size={18} />
-            Notifications
-          </h5>
-          <ul>
-            {(() => {
-              const notifications = [];
-              const safeAppointments = Array.isArray(appointments) ? appointments : [];
-              const safePrescriptions = Array.isArray(prescriptions) ? prescriptions : [];
-              const safeReports = Array.isArray(reports) ? reports : [];
+        {notificationsOpen && (
+          <div className="notification-panel p-3">
+            <h5>
+              <Bell className="me-2" size={18} />
+              Notifications
+            </h5>
+            <ul>
+              {(() => {
+                const notifications = [];
+                const safeAppointments = Array.isArray(appointments)
+                  ? appointments
+                  : [];
+                const safePrescriptions = Array.isArray(prescriptions)
+                  ? prescriptions
+                  : [];
+                const safeReports = Array.isArray(reports) ? reports : [];
 
-              // Add appointment notifications
-              safeAppointments.slice(0, 3).forEach((appt, index) => {
-                notifications.push(
-                  `Appointment ${index + 1}: ${new Date(appt.date).toLocaleDateString()} at ${appt.time} with ${appt.doctorId?.name} (${appt.doctorId?.department})`
+                // Add appointment notifications
+                safeAppointments.slice(0, 3).forEach((appt, index) => {
+                  notifications.push(
+                    `Appointment ${index + 1}: ${new Date(appt.date).toLocaleDateString()} at ${appt.time} with ${appt.doctorId?.name} (${appt.doctorId?.department})`,
+                  );
+                });
+
+                // Add prescription notifications
+                safePrescriptions.slice(0, 3).forEach((pres, index) => {
+                  const date = formatDate(pres.date || pres.createdAt);
+                  notifications.push(
+                    `Prescription ${index + 1}:  Issued by ${pres.doctor?.name || "Unknown Doctor"} for ${pres.patient?.name || "patient"} on ${date || "Date unavailable"}`,
+                  );
+                });
+
+                // Add report notifications
+                safeReports.slice(0, 3).forEach((report, index) => {
+                  const date = formatDate(report.createdAt || report.date);
+                  notifications.push(
+                    `Report ${index + 1}:  Verified by ${report.doctor?.name || "Unknown Doctor"} for ${report.patient?.name || "patient"} on ${date || "Date unavailable"}`,
+                  );
+                });
+
+                return notifications.length > 0 ? (
+                  notifications.map((notif, index) => (
+                    <li key={index}>{notif}</li>
+                  ))
+                ) : (
+                  <li>No new notifications</li>
                 );
-              });
+              })()}
+            </ul>
 
-              // Add prescription notifications
-              safePrescriptions.slice(0, 3).forEach((pres, index) => {
-                const date = formatDate(pres.date || pres.createdAt);
-                notifications.push(
-                  `Prescription ${index + 1}:  Issued by ${pres.doctor?.name || "Unknown Doctor" } for ${pres.patient?.name || "patient"} on ${date || "Date unavailable"}`
-                );
-              });
-
-              // Add report notifications
-              safeReports.slice(0, 3).forEach((report, index) => {
-                const date = formatDate(report.createdAt || report.date);
-                notifications.push(
-                  `Report ${index + 1}:  Verified by ${report.doctor?.name || "Unknown Doctor" } for ${report.patient?.name || "patient"} on ${date || "Date unavailable"}`
-                );
-              });
-
-              return notifications.length > 0 ? (
-                notifications.map((notif, index) => (
-                  <li key={index}>{notif}</li>
-                ))
-              ) : (
-                <li>No new notifications</li>
-              );
-            })()}
-          </ul>
-        </div>
+            <button
+              className="btn btn-sm btn-outline-secondary mt-2"
+              onClick={() => setNotificationsOpen(false)}
+            >
+              Hide
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

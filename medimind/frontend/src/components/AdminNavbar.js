@@ -11,7 +11,7 @@ function AdminNavbar({ adminInfo, onLogout }) {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const profileIcon =
-    adminInfo?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile;
+    adminInfo?.gender?.toLowerCase() === "male" ? maleProfile : femaleProfile;
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
@@ -27,7 +27,10 @@ function AdminNavbar({ adminInfo, onLogout }) {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light px-4 shadow-sm" style={{ height: "80px" }}>
+    <nav
+      className="navbar navbar-expand-lg navbar-light bg-light px-4 shadow-sm"
+      style={{ height: "80px" }}
+    >
       {/* LOGO */}
       <div className="d-flex align-items-center">
         <a className="navbar-brand d-flex align-items-center" href="/">
@@ -98,7 +101,10 @@ function AdminNavbar({ adminInfo, onLogout }) {
                 Role: {adminInfo?.role || "N/A"}
               </div>
               <div className="dropdown-divider"></div>
-              <button className="dropdown-item text-danger" onClick={handleLogout}>
+              <button
+                className="dropdown-item text-danger"
+                onClick={handleLogout}
+              >
                 <LogOut size={14} className="me-2" />
                 Logout
               </button>
