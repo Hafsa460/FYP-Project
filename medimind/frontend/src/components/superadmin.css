@@ -1,0 +1,129 @@
+.super-layout {
+  display: flex;
+  height: 100vh;
+  background-color: #e6ecec;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* SUPER ADMIN SIDEBAR */
+.super-sidebar {
+  width: 250px;
+  background: #ffffff;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.super-sidebar h2 {
+  color: #059da8;
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.super-nav {
+  padding: 10px 15px;
+  border-radius: 10px;
+  background: #f8f9fa;
+  color: #059da8;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: 500;
+}
+
+.super-nav:hover {
+  background: #76ced4;
+  color: white;
+}
+
+.super-nav.active {
+  background: #059da8;
+  color: white;
+}
+
+/* MAIN AREA */
+.super-main {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* HEADER */
+.super-header {
+  font-size: 22px;
+  font-weight: bold;
+  color: #059da8;
+  margin-bottom: 20px;
+}
+
+/* GRID CARDS */
+.super-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.super-card {
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+}
+
+.super-card:hover {
+  transform: translateY(-3px);
+}
+
+.super-card-title {
+  font-size: 14px;
+  color: #777;
+}
+
+.super-card-value {
+  font-size: 26px;
+  font-weight: bold;
+  color: #059da8;
+  margin-top: 8px;
+}
+
+/* TABLE STYLE */
+.super-table {
+  width: 100%;
+  margin-top: 20px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+.super-table th {
+  background: #059da8;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.super-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.super-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.super-btn.add {
+  background: #059da8;
+  color: white;
+}
+
+.super-btn.delete {
+  background: #e22639;
+  color: white;
+}
