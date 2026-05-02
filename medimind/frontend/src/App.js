@@ -43,8 +43,9 @@ import PatientDetails from "./components/PatientAdmin/PatientDetails";
 import AdminLogin from "./components/AdminLogin";
 import Doctoradmin from "./components/DoctorAdmin";
 import Dptadmin from "./components/DptAdmin";
-import Superadmin from "./components/SuperAdmin";
 import PatientSetPassword from "./components/PatientAdmin/SetPassword";
+import SuperAdminLayout from "./components/SuperAdminLayout";
+
 // Doctor Admin Dashboard pages
 import DoctorAdminLayout from "./components/DoctorAdmin/DoctorAdminLayout";
 import DoctorAdminDashboard from "./components/DoctorAdmin/DoctorAdminDashboard";
@@ -102,8 +103,8 @@ function App() {
 
       {/* Admin */}
       <Route path="/adminLogin" element={<AdminLogin />} />
-      <Route path="/dept-admin/*" element={<Dptadmin />} />
-      <Route path="/super" element={<Superadmin />} />
+      <Route path="/department" element={<Dptadmin />} />
+      <Route path="/super" element={<SuperAdminLayout />} />
       <Route path="/dctr" element={<Doctoradmin />} />
 
       {/* Patient Admin */}

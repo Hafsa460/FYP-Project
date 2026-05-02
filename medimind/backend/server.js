@@ -5,6 +5,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
+
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/auth");
 const doctorAuthRoutes = require("./routes/doctorAuth");
@@ -18,6 +19,10 @@ const prescriptionPatientRoutes = require("./routes/prescriptionPatient");
 const doctorAdminRoutes = require("./routes/doctorAdminRoutes");
 const reportRoutes = require("./routes/reportRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
+
+
+const superAdminRoutes = require("./routes/superAdminRoutes");
+
 const app = express();
 
 // Frontend URL from .env or default
@@ -38,10 +43,14 @@ app.use((req, res, next) => {
   next();
 });
 
-
+// MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected successfully"))
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    dbName: "hospital",
+  })
+  .then(() => console.log("✅ MongoDB connected to 'hospital' database"))
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);
     process.exit(1);
@@ -58,7 +67,7 @@ app.get("/api/doctor-admin/test", (req, res) => {
   res.json({ success: true, message: "Doctor admin routes are working" });
 });
 
-
+// ================= ROUTES =================
 
 // Prescriptions
 app.use("/api/prescriptions", prescriptionRoutes);
@@ -67,7 +76,6 @@ console.log("Prescription routes mounted at /api/prescriptions");
 // Prescriptions (Patient-specific)
 app.use("/api/patient-prescriptions", prescriptionPatientRoutes);
 console.log("Prescription (patient) routes mounted at /api/patient-prescriptions");
-
 
 // Users
 app.use("/api/users", userRoutes);
@@ -82,13 +90,16 @@ app.use("/api/password", passwordRoutes);
 console.log("Password routes mounted at /api/password");
 
 // Doctors
-app.use("/api/doctors", doctorRoutes); // for doctor data (GET /api/doctors)
+app.use("/api/doctors", doctorRoutes);
 console.log("Doctor routes mounted at /api/doctors");
-app.use("/api/doctor-auth", doctorAuthRoutes); // for doctor authentication
+
+app.use("/api/doctor-auth", doctorAuthRoutes);
 console.log("Doctor auth routes mounted at /api/doctor-auth");
 
+// Departments
 const departmentRoutes = require("./routes/departmentRoutes");
 app.use("/api/departments", departmentRoutes);
+console.log("Department routes mounted at /api/departments");
 
 // Appointments
 app.use("/api/appointments", appointmentRoutes);
@@ -102,23 +113,23 @@ console.log("Admin routes mounted at /api/admins");
 app.use("/api/adminpatient", patientRoutes);
 console.log("Patient routes mounted at /api/adminpatient");
 
-// Remove this duplicate line:
-app.use("/api/prescriptions", prescriptionRoutes);
-console.log("Prescription routes mounted at /api/prescriptions");
-
-
+// Doctor Admin
 app.use("/api/doctor-admin", doctorAdminRoutes);
 console.log("Doctor admin routes mounted at /api/doctor-admin");
 
+app.use("/api/superadmin", superAdminRoutes);
+console.log("Super admin routes mounted at /api/superadmin");
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // allow files to be served
+// Reports
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/reports", reportRoutes);
 console.log("Report routes mounted at /api/reports");
 
-
+// Feedback
 app.use("/api/feedback", feedbackRoutes);
 console.log("Feedback routes mounted at /api/feedback");
-// ===================== START SERVER =====================
+
+// ================= START SERVER =================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

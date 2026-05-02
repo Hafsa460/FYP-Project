@@ -19,22 +19,41 @@ export default function AdminLogin() {
     try {
       const res = await axios.post("http://localhost:5000/api/admins/login", {
         id: Number(id.trim()),
-        password: password.trim(),
+        password: password,
       });
 
-      localStorage.setItem("adminToken", res.data.token);
-      localStorage.setItem("adminRole", res.data.role);
-      localStorage.setItem("adminName", res.data.name);
+      // 🔥 DEBUG: show backend response
+      console.log("LOGIN RESPONSE:", res.data);
+
+      // ❌ SAFETY CHECK (prevents silent null token issues)
+      if (!res.data || !res.data.token) {
+        console.error("NO TOKEN RETURNED FROM BACKEND:", res.data);
+        setError("Login failed: no token received from server");
+        return;
+      }
+
+      // ✅ STORE TOKEN CORRECTLY
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", res.data.role);
+      localStorage.setItem("name", res.data.name);
+
+      console.log("TOKEN SAVED:", localStorage.getItem("token"));
 
       // ✅ Role-based redirection
       if (res.data.role === "doctorAdmin") navigate("/doctor-admin");
       else if (res.data.role === "patientAdmin") navigate("/patient-admin");
-      else if (res.data.role === "departmentAdmin") navigate("/dept-admin");
+      //else if (res.data.role === "departmentAdmin") navigate("/dept-admin");
+      else if (res.data.role === "departmentAdmin") navigate("/department"); 
       else if (res.data.role === "superAdmin") navigate("/super");
+      else navigate("/adminLogin");
+
     } catch (err) {
-      console.error("Login error:", err.response?.data);
+      console.error("Login error FULL:", err);
+      console.error("Backend response:", err.response?.data);
+
       setError(
-        err.response?.data?.message || "Login failed. Please try again."
+        err.response?.data?.message ||
+        "Login failed. Please try again."
       );
     }
   };
@@ -42,6 +61,7 @@ export default function AdminLogin() {
   return (
     <div className="login-page d-flex align-items-center justify-content-center">
       <div className="login-container shadow-lg row w-100">
+
         {/* Left Image Section */}
         <div className="col-md-6 image-section">
           <a href="/dash">
@@ -61,6 +81,7 @@ export default function AdminLogin() {
           {error && <div className="alert alert-danger">{error}</div>}
 
           <form onSubmit={handleLogin}>
+
             {/* Admin ID */}
             <div className="mb-3">
               <label className="form-label">Admin ID</label>
@@ -77,6 +98,7 @@ export default function AdminLogin() {
             {/* Password */}
             <div className="mb-3">
               <label className="form-label">Password</label>
+
               <div className="password-wrapper">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -86,11 +108,11 @@ export default function AdminLogin() {
                   placeholder="Enter Password"
                   required
                 />
+
                 <button
                   type="button"
                   className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -101,6 +123,7 @@ export default function AdminLogin() {
             <button type="submit" className="btn btn-teal w-100 mt-3">
               Login
             </button>
+
           </form>
         </div>
       </div>
