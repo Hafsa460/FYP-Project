@@ -6,7 +6,7 @@
   overflow: hidden;
 }
 
-.sidebar {
+.neuro-dashboard .sidebar {
   background: #4fa8bb;
   width: 320px;
   min-width: 320px;
@@ -16,13 +16,13 @@
 }
 
 /* remove bullets */
-.sidebar-menu {
+.neuro-dashboard .sidebar-menu {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.sidebar-link {
+.neuro-dashboard .sidebar-link {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -45,7 +45,7 @@
   cursor: pointer;
 }
 
-.sidebar-link:hover {
+.neuro-dashboard .sidebar-link:hover {
   background: white;
   color: #059da8 !important;
   transform: translateX(4px);
@@ -54,21 +54,21 @@
 }
 
 /* button reset */
-.sidebar-button {
+.neuro-dashboard .sidebar-button {
   border: none;
   outline: none;
   font-family: inherit;
 }
 
 /* nested dropdown buttons */
-.nested-links {
+.neuro-dashboard .nested-links {
   list-style: none;
   padding-left: 14px;
   margin-top: 8px;
   margin-bottom: 10px;
 }
 
-.nested-links .sidebar-link {
+.neuro-dashboard .nested-links .sidebar-link {
   background: rgba(255, 255, 255, 0.12);
   font-size: 14px;
   border-radius: 12px;
@@ -76,17 +76,17 @@
 }
 
 /* logout button */
-.logout-btn {
+.neuro-dashboard .logout-btn {
   background: rgba(255, 255, 255, 0.15);
 }
 
-.logout-btn:hover {
+.neuro-dashboard .logout-btn:hover {
   background: #ffffff;
   color: #dc3545 !important;
 }
 
 /* doctor section */
-.sidebar-header {
+.neuro-dashboard .sidebar-header {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -95,19 +95,19 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.25);
 }
 
-.doctor-name {
+.neuro-dashboard .doctor-name {
   color: white;
   font-size: 24px;
   font-weight: 700;
 }
 
-.doctor-role {
+.neuro-dashboard .doctor-role {
   color: rgba(255, 255, 255, 0.85);
   font-size: 15px;
 }
 /* Profile image */
 
-.sidebar-header .profile-icon {
+.neuro-dashboard .sidebar-header .profile-icon {
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -115,7 +115,7 @@
   border: 2px solid #059da8;
 }
 
-.sidebar-header .profile-icon {
+.neuro-dashboard .sidebar-header .profile-icon {
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -123,34 +123,34 @@
   border: 2px solid #059da8;
 }
 
-.sidebar-meta {
+.neuro-dashboard .sidebar-meta {
   min-width: 0;
 }
 
-.doctor-name {
+.neuro-dashboard .doctor-name {
   font-size: 1rem;
   color: #08425d;
   margin: 0;
 }
 
-.doctor-role {
+.neuro-dashboard .doctor-role {
   font-size: 0.88rem;
   color: #5c7d8a;
   margin-top: 0.25rem;
 }
 
-.sidebar-menu {
+.neuro-dashboard .sidebar-menu {
   padding: 0 0.5rem;
 }
 
-.sidebar .nested-links {
+.neuro-dashboard .sidebar .nested-links {
   margin-top: 0.75rem;
   padding-left: 1rem;
   display: grid;
   gap: 0.5rem;
 }
 
-.sidebar .nested-links .nav-link {
+.neuro-dashboard .sidebar .nested-links .nav-link {
   background-color: #e6fbfd;
   color: #0a6170;
   font-size: 0.95rem;
@@ -159,12 +159,12 @@
   border-color: rgba(5, 157, 168, 0.08);
 }
 
-.sidebar .nested-links .nav-link:hover,
-.sidebar .nested-links .nav-link:focus {
+.neuro-dashboard .sidebar .nested-links .nav-link:hover,
+.neuro-dashboard .sidebar .nested-links .nav-link:focus {
   background-color: #d8f3f8;
 }
 
-.content {
+.neuro-dashboard .content {
   flex-grow: 1;
   padding: 24px;
   overflow-y: auto;
@@ -172,7 +172,7 @@
   background-color: #ffffff;
 }
 
-.main-content {
+.neuro-dashboard .main-content {
   width: 100%;
   min-height: 0;
   padding: 24px;
@@ -181,7 +181,7 @@
   box-shadow: 0 16px 40px rgba(8, 64, 75, 0.06);
 }
 
-.doctor-card {
+.neuro-dashboard .doctor-card {
   background-color: #ffffff;
   border-radius: 22px;
   box-shadow: 0 15px 35px rgba(5, 157, 168, 0.08);
@@ -193,20 +193,20 @@
   margin-bottom: 24px;
 }
 
-.doctor-card .profile-icon {
+.neuro-dashboard .doctor-card .profile-icon {
   width: 72px;
   height: 72px;
   border-width: 3px;
 }
 
-.card-grid {
+.neuro-dashboard .card-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
   margin-bottom: 24px;
 }
 
-.card-grid .card {
+.neuro-dashboard .card-grid .card {
   background-color: #ffffff;
   border-radius: 18px;
   padding: 24px 20px;
@@ -217,29 +217,29 @@
     box-shadow 0.2s ease;
 }
 
-.card-grid .card:hover {
+.neuro-dashboard .card-grid .card:hover {
   transform: translateY(-3px);
   box-shadow: 0 18px 32px rgba(5, 157, 168, 0.12);
 }
 
-.card-grid .card .fw-bold {
+.neuro-dashboard .card-grid .card .fw-bold {
   color: #475569;
   margin-bottom: 0.75rem;
 }
 
-.card-grid .card .fs-4 {
+.neuro-dashboard .card-grid .card .fs-4 {
   font-size: 2rem;
   color: #059da8;
 }
 
-.bottom-grid {
+.neuro-dashboard .bottom-grid {
   display: grid;
   grid-template-columns: 1.3fr 0.9fr;
   gap: 1rem;
   align-items: stretch;
 }
 
-.chart-section {
+.neuro-dashboard .chart-section {
   background: #ffffff;
   padding: 20px;
   border-radius: 22px;
@@ -249,33 +249,33 @@
   max-height: 420px;
 }
 
-.chart-section::-webkit-scrollbar {
+.neuro-dashboard .chart-section::-webkit-scrollbar {
   display: none;
 }
 
-.chart-section {
+.neuro-dashboard .chart-section {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-.section-title {
+.neuro-dashboard .section-title {
   font-size: 1.2rem;
   font-weight: 700;
   color: #059da8;
   margin-bottom: 1rem;
 }
 
-.chart-section ul {
+.neuro-dashboard .chart-section ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.chart-section .d-flex {
+.neuro-dashboard .chart-section .d-flex {
   gap: 0.85rem;
 }
 
-.chart-section li {
+.neuro-dashboard .chart-section li {
   display: flex;
   align-items: center;
   gap: 0.85rem;
@@ -284,11 +284,11 @@
   font-weight: 500;
 }
 
-.chart-section li:last-child {
+.neuro-dashboard .chart-section li:last-child {
   margin-bottom: 0;
 }
 
-.notification-panel {
+.neuro-dashboard .notification-panel {
   width: 320px;
   min-width: 320px;
   background: #ffffff;
@@ -300,7 +300,7 @@
   border-radius: 0 !important;
 }
 
-.notification-panel h5 {
+.neuro-dashboard .notification-panel h5 {
   font-size: 20px;
   font-weight: 700;
   color: #059da8;
@@ -311,7 +311,7 @@
 
 /* Notification list */
 
-.notification-panel ul {
+.neuro-dashboard .notification-panel ul {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -319,7 +319,7 @@
 
 /* Each notification */
 
-.notification-panel li {
+.neuro-dashboard .notification-panel li {
   background: #f8fcfc;
   border: 1px solid #e8f4f6;
   padding: 14px 14px;
@@ -333,14 +333,14 @@
 
 /* Hover */
 
-.notification-panel li:hover {
+.neuro-dashboard .notification-panel li:hover {
   background: #f1fbfc;
   border-color: rgba(5, 157, 168, 0.18);
 }
 
 /* Hide button */
 
-.notification-panel button {
+.neuro-dashboard .notification-panel button {
   width: 100%;
   margin-top: 16px;
   padding: 12px;
@@ -352,7 +352,7 @@
   transition: 0.25s ease;
 }
 
-.notification-panel button:hover {
+.neuro-dashboard .notification-panel button:hover {
   background: #059da8;
   color: white;
   border-color: #059da8;
@@ -360,7 +360,7 @@
 
 /* Show button */
 
-.show-btn {
+.neuro-dashboard .show-btn {
   position: absolute;
   bottom: 20px;
   right: 20px;
@@ -374,18 +374,18 @@
   transition: 0.25s ease;
 }
 
-.show-btn:hover {
+.neuro-dashboard .show-btn:hover {
   background: #047b84;
 }
 
 @media (max-width: 1200px) {
-  .sidebar,
-  .notification-panel {
+  .neuro-dashboard .sidebar,
+  .neuro-dashboard .notification-panel {
     width: 240px;
     min-width: 240px;
   }
 
-  .card-grid {
+  .neuro-dashboard .card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -396,32 +396,32 @@
     min-height: auto;
   }
 
-  .sidebar,
-  .notification-panel {
+  .neuro-dashboard .sidebar,
+  .neuro-dashboard .notification-panel {
     width: 100%;
     min-width: 100%;
     border-radius: 24px;
   }
 
-  .content {
+  .neuro-dashboard .content {
     padding: 16px;
   }
 
-  .bottom-grid {
+  .neuro-dashboard .bottom-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .sidebar {
+  .neuro-dashboard .sidebar {
     padding: 20px 18px;
   }
 
-  .content {
+  .neuro-dashboard .content {
     padding: 16px;
   }
 
-  .card-grid {
+  .neuro-dashboard .card-grid {
     grid-template-columns: 1fr;
   }
 }

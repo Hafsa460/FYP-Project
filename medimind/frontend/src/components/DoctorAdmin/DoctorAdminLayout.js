@@ -31,7 +31,9 @@ function DoctorAdminLayout() {
         if (data.success) {
           setAdmin(data.admin);
           // Load stored notifications for this admin
-          const stored = adminNotificationService.getStoredNotifications(data.admin.id);
+          const stored = adminNotificationService.getStoredNotifications(
+            data.admin.id,
+          );
           setNotifications(stored);
         } else {
           console.error("Failed to fetch admin:", data.error);
@@ -51,11 +53,11 @@ function DoctorAdminLayout() {
   // Subscribe to notifications
   useEffect(() => {
     if (!admin) return;
-    
+
     const unsubscribe = adminNotificationService.subscribe((notification) => {
       // Only add notifications for this admin
       if (notification.adminId === admin.id) {
-        setNotifications(prev => [notification, ...prev]);
+        setNotifications((prev) => [notification, ...prev]);
       }
     });
 
@@ -72,39 +74,75 @@ function DoctorAdminLayout() {
     <>
       <AdminNavbar adminInfo={admin} onLogout={handleLogout} />
       <div className="admin-layout d-flex">
-
         {/* Sidebar */}
         <div className="sidebar p-3">
           <div className="admin-profile d-flex align-items-center mb-4">
-            <img src={admin?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile} alt="Admin" className="profile-icon me-3" />
+            <img
+              src={
+                admin?.gender?.toLowerCase() === "male"
+                  ? maleProfile
+                  : femaleProfile
+              }
+              alt="Admin"
+              className="profile-icon me-3"
+            />
             <div className="admin-details fw-semibold">
-              {loading ? "Loading..." : admin ? `${admin.name}` : "Doctor Admin"}
+              {loading
+                ? "Loading..."
+                : admin
+                  ? `${admin.name}`
+                  : "Doctor Admin"}
               <div className="text-muted small">ID: {admin?.id ?? "N/A"}</div>
-              <div className="text-muted small">Role: {admin?.role ?? "N/A"}</div>
+              <div className="text-muted small">
+                Role: {admin?.role ?? "N/A"}
+              </div>
             </div>
           </div>
 
           <ul className="nav flex-column">
             <li className="nav-item">
-              <Link to="/doctor-admin" className="nav-link">Dashboard</Link>
+              <Link to="/doctor-admin" className="nav-link">
+                Dashboard
+              </Link>
             </li>
             <li className="nav-item">
-              <Link to="doctors" className="nav-link">Manage Doctors</Link>
+              <Link to="doctors" className="nav-link">
+                Manage Doctors
+              </Link>
             </li>
             <li className="nav-item">
-              <Link to="/doctor-admin/notifications" className="nav-link">Notifications</Link>
+              <Link to="/doctor-admin/notifications" className="nav-link">
+                Notifications
+              </Link>
             </li>
             <li className="nav-item">
-              <button className="btn btn-link nav-link text-danger" onClick={handleLogout}>Logout</button>
+              <button
+                className="btn btn-link nav-link text-danger"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
             </li>
           </ul>
         </div>
 
         {/* Main Content */}
         <div className="content p-4 flex-grow-1 position-relative">
-          <Outlet context={{ notify: adminNotificationService.notify.bind(adminNotificationService), admin }} />
+          <Outlet
+            context={{
+              notify: adminNotificationService.notify.bind(
+                adminNotificationService,
+              ),
+              admin,
+            }}
+          />
           {!showNotifications && (
-            <button className="btn btn-sm btn-info show-btn" onClick={() => setShowNotifications(true)}>Show Notifications</button>
+            <button
+              className="btn btn-sm btn-info show-btn"
+              onClick={() => setShowNotifications(true)}
+            >
+              Show Notifications
+            </button>
           )}
         </div>
 
@@ -121,7 +159,12 @@ function DoctorAdminLayout() {
                 <li>No notifications yet</li>
               )}
             </ul>
-            <button className="btn btn-sm btn-outline-secondary mt-2" onClick={() => setShowNotifications(false)}>Hide</button>
+            <button
+              className="btn btn-sm btn-outline-secondary mt-2"
+              onClick={() => setShowNotifications(false)}
+            >
+              Hide
+            </button>
           </div>
         ) : null}
       </div>
