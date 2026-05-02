@@ -15,65 +15,89 @@ function NeuroLayout() {
   const [prescriptionOpen, setPrescriptionOpen] = useState(false);
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [appointments, setAppointments] = useState([]); // ✅ Store upcoming appointments
-  const [prescriptions, setPrescriptions] = useState([]); // ✅ Store recent prescriptions
-  const [reports, setReports] = useState([]); // ✅ Store recent reports
+  const [appointments, setAppointments] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [reports, setReports] = useState([]);
+
   const navigate = useNavigate();
 
-  // Fetch logged-in doctor
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
         const token = localStorage.getItem("doctorToken");
+
         if (!token) {
           navigate("/login-doctor");
           return;
         }
 
         const res = await fetch("http://localhost:5000/api/doctor-auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         const data = await res.json();
+
         if (data.success) {
           setDoctor(data.doctor);
 
-          // Fetch upcoming appointments for this doctor
+          // Upcoming appointments
           const apptRes = await fetch(
             `http://localhost:5000/api/doctor-auth/${data.doctor._id}/upcoming`,
-            { headers: { Authorization: `Bearer ${token}` } },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
           );
 
           if (!apptRes.ok) {
-            console.error("Failed to fetch appointments:", apptRes.status);
-            setAppointments([]); // fallback
-            return;
+            console.error("Failed to fetch appointments");
+            setAppointments([]);
+          } else {
+            const apptData = await apptRes.json();
+            if (apptData.success) {
+              setAppointments(apptData.appointments);
+            }
           }
 
-          const apptData = await apptRes.json();
-          if (apptData.success) setAppointments(apptData.appointments);
-
-          // Fetch recent prescriptions by this doctor
+          // Prescriptions
           const presRes = await fetch(
             `http://localhost:5000/api/doctor-auth/${data.doctor._id}/prescriptions`,
-            { headers: { Authorization: `Bearer ${token}` } },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
           );
-          const presData = await presRes.json();
-          if (presData.success)
-            setPrescriptions(presData.prescriptions.slice(-5)); // Last 5
 
-          // Fetch recent reports by this doctor
+          const presData = await presRes.json();
+
+          if (presData.success) {
+            setPrescriptions(presData.prescriptions.slice(-5));
+          }
+
+          // Reports
           const reportRes = await fetch(
             `http://localhost:5000/api/doctor-auth/${data.doctor._id}/reports`,
-            { headers: { Authorization: `Bearer ${token}` } },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
           );
+
           const reportData = await reportRes.json();
-          if (reportData.success) setReports(reportData.reports.slice(0, 5)); // Last 5
+
+          if (reportData.success) {
+            setReports(reportData.reports.slice(0, 5));
+          }
         } else {
           navigate("/login-doctor");
         }
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
         navigate("/login-doctor");
       } finally {
         setLoading(false);
@@ -95,64 +119,77 @@ function NeuroLayout() {
   return (
     <>
       <Navbar />
+
       <div
-        className={`neuro-dashboard d-flex ${showNotifications ? "with-notifications" : ""}`}
+        className={`neuro-dashboard d-flex ${
+          showNotifications ? "with-notifications" : ""
+        }`}
       >
-        {/* Sidebar */}
-        <div className="sidebar p-3">
+        {/* SIDEBAR */}
+        <div className="sidebar">
           <div className="sidebar-header">
             <img src={profileIcon} alt="Doctor" className="profile-icon" />
+
             <div className="sidebar-meta">
               <div className="doctor-name fw-semibold">
                 {loading ? "Loading..." : doctor ? doctor.name : "Not Found"}
               </div>
+
               <div className="doctor-role text-muted">
                 {doctor?.designation || "Neurologist"}
               </div>
             </div>
           </div>
 
-          <ul className="nav flex-column sidebar-menu">
-            <li className="nav-item">
+          <ul className="sidebar-menu">
+            <li>
               <Link
                 to="/neuro-dashboard/appointment-schedule"
-                className="nav-link"
+                className="sidebar-link"
               >
                 Appointment Schedule
               </Link>
             </li>
+
             {doctor?.department?.toLowerCase() === "neurology" && (
-              <li className="nav-item">
-                <Link to="/neuro-dashboard/verify-reports" className="nav-link">
+              <li>
+                <Link
+                  to="/neuro-dashboard/verify-reports"
+                  className="sidebar-link"
+                >
                   Verify Test Reports
                 </Link>
               </li>
             )}
-            <li className="nav-item">
+
+            <li>
               <Link
                 to="/neuro-dashboard/profile-management"
-                className="nav-link"
+                className="sidebar-link"
               >
                 Profile Management
               </Link>
             </li>
-            <li className="nav-item">
+
+            <li>
               <button
-                className="btn btn-link nav-link d-flex justify-content-between align-items-center"
+                className="sidebar-link sidebar-button"
                 onClick={() => setPrescriptionOpen(!prescriptionOpen)}
               >
-                Prescription Management
+                <span>Prescription Management</span>
                 <span>{prescriptionOpen ? "▲" : "▼"}</span>
               </button>
+
               {prescriptionOpen && (
-                <ul className="nav flex-column ms-3">
-                  <li className="nav-item">
-                    <Link to="/neuro-dashboard/add" className="nav-link">
+                <ul className="nested-links">
+                  <li>
+                    <Link to="/neuro-dashboard/add" className="sidebar-link">
                       Add Prescription
                     </Link>
                   </li>
-                  <li className="nav-item">
-                    <Link to="/neuro-dashboard/view" className="nav-link">
+
+                  <li>
+                    <Link to="/neuro-dashboard/view" className="sidebar-link">
                       View Prescriptions
                     </Link>
                   </li>
@@ -160,9 +197,9 @@ function NeuroLayout() {
               )}
             </li>
 
-            <li className="nav-item">
+            <li>
               <button
-                className="btn btn-link nav-link text-danger"
+                className="sidebar-link logout-btn"
                 onClick={handleLogout}
               >
                 Logout
@@ -171,12 +208,13 @@ function NeuroLayout() {
           </ul>
         </div>
 
-        {/* Main Content */}
+        {/* MAIN CONTENT */}
         <div className="content p-4 flex-grow-1 position-relative">
           <Outlet />
+
           {!showNotifications && (
             <button
-              className="btn btn-sm btn-info show-btn"
+              className="show-btn"
               onClick={() => setShowNotifications(true)}
             >
               Show Notifications
@@ -184,33 +222,48 @@ function NeuroLayout() {
           )}
         </div>
 
-        {showNotifications ? (
+        {/* NOTIFICATION PANEL */}
+        {showNotifications && (
           <div className="notification-panel p-3">
             <h5>Notifications</h5>
+
             <ul>
               {(() => {
                 const notifications = [];
 
-                // Add appointment notifications
                 appointments.slice(0, 3).forEach((appt, index) => {
                   const date = formatDate(appt.date);
+
                   notifications.push(
-                    `Appointment ${index + 1}: ${date || "Date unavailable"} at ${appt.time} with ${appt.patientId?.name || "Unknown Patient"}`,
+                    `Appointment ${index + 1}: ${
+                      date || "Date unavailable"
+                    } at ${appt.time} with ${
+                      appt.patientId?.name || "Unknown Patient"
+                    }`,
                   );
                 });
 
-                // Add prescription notifications
                 prescriptions.slice(0, 3).forEach((pres, index) => {
                   const date = formatDate(pres.date || pres.createdAt);
+
                   notifications.push(
-                    `Prescription ${index + 1}: Issued by ${doctor?.name || "Unknown Doctor"} for ${pres.patient?.name || "Unknown Patient"} on ${date || "Date unavailable"}`,
+                    `Prescription ${index + 1}: Issued by ${
+                      doctor?.name || "Unknown Doctor"
+                    } for ${
+                      pres.patient?.name || "Unknown Patient"
+                    } on ${date || "Date unavailable"}`,
                   );
                 });
 
                 reports.slice(0, 3).forEach((report, index) => {
                   const date = formatDate(report.createdAt || report.date);
+
                   notifications.push(
-                    `Report ${index + 1}: Verified by ${doctor?.name || "Unknown Doctor"} for ${report.patient?.name || "Unknown Patient"} on ${date || "Date unavailable"}`,
+                    `Report ${index + 1}: Verified by ${
+                      doctor?.name || "Unknown Doctor"
+                    } for ${
+                      report.patient?.name || "Unknown Patient"
+                    } on ${date || "Date unavailable"}`,
                   );
                 });
 
@@ -223,6 +276,7 @@ function NeuroLayout() {
                 );
               })()}
             </ul>
+
             <button
               className="btn btn-sm btn-outline-secondary mt-2"
               onClick={() => setShowNotifications(false)}
@@ -230,7 +284,7 @@ function NeuroLayout() {
               Hide
             </button>
           </div>
-        ) : null}
+        )}
       </div>
     </>
   );

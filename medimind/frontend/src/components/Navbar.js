@@ -125,7 +125,10 @@ function Navbar() {
         </button>
 
         {userType && (
-          <Link to={getDashboardRoute()} className="btn btn-outline-teal">
+          <Link
+            to={getDashboardRoute()}
+            className="nav-link btn btn-link text-teal"
+          >
             Dashboard
           </Link>
         )}
