@@ -36,11 +36,13 @@ export default function SuperAdmin({ activeTab }) {
   const [appointments, setAppointments] = useState([]);
 
   const [newAdmin, setNewAdmin] = useState({
-    id: "",
     name: "",
+    email: "",
     password: "",
-    role: "doctorAdmin",
+    role: "patientAdmin",
+    gender: "female",
   });
+  const [adminTab, setAdminTab] = useState("patientAdmin");
 
   const cacheRef = useRef({
     overview: null,
@@ -133,19 +135,13 @@ export default function SuperAdmin({ activeTab }) {
   }, [loadData]);
 
   useEffect(() => {
-    if (activeTab === "doctorAdmins") {
-      setNewAdmin((prev) => ({ ...prev, role: "doctorAdmin" }));
-    } else if (activeTab === "departmentAdmins") {
-      setNewAdmin((prev) => ({ ...prev, role: "departmentAdmin" }));
-    } else if (activeTab === "patientAdmins") {
-      setNewAdmin((prev) => ({ ...prev, role: "patientAdmin" }));
-    }
-  }, [activeTab]);
+    setNewAdmin((prev) => ({ ...prev, role: adminTab }));
+  }, [adminTab]);
 
   const handleCreateAdmin = async (e) => {
     e.preventDefault();
 
-    if (!newAdmin.id || !newAdmin.name || !newAdmin.password || !newAdmin.role) {
+    if (!newAdmin.name || !newAdmin.email || !newAdmin.password || !newAdmin.role) {
       toast("All fields are required");
       return;
     }
@@ -159,10 +155,11 @@ export default function SuperAdmin({ activeTab }) {
       toast("Admin created");
 
       setNewAdmin({
-        id: "",
         name: "",
+        email: "",
         password: "",
         role: newAdmin.role,
+        gender: newAdmin.gender,
       });
 
       cacheRef.current.admins = null;
@@ -223,11 +220,21 @@ export default function SuperAdmin({ activeTab }) {
 
   const renderAdminsTable = (list) => (
     <table className="super-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Action</th>
+        </tr>
+      </thead>
       <tbody>
         {safeArray(list).map((a) => (
           <tr key={a._id}>
             <td>{a.name}</td>
             <td>{a.id}</td>
+            <td>{a.email}</td>
             <td>{a.role}</td>
             <td>
               <button
@@ -318,18 +325,19 @@ export default function SuperAdmin({ activeTab }) {
     <form onSubmit={handleCreateAdmin} className="super-form">
       <div className="super-form-row">
         <input
-          placeholder="Admin ID"
-          value={newAdmin.id}
-          onChange={(e) =>
-            setNewAdmin({ ...newAdmin, id: e.target.value })
-          }
-        />
-
-        <input
           placeholder="Full Name"
           value={newAdmin.name}
           onChange={(e) =>
             setNewAdmin({ ...newAdmin, name: e.target.value })
+          }
+        />
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={newAdmin.email}
+          onChange={(e) =>
+            setNewAdmin({ ...newAdmin, email: e.target.value })
           }
         />
       </div>
@@ -345,6 +353,19 @@ export default function SuperAdmin({ activeTab }) {
         />
 
         <select
+          value={newAdmin.role}
+          onChange={(e) => {
+            const role = e.target.value;
+            setAdminTab(role);
+            setNewAdmin({ ...newAdmin, role });
+          }}
+        >
+          <option value="patientAdmin">Patient Admin</option>
+          <option value="doctorAdmin">Doctor Admin</option>
+          <option value="departmentAdmin">Department Admin</option>
+        </select>
+
+        <select
           value={newAdmin.gender}
           onChange={(e) =>
             setNewAdmin({ ...newAdmin, gender: e.target.value })
@@ -354,12 +375,45 @@ export default function SuperAdmin({ activeTab }) {
           <option value="female">Female</option>
         </select>
 
-        <button type="submit" className="super-btn">
+        <button type="submit" className="super-btn add">
           + Add {newAdmin.role}
         </button>
       </div>
     </form>
   );
+
+  const renderAdminManagement = () => {
+    const tabs = [
+      { key: "patientAdmin", label: "Patient Admins" },
+      { key: "doctorAdmin", label: "Doctor Admins" },
+      { key: "departmentAdmin", label: "Department Admins" },
+    ];
+
+    return (
+      <>
+        <div className="super-header">Admin Management</div>
+
+        <div className="admin-tabs" role="tablist">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`admin-tab ${adminTab === tab.key ? "active" : ""}`}
+              onClick={() => setAdminTab(tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="admin-content">
+          <div className="admin-section-title">{tabs.find((tab) => tab.key === adminTab)?.label}</div>
+          {renderForm()}
+          {renderAdminsTable(getAdminsByRole(adminTab))}
+        </div>
+      </>
+    );
+  };
 
   const renderContent = () => {
     if (loading) return <div className="super-header">Loading...</div>;
@@ -376,32 +430,8 @@ export default function SuperAdmin({ activeTab }) {
           </>
         );
 
-      case "doctorAdmins":
-        return (
-          <>
-            <div className="super-header">Doctor Admins</div>
-            {renderForm()}
-            {renderAdminsTable(getAdminsByRole("doctorAdmin"))}
-          </>
-        );
-
-      case "departmentAdmins":
-        return (
-          <>
-            <div className="super-header">Department Admins</div>
-            {renderForm()}
-            {renderAdminsTable(getAdminsByRole("departmentAdmin"))}
-          </>
-        );
-
-      case "patientAdmins":
-        return (
-          <>
-            <div className="super-header">Patient Admins</div>
-            {renderForm()}
-            {renderAdminsTable(getAdminsByRole("patientAdmin"))}
-          </>
-        );
+      case "adminManagement":
+        return renderAdminManagement();
 
       default:
         return <div className="super-header">Select section</div>;
