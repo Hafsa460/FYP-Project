@@ -4,12 +4,18 @@ const mongoose = require("mongoose");
 const adminSchema = new mongoose.Schema({
   id: {
     type: Number,
-    required: true,
     unique: true,
   },
   name: {
     type: String,
     required: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
     trim: true,
   },
   password: {
@@ -27,6 +33,12 @@ const adminSchema = new mongoose.Schema({
     enum: ["male", "female"],
     default: "female",
   },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: String,
+  verificationTokenExpires: Date,
 }, { timestamps: true });
 
 module.exports = mongoose.models.Admin || mongoose.model("Admin", adminSchema);

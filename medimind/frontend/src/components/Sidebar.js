@@ -4,9 +4,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   const menu = [
     { key: "dashboard", label: "Dashboard" },
     { key: "superAdmins", label: "Super Admins" },
-    { key: "doctorAdmins", label: "Doctor Admins" },
-    { key: "departmentAdmins", label: "Department Admins" },
-    { key: "patientAdmins", label: "Patient Admins" },
+    { key: "adminManagement", label: "Manage Admins" },
   ];
 
   return (
