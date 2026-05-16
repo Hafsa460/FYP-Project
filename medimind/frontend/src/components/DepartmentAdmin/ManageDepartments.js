@@ -82,7 +82,7 @@ export default function ManageDepartments() {
       const data = await res.json();
       if (res.ok) {
         // Send notification
-        adminNotificationService.notifyDepartmentAdded(admin?.id, confirmData.name);
+        adminNotificationService.notifyDepartmentAdded(admin?.id, admin?.name, confirmData.name);
         setName("");
         setDesc("");
         setDoctors(0);
@@ -109,7 +109,7 @@ export default function ManageDepartments() {
         headers: { Authorization: token ? `Bearer ${token}` : undefined },
       });
       // Send notification
-      adminNotificationService.notifyDepartmentDeleted(admin?.id, deptToDelete?.name || "Unknown");
+      adminNotificationService.notifyDepartmentDeleted(admin?.id, admin?.name, deptToDelete?.name || "Unknown");
       setDeleteDialog({ show: false, id: null });
       fetchDepts();
     } catch (err) {

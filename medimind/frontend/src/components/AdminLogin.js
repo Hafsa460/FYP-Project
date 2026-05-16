@@ -1,6 +1,6 @@
 // src/components/AdminLogin.js
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import coverimage from "../images/cover.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -32,12 +32,14 @@ export default function AdminLogin() {
         return;
       }
 
-      // ✅ STORE TOKEN CORRECTLY
+      // ✅ STORE TOKEN CORRECTLY FOR BOTH API AND ADMIN ROUTES
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("adminToken", res.data.token);
       localStorage.setItem("role", res.data.role);
       localStorage.setItem("name", res.data.name);
 
       console.log("TOKEN SAVED:", localStorage.getItem("token"));
+      console.log("ADMIN TOKEN SAVED:", localStorage.getItem("adminToken"));
 
       // ✅ Role-based redirection
       if (res.data.role === "doctorAdmin") navigate("/doctor-admin");
@@ -123,6 +125,11 @@ export default function AdminLogin() {
             <button type="submit" className="btn btn-teal w-100 mt-3">
               Login
             </button>
+            <div className="text-center mt-3">
+              <Link to="/admin-forgot-password" className="text-decoration-none">
+                Forgot Password?
+              </Link>
+            </div>
 
           </form>
         </div>
