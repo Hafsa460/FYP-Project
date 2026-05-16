@@ -30,6 +30,7 @@ function DoctorAdminLayout() {
         const data = await res.json();
         if (data.success) {
           setAdmin(data.admin);
+          try { localStorage.setItem("name", data.admin.name || ""); } catch(e) {}
           // Load stored notifications for this admin
           const stored = adminNotificationService.getStoredNotifications(
             data.admin.id,
@@ -150,11 +151,18 @@ function DoctorAdminLayout() {
         {showNotifications ? (
           <div className="notification-panel p-3">
             <h5>Notifications</h5>
-            <ul>
+            <ul className="list-unstyled">
               {notifications && notifications.length > 0 ? (
-                notifications.map((notif) => (
-                  <li key={notif.id}>{notif.message}</li>
-                ))
+                notifications.map((notif) => {
+                  const date = notif.timestamp ? new Date(notif.timestamp).toLocaleDateString("en-GB") : "";
+
+                  return (
+                    <li key={notif.id} className="mb-2">
+                      <div>{notif.message}</div>
+                      <div className="text-muted small">on {date}</div>
+                    </li>
+                  );
+                })
               ) : (
                 <li>No notifications yet</li>
               )}

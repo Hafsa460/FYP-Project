@@ -1,5 +1,6 @@
 // models/admin.js
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const adminSchema = new mongoose.Schema({
   id: {
@@ -40,5 +41,15 @@ const adminSchema = new mongoose.Schema({
   verificationToken: String,
   verificationTokenExpires: Date,
 }, { timestamps: true });
+
+adminSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  if (typeof this.password !== "string") return next();
+  if (this.password.startsWith("$2")) return next();
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
 
 module.exports = mongoose.models.Admin || mongoose.model("Admin", adminSchema);

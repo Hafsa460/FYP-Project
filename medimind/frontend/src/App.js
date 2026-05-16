@@ -8,6 +8,7 @@ import LoginPatients from "./components/LoginPatients";
 import SignUp from "./components/SignUp";
 import LandingPage from "./components/LandingPage";
 import ForgotPassword from "./components/ForgotPassword";
+import AdminForgotPassword from "./components/AdminForgotPassword";
 import ResetPassword from "./components/ResetPassowrd";
 import HelpAndSupport from "./components/HelpAndSupport";
 
@@ -41,7 +42,6 @@ import PatientAdminLayout from "./components/PatientAdmin/PatientAdminLayout";
 import PatientAdminDashboard from "./components/PatientAdmin/PatientAdminDashboard";
 import PatientDetails from "./components/PatientAdmin/PatientDetails";
 import AdminLogin from "./components/AdminLogin";
-import Doctoradmin from "./components/DoctorAdmin";
 import Dptadmin from "./components/DptAdmin";
 import PatientSetPassword from "./components/PatientAdmin/SetPassword";
 import SuperAdminLayout from "./components/SuperAdminLayout";
@@ -70,6 +70,7 @@ function App() {
 
       {/* Forgot/Reset Password */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/admin-forgot-password" element={<AdminForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       {/* Neurologist Layout */}
@@ -105,8 +106,7 @@ function App() {
       {/* Admin */}
       <Route path="/adminLogin" element={<AdminLogin />} />
       <Route path="/department" element={<Dptadmin />} />
-      <Route path="/super" element={<SuperAdminLayout />} />
-      <Route path="/dctr" element={<Doctoradmin />} />
+      <Route path="/super" element={<SuperAdminLayout />}  />
 
       {/* Patient Admin */}
       <Route path="/patient-admin" element={<PatientAdminLayout />}>
