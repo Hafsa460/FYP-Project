@@ -12,7 +12,7 @@ const DoctorAdminDashboard = () => {
   const [overview, setOverview] = useState({});
   const [admin, setAdmin] = useState(null);
 
-  const token = localStorage.getItem("adminToken");
+  const token = localStorage.getItem("adminToken") || localStorage.getItem("token");
 
   const fetchOverview = async () => {
     try {

@@ -54,7 +54,7 @@ export default function DoctorDetails() {
     closeDialog();
   };
 
-  const token = localStorage.getItem("adminToken");
+  const token = localStorage.getItem("adminToken") || localStorage.getItem("token");
 
   /* ---------------------------------------------------------
      FETCH ALL DOCTORS (when page loads without an ID)
@@ -134,7 +134,7 @@ export default function DoctorDetails() {
           const data = await res.json();
           if (data.success) {
             showDialog("success", "Doctor deactivated successfully!");
-            adminNotificationService.notifyDoctorDeleted(admin?.id, data.doctor?.name || "Unknown");
+            adminNotificationService.notifyDoctorDeleted(admin?.id, admin?.name, data.doctor?.name || "Unknown");
             fetchAllDoctors();
           } else {
             showDialog("error", data.error || "Failed to deactivate doctor");
@@ -150,7 +150,12 @@ export default function DoctorDetails() {
   /* ---------------------------------------------------------
      REACTIVATE DOCTOR
   --------------------------------------------------------- */
-  const handleReactivate = async (doctorId) => {
+  const handleReactivate = async (doctorId, isVerified) => {
+    if (isVerified === false) {
+      showDialog("error", "Cannot reactivate this doctor because email is not verified.");
+      return;
+    }
+
     showConfirmDialog(
       "Are you sure you want to reactivate this doctor?",
       async () => {
@@ -166,7 +171,7 @@ export default function DoctorDetails() {
           const data = await res.json();
           if (data.success) {
             showDialog("success", "Doctor reactivated successfully!");
-            adminNotificationService.notifyDoctorUpdated(admin?.id, data.doctor?.name || "Unknown");
+            adminNotificationService.notifyDoctorUpdated(admin?.id, admin?.name, data.doctor?.name || "Unknown");
             fetchAllDoctors();
           } else {
             showDialog("error", data.error || "Failed to reactivate doctor");
@@ -228,7 +233,7 @@ export default function DoctorDetails() {
       if (data.success) {
         showDialog("success", "Doctor added and verification email sent!");
         // Send notification
-        adminNotificationService.notifyDoctorAdded(admin?.id, formData.name);
+        adminNotificationService.notifyDoctorAdded(admin?.id, admin?.name, formData.name);
         setFormData({
           name: "",
           email: "",
@@ -268,8 +273,8 @@ export default function DoctorDetails() {
     doc.designation.toLowerCase().includes(search.toLowerCase())
   );
 
-  const activeDoctors = filteredDoctors.filter(doc => doc.active);
-  const inactiveDoctors = filteredDoctors.filter(doc => !doc.active);
+  const activeDoctors = filteredDoctors.filter(doc => doc.active && doc.isVerified);
+  const inactiveDoctors = filteredDoctors.filter(doc => !doc.active || !doc.isVerified);
 
   /* ---------------------------------------------------------
      MODE 1: NO ID → SHOW DOCTOR LIST
@@ -315,7 +320,7 @@ export default function DoctorDetails() {
               ))}
             </div>
 
-            <h4>Inactive Doctors</h4>
+            <h4>Deactivated Doctors</h4>
             <div className="cards-grid">
               {inactiveDoctors.map((doc) => (
                 <div key={doc._id} className="doctor-card inactive">
@@ -332,8 +337,8 @@ export default function DoctorDetails() {
                   </div>
                   <div><strong>Designation:</strong> {doc.designation}</div>
                   <div><strong>Phone:</strong> {doc.pno}</div>
-                  <span style={{ color: "gray" }}>Inactive</span>
-                  <button onClick={() => handleReactivate(doc._id)} style={{ color: "white", marginTop: 5 }}>Reactivate Doctor</button>
+                  <div><strong>Status:</strong> {doc.active ? "Unverified" : "Deactivated"}</div>
+                  <button onClick={() => handleReactivate(doc._id, doc.isVerified)} style={{ color: "white", marginTop: 5 }}>Reactivate Doctor</button>
                 </div>
               ))}
             </div>

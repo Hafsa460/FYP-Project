@@ -221,28 +221,48 @@ router.post("/set-password/:token", async (req, res) => {
       return res.status(400).json({ error: "Invalid or expired link" });
     }
 
-    admin.password = password;
+    const wasVerified = admin.isVerified;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    admin.password = hashedPassword;
     admin.isVerified = true;
     admin.verificationToken = undefined;
     admin.verificationTokenExpires = undefined;
 
     await admin.save();
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: admin.email,
-      subject: "Your admin account is activated",
-      html: `
-        <p>Hi ${admin.name},</p>
-        <p>Your ${admin.role} account has been successfully activated.</p>
-        <p><strong>Your login credentials:</strong></p>
-        <p><strong>Admin ID:</strong> ${admin.id}</p>
-        <p>You can now log in using your Admin ID and password.</p>
-        <p>Please keep this information secure.</p>
-      `,
-    });
+    if (!wasVerified) {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: admin.email,
+        subject: "Your admin account is activated",
+        html: `
+          <p>Hi ${admin.name},</p>
+          <p>Your ${admin.role} account has been successfully activated.</p>
+          <p><strong>Your login credentials:</strong></p>
+          <p><strong>Admin ID:</strong> ${admin.id}</p>
+          <p>You can now log in using your Admin ID and password.</p>
+          <p>Please keep this information secure.</p>
+        `,
+      });
 
-    res.json({ success: true, message: "Password set successfully. Account activated. Check your email for login credentials." });
+      res.json({
+        success: true,
+        message: "Password set successfully. Account activated. Check your email for login credentials.",
+      });
+    } else {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: admin.email,
+        subject: "Admin Password Changed",
+        html: `
+          <p>Hi ${admin.name},</p>
+          <p>Your admin password has been updated successfully.</p>
+          <p>If you did not request this change, please contact your administrator immediately.</p>
+        `,
+      });
+
+      res.json({ success: true, message: "Password reset successfully." });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
