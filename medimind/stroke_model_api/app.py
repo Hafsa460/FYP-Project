@@ -2,7 +2,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import torch
 import torch.nn as nn
-from torchvision import models
+import timm
+import torchvision.transforms as T
+import cv2
 import numpy as np
 import uuid
 import os
@@ -13,68 +15,171 @@ CORS(app)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# ---------------- MODELS ----------------
-stage1_model = models.resnet50(pretrained=False)
-stage1_model.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
-stage1_model.fc = nn.Linear(stage1_model.fc.in_features, 2)
-stage1_model.load_state_dict(torch.load("best_stage1_model.pth", map_location=device))
-stage1_model.to(device).eval()
+# Constants
+IMG_SIZE = 224
+CLASS_NAMES = ["Haemorrhagic", "Ischemic", "Normal"]
+CLASS_MAP = {0: "Haemorrhagic", 1: "Ischemic", 2: "Normal"}
 
-stage2_model = models.resnet50(pretrained=False)
-stage2_model.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
-stage2_model.fc = nn.Linear(stage2_model.fc.in_features, 2)
-stage2_model.load_state_dict(torch.load("best_stage2_model.pth", map_location=device))
-stage2_model.to(device).eval()
+# ============ BUILD MODEL ARCHITECTURE (matches training) ============
+def build_inference_model(num_classes=3):
+    """
+    Reconstructs the exact model architecture used in training:
+    - GhostNet backbone (frozen)
+    - Classifier head with dropout
+    """
+    ghost = timm.create_model('ghostnet_100', pretrained=False, num_classes=0)
+    
+    # Detect feature size dynamically
+    ghost.eval()
+    with torch.no_grad():
+        dummy = torch.zeros(1, 3, IMG_SIZE, IMG_SIZE).to(device)
+        out_f = ghost(dummy).shape[1]  # Should be 960
+    
+    # Build classifier head
+    classifier = nn.Sequential(
+        nn.Linear(out_f, 512),
+        nn.BatchNorm1d(512),
+        nn.SiLU(),
+        nn.Dropout(p=0.4),
+        nn.Linear(512, 256),
+        nn.BatchNorm1d(256),
+        nn.SiLU(),
+        nn.Dropout(p=0.3),
+        nn.Linear(256, num_classes)
+    )
+    
+    class StrokeModel(nn.Module):
+        def __init__(self, backbone, classifier):
+            super().__init__()
+            self.backbone = backbone
+            self.classifier = classifier
+        
+        def forward(self, x):
+            features = self.backbone(x)
+            return self.classifier(features)
+    
+    return StrokeModel(ghost, classifier).to(device)
 
-CLASS_MAP = {0: "Hemorrhagic", 1: "Ischemic", 2: "Normal"}
+# Load the trained model
+print("📦 Loading trained model...")
+model = build_inference_model(num_classes=3)
+model.load_state_dict(torch.load("model.pth", map_location=device))
+model.to(device).eval()
+print("✅ Model loaded successfully")
 
-# ---------------- UTILS ----------------
-def load_tensor(path):
-    img = Image.open(path).convert("L").resize((224, 224))
-    img = np.array(img) / 255.0
-    tensor = torch.tensor(img).unsqueeze(0).unsqueeze(0).float().to(device)
-    return tensor
+# ============ PREPROCESSING TRANSFORMS ============
+val_transform = T.Compose([
+    T.ToPILImage(),
+    T.Resize((IMG_SIZE, IMG_SIZE)),
+    T.ToTensor(),
+    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
 
-# ---------------- API ----------------
+# ============ UTILITY FUNCTIONS ============
+def gaussian_bilateral(img):
+    """
+    Gaussian-Bilateral filter for noise reduction + edge preservation
+    (same as used in training)
+    """
+    blurred = cv2.GaussianBlur(img, (5, 5), sigmaX=1.0)
+    filtered = cv2.bilateralFilter(blurred, d=9, sigmaColor=75, sigmaSpace=75)
+    return filtered
+
+def load_and_preprocess_image(image_path):
+    """
+    Load and preprocess image using same pipeline as training
+    """
+    img = cv2.imread(image_path)
+    
+    if img is None:
+        raise ValueError(f"Could not read image: {image_path}")
+    
+    # Convert to RGB
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    
+    # Resize to IMG_SIZE
+    img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+    
+    # Apply Gaussian-Bilateral filter (same as training)
+    img = gaussian_bilateral(img)
+    
+    # Apply validation transform
+    img_tensor = val_transform(img).unsqueeze(0).to(device)
+    
+    return img_tensor
+
+# ============ API ENDPOINT ============
 @app.route("/predict-stroke", methods=["POST"])
 def predict():
+    """
+    Predict stroke type from MRI image
+    
+    Returns:
+        JSON with prediction, confidence, and per-class probabilities
+    """
     img_path = None
     try:
+        # Validate request
         if "image" not in request.files:
-            return jsonify({"success": False, "message": "No image provided"}), 400
-
+            return jsonify({
+                "success": False, 
+                "message": "No image provided"
+            }), 400
+        
         file = request.files["image"]
+        if file.filename == '':
+            return jsonify({
+                "success": False,
+                "message": "No file selected"
+            }), 400
+        
+        # Save temporary file
         img_path = f"tmp_{uuid.uuid4().hex}.png"
         file.save(img_path)
-
-        x = load_tensor(img_path)
-
-        # -------- Stage 1 --------
-        out1 = stage1_model(x)
-        p1 = torch.argmax(out1, dim=1).item()
-
-        if p1 == 1:  # Ischemic
-            final = 1
-            confidence = torch.softmax(out1, dim=1)[0, 1].item()
-        else:
-            # -------- Stage 2 --------
-            out2 = stage2_model(x)
-            p2 = torch.argmax(out2, dim=1).item()
-            final = 0 if p2 == 0 else 2
-            confidence = torch.softmax(out2, dim=1)[0, p2].item()
-
+        
+        # Preprocess image
+        img_tensor = load_and_preprocess_image(img_path)
+        
+        # Get prediction
+        with torch.no_grad():
+            output = model(img_tensor)
+            probabilities = torch.softmax(output, dim=1)[0].cpu().numpy()
+        
+        # Get predicted class and confidence
+        pred_idx = np.argmax(probabilities)
+        pred_class = CLASS_MAP[pred_idx]
+        confidence = float(probabilities[pred_idx])
+        
+        # Prepare response with all class probabilities
+        class_probs = {
+            CLASS_MAP[i]: float(probabilities[i]) 
+            for i in range(len(CLASS_MAP))
+        }
+        
         return jsonify({
             "success": True,
-            "prediction": CLASS_MAP[final],
-            "confidence": confidence
+            "prediction": pred_class,
+            "confidence": confidence,
+            "confidence_percent": confidence * 100,
+            "class_probabilities": class_probs
         }), 200
-
+    
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
+        return jsonify({
+            "success": False, 
+            "error": str(e)
+        }), 500
+    
     finally:
+        # Clean up temporary file
         if img_path and os.path.exists(img_path):
             os.remove(img_path)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    print("🚀 Stroke Detection API")
+    print(f"   Device: {device}")
+    print(f"   Classes: {CLASS_NAMES}")
+    print(f"   Model: model.pth")
+    print("\n✅ Server starting on http://0.0.0.0:5000")
+    print("   Endpoint: POST /predict-stroke")
+    app.run(host="0.0.0.0", port=5000, debug=False)
