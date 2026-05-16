@@ -121,7 +121,7 @@ export default function PatientDetails() {
     if (data.message) {
       showDialog("success", data.message);
       // Send notification
-      adminNotificationService.notifyPatientAdded(admin?.id, formData.name);
+      adminNotificationService.notifyPatientAdded(admin?.id, admin?.name, formData.name);
       setFormData({
         name: "",
         email: "",
