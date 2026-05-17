@@ -18,6 +18,7 @@ function Navbar() {
     const doctor = JSON.parse(localStorage.getItem("doctor") || "null");
     const patient = JSON.parse(localStorage.getItem("patient") || "null");
     const admin = JSON.parse(localStorage.getItem("admin") || "null");
+
     const adminToken = localStorage.getItem("adminToken");
     const adminRole = localStorage.getItem("adminRole");
     const adminName = localStorage.getItem("adminName");
@@ -54,23 +55,49 @@ function Navbar() {
     navigate("/");
   };
 
+  // ✅ FIXED DASHBOARD ROUTES
   const getDashboardRoute = () => {
     if (userType === "doctor") return "/neuro-dashboard";
     if (userType === "patient") return "/PatientDashboard";
+
     if (userType === "admin") {
       const adminRole = localStorage.getItem("adminRole");
+
       if (adminRole === "doctorAdmin") return "/doctor-admin";
       if (adminRole === "patientAdmin") return "/patient-admin";
       if (adminRole === "departmentAdmin") return "/dept-admin";
       if (adminRole === "superAdmin") return "/super";
+
       return "/";
     }
+
     return "/";
   };
 
-  // ✅ FINAL SCROLL HANDLER (HASH BASED — STABLE)
-  const handleScrollTo = (id) => {
-    window.location.hash = id;
+  // ✅ FIXED SCROLL LOGIC (THIS IS THE IMPORTANT PART)
+  const goToSection = (id) => {
+    if (location.pathname !== "/dash") {
+      // go home first, then scroll
+      navigate("/dash");
+
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+
+      return;
+    }
+
+    // already on homepage
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const goHome = () => {
+    navigate("/dash");
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 100);
   };
 
   return (
@@ -90,33 +117,36 @@ function Navbar() {
 
       {/* LINKS */}
       <div className="ms-auto d-flex align-items-center gap-4">
-        <button
-          className="nav-link btn btn-link text-teal"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        >
+        {/* HOME */}
+        <button className="nav-link btn btn-link text-teal" onClick={goHome}>
           Home
         </button>
 
+        {/* DEPARTMENTS */}
         <button
           className="nav-link btn btn-link text-teal"
-          onClick={() => handleScrollTo("departments")}
+          onClick={() => goToSection("departments")}
         >
           Departments
         </button>
 
+        {/* DOCTORS */}
         <button
           className="nav-link btn btn-link text-teal"
-          onClick={() => handleScrollTo("doctors")}
+          onClick={() => goToSection("doctors")}
         >
           Doctors
         </button>
 
+        {/* ABOUT */}
         <button
           className="nav-link btn btn-link text-teal"
-          onClick={() => handleScrollTo("contact")}
+          onClick={() => goToSection("contact")}
         >
           About Us
         </button>
+
+        {/* HELP */}
         <button
           className="nav-link btn btn-link text-teal"
           onClick={() => navigate("/help-support")}
@@ -124,6 +154,7 @@ function Navbar() {
           Help & Support
         </button>
 
+        {/* DASHBOARD */}
         {userType && (
           <Link
             to={getDashboardRoute()}
@@ -133,17 +164,19 @@ function Navbar() {
           </Link>
         )}
 
+        {/* LOGIN */}
         {!userType && (
           <Link to="/Login-option" className="btn btn-teal">
             Login / Sign Up
           </Link>
         )}
 
+        {/* PROFILE */}
         {userType && (
           <div className="position-relative">
             <img
               src={profileIcon}
-              alt={user?.name ? `${user.name} profile` : "Profile"}
+              alt={user?.name || "Profile"}
               className="rounded-circle"
               style={{ width: "45px", cursor: "pointer" }}
               onClick={() => setShowDropdown((prev) => !prev)}
