@@ -12,33 +12,56 @@ function PatientAdminLayout() {
   const [notifications, setNotifications] = useState([]);
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
 
+  // ✅ ROLE-BASED DASHBOARD ROUTE
+  const getDashboardRoute = () => {
+    const adminRole = localStorage.getItem("adminRole");
+
+    if (adminRole === "doctorAdmin") return "/doctor-admin";
+    if (adminRole === "patientAdmin") return "/patient-admin";
+    if (adminRole === "departmentAdmin") return "/dept-admin";
+    if (adminRole === "superAdmin") return "/super";
+
+    return "/";
+  };
+
+  // ✅ FETCH ADMIN DATA
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
         const token = localStorage.getItem("adminToken");
+
         if (!token) {
           navigate("/adminLogin");
           return;
         }
 
-        // For patient admin, we can use the same admin auth endpoint
         const res = await fetch("http://localhost:5000/api/admins/dashboard", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         const data = await res.json();
+
         if (data.message) {
-          // Extract admin info from token or set default
-          const adminData = { name: "Patient Admin", role: "patientAdmin", gender: "female", id: localStorage.getItem("adminId") || "N/A" };
+          const adminData = {
+            name: localStorage.getItem("adminName") || "Admin",
+            role: localStorage.getItem("adminRole") || "patientAdmin",
+            gender: "female",
+            id: localStorage.getItem("adminId") || "N/A",
+          };
+
           setAdmin(adminData);
-          try { localStorage.setItem("name", adminData.name || ""); } catch(e) {}
-          // Load stored notifications for this admin
-          const stored = adminNotificationService.getStoredNotifications(adminData.id);
+
+          const stored = adminNotificationService.getStoredNotifications(
+            adminData.id,
+          );
+
           setNotifications(stored);
         } else {
-          console.error("Failed to fetch admin:", data.message);
           navigate("/adminLogin");
         }
       } catch (err) {
@@ -52,89 +75,143 @@ function PatientAdminLayout() {
     fetchAdmin();
   }, [navigate]);
 
-  // Subscribe to notifications
+  // ✅ LIVE NOTIFICATIONS
   useEffect(() => {
     if (!admin) return;
-    
+
     const unsubscribe = adminNotificationService.subscribe((notification) => {
-      // Only add notifications for this admin
       if (notification.adminId === admin.id) {
-        setNotifications(prev => [notification, ...prev]);
+        setNotifications((prev) => [notification, ...prev]);
       }
     });
 
     return unsubscribe;
   }, [admin]);
 
+  // ✅ LOGOUT
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminRole");
     localStorage.removeItem("adminName");
+    localStorage.removeItem("adminId");
+
     navigate("/adminLogin");
   };
 
   return (
     <>
       <AdminNavbar adminInfo={admin} onLogout={handleLogout} />
-      <div className={`admin-layout d-flex ${showNotifications ? "with-notifications" : ""}`}>
-        {/* Sidebar */}
+
+      <div className="admin-layout d-flex">
+        {/* ================= SIDEBAR ================= */}
         <div className="sidebar p-3">
+          {/* PROFILE SECTION */}
           <div className="admin-profile d-flex align-items-center mb-4">
-            <img src={admin?.gender?.toLowerCase() === "female" ? femaleProfile : maleProfile} alt="Admin" className="profile-icon me-3" />
+            <img
+              src={
+                admin?.gender?.toLowerCase() === "female"
+                  ? femaleProfile
+                  : maleProfile
+              }
+              alt="Admin"
+              className="profile-icon me-3"
+            />
+
             <div className="admin-details fw-semibold">
-              {loading ? "Loading..." : admin ? `${admin.name}` : "Patient Admin"}
-              <div className="text-muted small">ID: {admin?.id ?? "N/A"}</div>
-              <div className="text-muted small">Role: {admin?.role ?? "patientAdmin"}</div>
+              {loading ? "Loading..." : admin?.name || "Admin"}
+
+              <div className="text-muted small">
+                Role: {admin?.role || "patientAdmin"}
+              </div>
+
+              <div className="text-muted small">ID: {admin?.id || "N/A"}</div>
             </div>
           </div>
 
+          {/* NAV LINKS */}
           <ul className="nav flex-column">
             <li className="nav-item">
-              <Link to="/patient-admin" className="nav-link">Dashboard</Link>
+              <Link to="/patient-admin" className="nav-link">
+                Dashboard
+              </Link>
             </li>
+
             <li className="nav-item">
-              <Link to="/patient-admin/patients" className="nav-link">Manage Patients</Link>
+              <Link to="/patient-admin/patients" className="nav-link">
+                Manage Patients
+              </Link>
             </li>
+
+            {/* ROLE BASED DASHBOARD */}
             <li className="nav-item">
-              {/* Departments moved to Department Admin portal */}
+              <Link to={getDashboardRoute()} className="nav-link fw-semibold">
+                Main Dashboard
+              </Link>
             </li>
-            <li className="nav-item">
-              <button className="btn btn-link nav-link text-danger" onClick={handleLogout}>Logout</button>
+
+            <li className="nav-item mt-3">
+              <button
+                className="btn btn-link nav-link text-danger"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
             </li>
           </ul>
         </div>
 
-        {/* Main Content */}
+        {/* ================= MAIN CONTENT ================= */}
         <div className="content p-4 flex-grow-1 position-relative">
-          <Outlet context={{ notify: adminNotificationService.notify.bind(adminNotificationService), admin }} />
+          <Outlet
+            context={{
+              notify: adminNotificationService.notify.bind(
+                adminNotificationService,
+              ),
+              admin,
+            }}
+          />
+
           {!showNotifications && (
-            <button className="btn btn-sm btn-info show-btn" onClick={() => setShowNotifications(true)}>Show Notifications</button>
+            <button
+              className="btn btn-sm btn-info show-btn"
+              onClick={() => setShowNotifications(true)}
+            >
+              Show Notifications
+            </button>
           )}
         </div>
 
-        {/* Notification Panel */}
-        {showNotifications ? (
+        {/* ================= NOTIFICATIONS ================= */}
+        {showNotifications && (
           <div className="notification-panel p-3">
             <h5>Notifications</h5>
-            <ul className="list-unstyled">
-              {notifications && notifications.length > 0 ? (
-                notifications.map((notif) => {
-                  const date = notif.timestamp ? new Date(notif.timestamp).toLocaleDateString("en-GB") : "";
 
-                  return (
-                    <li key={notif.id} className="mb-2">
-                      <div>{notif.message}</div>
-                      <div className="text-muted small">on {date}</div>
-                    </li>
-                  );
-                })
+            <ul className="list-unstyled">
+              {notifications.length > 0 ? (
+                notifications.map((notif) => (
+                  <li key={notif.id} className="mb-2">
+                    <div>{notif.message}</div>
+
+                    <div className="text-muted small">
+                      {notif.timestamp
+                        ? new Date(notif.timestamp).toLocaleDateString("en-GB")
+                        : ""}
+                    </div>
+                  </li>
+                ))
               ) : (
                 <li>No notifications yet</li>
               )}
             </ul>
-            <button className="btn btn-sm btn-outline-secondary mt-2" onClick={() => setShowNotifications(false)}>Hide</button>
+
+            <button
+              className="btn btn-sm btn-outline-secondary mt-2"
+              onClick={() => setShowNotifications(false)}
+            >
+              Hide
+            </button>
           </div>
-        ) : null}
+        )}
       </div>
     </>
   );
