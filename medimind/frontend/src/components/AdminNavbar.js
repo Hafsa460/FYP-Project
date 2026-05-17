@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogOut, Menu, X } from "lucide-react";
 import "./AdminNavbar.css";
 import coverimage from "../images/cover.png";
@@ -8,6 +8,7 @@ import femaleProfile from "../images/female.png";
 
 function AdminNavbar({ adminInfo, onLogout }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showDropdown, setShowDropdown] = useState(false);
 
   const profileIcon =
@@ -23,7 +24,18 @@ function AdminNavbar({ adminInfo, onLogout }) {
   };
 
   const handleScrollTo = (id) => {
-    window.location.hash = id;
+    const target = { pathname: "/dash", hash: `#${id}` };
+
+    if (location.pathname !== "/dash" || location.hash !== `#${id}`) {
+      navigate(target);
+      return;
+    }
+
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.history.replaceState(null, "", `${target.pathname}${target.hash}`);
+    }
   };
 
   return (
@@ -33,12 +45,12 @@ function AdminNavbar({ adminInfo, onLogout }) {
     >
       {/* LOGO */}
       <div className="d-flex align-items-center">
-        <a className="navbar-brand d-flex align-items-center" href="/">
+        <Link className="navbar-brand d-flex align-items-center" to="/dash">
           <img src={coverimage} alt="MediMind Logo" style={{ width: "80px" }} />
-        </a>
-        <a href="/" className="text-decoration-none">
+        </Link>
+        <Link to="/dash" className="text-decoration-none">
           <strong className="text-teal">MediMind Admin</strong>
-        </a>
+        </Link>
       </div>
 
       {/* LINKS AND AUTH */}
@@ -46,7 +58,16 @@ function AdminNavbar({ adminInfo, onLogout }) {
         {/* Navigation Buttons */}
         <button
           className="nav-link btn btn-link text-teal"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          onClick={() => {
+            if (location.pathname !== "/dash") {
+              navigate("/dash");
+              setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }, 200);
+            } else {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          }}
         >
           Home
         </button>
