@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
+import "./Login.css";
 
 export default function AdminForgotPassword() {
   const [email, setEmail] = useState("");
