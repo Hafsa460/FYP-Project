@@ -252,6 +252,7 @@ export default function SuperAdmin({ activeTab }) {
 
   const renderDashboard = () => (
     <>
+      
       <div className="super-header">Welcome Super Admin</div>
 
       <div className="super-grid">

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import adminNotificationService from "../../services/AdminNotificationService";
 import "../PatientAdmin/PatientAdmin.css";
+import AdminNavbar from "../AdminNavbar";
 
 export default function ManageDepartments() {
   const { admin } = useOutletContext() || {};
@@ -28,7 +29,9 @@ export default function ManageDepartments() {
     }
   };
 
-  useEffect(() => { fetchDepts(); }, []);
+  useEffect(() => {
+    fetchDepts();
+  }, []);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -37,7 +40,14 @@ export default function ManageDepartments() {
       setError("Name is required");
       return;
     }
-    setConfirmData({ name: name.trim(), description: desc, doctors, nurses, staff, rooms });
+    setConfirmData({
+      name: name.trim(),
+      description: desc,
+      doctors,
+      nurses,
+      staff,
+      rooms,
+    });
   };
 
   const handleDelete = async (id) => {
@@ -82,7 +92,11 @@ export default function ManageDepartments() {
       const data = await res.json();
       if (res.ok) {
         // Send notification
-        adminNotificationService.notifyDepartmentAdded(admin?.id, admin?.name, confirmData.name);
+        adminNotificationService.notifyDepartmentAdded(
+          admin?.id,
+          admin?.name,
+          confirmData.name,
+        );
         setName("");
         setDesc("");
         setDoctors(0);
@@ -103,13 +117,19 @@ export default function ManageDepartments() {
   const handleConfirmDelete = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const deptToDelete = departments.find(d => d._id === deleteDialog.id || d.id === deleteDialog.id);
+      const deptToDelete = departments.find(
+        (d) => d._id === deleteDialog.id || d.id === deleteDialog.id,
+      );
       await fetch(`http://localhost:5000/api/departments/${deleteDialog.id}`, {
         method: "DELETE",
         headers: { Authorization: token ? `Bearer ${token}` : undefined },
       });
       // Send notification
-      adminNotificationService.notifyDepartmentDeleted(admin?.id, admin?.name, deptToDelete?.name || "Unknown");
+      adminNotificationService.notifyDepartmentDeleted(
+        admin?.id,
+        admin?.name,
+        deptToDelete?.name || "Unknown",
+      );
       setDeleteDialog({ show: false, id: null });
       fetchDepts();
     } catch (err) {
@@ -119,8 +139,15 @@ export default function ManageDepartments() {
 
   return (
     <div>
+      <AdminNavbar />
       <h2>Manage Departments</h2>
-      <button className="btn btn-primary mb-3" onClick={() => { setShowAddModal(true); setError(""); }}>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() => {
+          setShowAddModal(true);
+          setError("");
+        }}
+      >
         Add Department
       </button>
 
@@ -132,7 +159,11 @@ export default function ManageDepartments() {
             <form onSubmit={handleAdd}>
               <div className="form-group">
                 <label>Name</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} required />
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
               </div>
               <div className="form-group">
                 <label>Description</label>
@@ -140,23 +171,45 @@ export default function ManageDepartments() {
               </div>
               <div className="form-group">
                 <label>Doctors</label>
-                <input value={doctors} onChange={(e) => setDoctors(e.target.value.replace(/\D/g, ""))} />
+                <input
+                  value={doctors}
+                  onChange={(e) =>
+                    setDoctors(e.target.value.replace(/\D/g, ""))
+                  }
+                />
               </div>
               <div className="form-group">
                 <label>Nurses</label>
-                <input value={nurses} onChange={(e) => setNurses(e.target.value.replace(/\D/g, ""))} />
+                <input
+                  value={nurses}
+                  onChange={(e) => setNurses(e.target.value.replace(/\D/g, ""))}
+                />
               </div>
               <div className="form-group">
                 <label>Staff</label>
-                <input value={staff} onChange={(e) => setStaff(e.target.value.replace(/\D/g, ""))} />
+                <input
+                  value={staff}
+                  onChange={(e) => setStaff(e.target.value.replace(/\D/g, ""))}
+                />
               </div>
               <div className="form-group">
                 <label>Rooms</label>
-                <input value={rooms} onChange={(e) => setRooms(e.target.value.replace(/\D/g, ""))} />
+                <input
+                  value={rooms}
+                  onChange={(e) => setRooms(e.target.value.replace(/\D/g, ""))}
+                />
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowAddModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-success">Next: Confirm</button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-success">
+                  Next: Confirm
+                </button>
               </div>
             </form>
           </div>
@@ -174,21 +227,24 @@ export default function ManageDepartments() {
                 const token = localStorage.getItem("adminToken");
                 const updateDepartment = async () => {
                   try {
-                    const res = await fetch(`http://localhost:5000/api/departments/${editDept.id}`, {
-                      method: "PUT",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: token ? `Bearer ${token}` : undefined,
+                    const res = await fetch(
+                      `http://localhost:5000/api/departments/${editDept.id}`,
+                      {
+                        method: "PUT",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: token ? `Bearer ${token}` : undefined,
+                        },
+                        body: JSON.stringify({
+                          name: editDept.name.trim(),
+                          description: editDept.description,
+                          doctors: Number(editDept.doctors) || 0,
+                          nurses: Number(editDept.nurses) || 0,
+                          staff: Number(editDept.staff) || 0,
+                          rooms: Number(editDept.rooms) || 0,
+                        }),
                       },
-                      body: JSON.stringify({
-                        name: editDept.name.trim(),
-                        description: editDept.description,
-                        doctors: Number(editDept.doctors) || 0,
-                        nurses: Number(editDept.nurses) || 0,
-                        staff: Number(editDept.staff) || 0,
-                        rooms: Number(editDept.rooms) || 0,
-                      }),
-                    });
+                    );
                     const data = await res.json();
                     if (!res.ok) {
                       setError(data?.message || "Failed to update department");
@@ -215,39 +271,58 @@ export default function ManageDepartments() {
                 <label>Description</label>
                 <input
                   value={editDept.description}
-                  onChange={(e) => handleEditChange("description", e.target.value)}
+                  onChange={(e) =>
+                    handleEditChange("description", e.target.value)
+                  }
                 />
               </div>
               <div className="form-group">
                 <label>Doctors</label>
                 <input
                   value={editDept.doctors}
-                  onChange={(e) => handleEditChange("doctors", e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) =>
+                    handleEditChange(
+                      "doctors",
+                      e.target.value.replace(/\D/g, ""),
+                    )
+                  }
                 />
               </div>
               <div className="form-group">
                 <label>Nurses</label>
                 <input
                   value={editDept.nurses}
-                  onChange={(e) => handleEditChange("nurses", e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) =>
+                    handleEditChange(
+                      "nurses",
+                      e.target.value.replace(/\D/g, ""),
+                    )
+                  }
                 />
               </div>
               <div className="form-group">
                 <label>Staff</label>
                 <input
                   value={editDept.staff}
-                  onChange={(e) => handleEditChange("staff", e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) =>
+                    handleEditChange("staff", e.target.value.replace(/\D/g, ""))
+                  }
                 />
               </div>
               <div className="form-group">
                 <label>Rooms</label>
                 <input
                   value={editDept.rooms}
-                  onChange={(e) => handleEditChange("rooms", e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) =>
+                    handleEditChange("rooms", e.target.value.replace(/\D/g, ""))
+                  }
                 />
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button className="btn btn-secondary" onClick={() => setEditDept(null)}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setEditDept(null)}
+                >
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-success">
@@ -263,15 +338,34 @@ export default function ManageDepartments() {
         <div className="dialog-overlay">
           <div className="dialog-box">
             <h4>Confirm Department</h4>
-            <p><strong>Name:</strong> {confirmData.name}</p>
-            <p><strong>Description:</strong> {confirmData.description}</p>
-            <p><strong>Doctors:</strong> {confirmData.doctors}</p>
-            <p><strong>Nurses:</strong> {confirmData.nurses}</p>
-            <p><strong>Staff:</strong> {confirmData.staff}</p>
-            <p><strong>Rooms:</strong> {confirmData.rooms}</p>
+            <p>
+              <strong>Name:</strong> {confirmData.name}
+            </p>
+            <p>
+              <strong>Description:</strong> {confirmData.description}
+            </p>
+            <p>
+              <strong>Doctors:</strong> {confirmData.doctors}
+            </p>
+            <p>
+              <strong>Nurses:</strong> {confirmData.nurses}
+            </p>
+            <p>
+              <strong>Staff:</strong> {confirmData.staff}
+            </p>
+            <p>
+              <strong>Rooms:</strong> {confirmData.rooms}
+            </p>
             <div style={{ display: "flex", gap: 8 }}>
-              <button className="btn btn-secondary" onClick={() => setConfirmData(null)}>Cancel</button>
-              <button className="btn btn-success" onClick={handleConfirmAdd}>Confirm Add</button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setConfirmData(null)}
+              >
+                Cancel
+              </button>
+              <button className="btn btn-success" onClick={handleConfirmAdd}>
+                Confirm Add
+              </button>
             </div>
           </div>
         </div>
@@ -283,8 +377,15 @@ export default function ManageDepartments() {
             <h4>Confirm Delete</h4>
             <p>Are you sure you want to delete this department?</p>
             <div style={{ display: "flex", gap: 8 }}>
-              <button className="btn btn-secondary" onClick={() => setDeleteDialog({ show: false, id: null })}>Cancel</button>
-              <button className="btn btn-danger" onClick={handleConfirmDelete}>Delete</button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setDeleteDialog({ show: false, id: null })}
+              >
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={handleConfirmDelete}>
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -299,8 +400,18 @@ export default function ManageDepartments() {
                 <div className="d-dept">{d.description}</div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => handleEditClick(d)} className="btn btn-sm btn-primary">Edit</button>
-                <button onClick={() => handleDelete(d._id || d.id)} className="btn btn-sm btn-danger">Delete</button>
+                <button
+                  onClick={() => handleEditClick(d)}
+                  className="btn btn-sm btn-primary"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(d._id || d.id)}
+                  className="btn btn-sm btn-danger"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>
@@ -309,5 +420,3 @@ export default function ManageDepartments() {
     </div>
   );
 }
-
-
