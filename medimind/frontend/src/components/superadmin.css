@@ -303,6 +303,64 @@ body,
   box-shadow: 0 16px 40px rgba(8, 64, 75, 0.06);
 }
 
+/* Chart sections */
+.chart-section {
+  margin-top: 18px;
+  margin-bottom: 20px;
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #059da8;
+  margin-bottom: 10px;
+}
+
+.activity-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.activity-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 12px 30px rgba(8, 64, 75, 0.08);
+  border-left: 5px solid #22c55e;
+}
+
+.activity-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f766e;
+  margin-bottom: 12px;
+}
+
+.activity-card ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.activity-card li {
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  font-size: 13px;
+}
+
+.activity-card li:last-child {
+  border-bottom: none;
+}
+
+.chart-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* =========================================================
    RESPONSIVE
    ========================================================= */
