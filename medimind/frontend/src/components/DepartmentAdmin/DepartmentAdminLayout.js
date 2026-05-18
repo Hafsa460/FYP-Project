@@ -3,7 +3,7 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import "../PatientAdmin/PatientAdmin.css";
 import maleProfile from "../../images/male.png";
 import femaleProfile from "../../images/female.png";
-import AdminNavbar from "./AdminNavbar";
+import AdminNavbar from "../AdminNavbar";
 import adminNotificationService from "../../services/AdminNotificationService";
 
 function DepartmentAdminLayout() {
