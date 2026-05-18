@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
 import "./AdminNavbar.css";
 
 import coverimage from "../images/cover.png";
@@ -68,6 +67,39 @@ function AdminNavbar({ adminInfo, activeTab, onTabChange, onLogout }) {
         >
           Home
         </button>
+        {/* SuperAdmin section tabs */}
+        {onTabChange && (
+          <>
+            <NavButton
+              active={activeTab === "dashboard"}
+              onClick={() => onTabChange("dashboard")}
+            >
+              Dashboard
+            </NavButton>
+
+            <NavButton
+              active={activeTab === "superAdmins"}
+              onClick={() => onTabChange("superAdmins")}
+            >
+              Super Admins
+            </NavButton>
+
+            <NavButton
+              active={activeTab === "adminManagement"}
+              onClick={() => onTabChange("adminManagement")}
+            >
+              Manage Admins
+            </NavButton>
+          </>
+        )}
+
+        {/* LOGOUT BUTTON */}
+        <button
+          className="logout-btn btn btn-link text-teal"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
 
         {/* PROFILE */}
         <div className="admin-profile">
@@ -84,11 +116,6 @@ function AdminNavbar({ adminInfo, activeTab, onTabChange, onLogout }) {
             </div>
           )}
         </div>
-
-        {/* LOGOUT ICON ONLY */}
-        <button className="logout-icon-btn" onClick={handleLogout}>
-          <LogOut size={18} />
-        </button>
       </div>
     </nav>
   );

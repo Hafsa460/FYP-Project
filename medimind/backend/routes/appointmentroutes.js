@@ -11,7 +11,8 @@ const router = express.Router();
 // Middleware to verify admin token
 const verifyAdminToken = (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ error: "Access denied. No token provided." });
+  if (!token)
+    return res.status(401).json({ error: "Access denied. No token provided." });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -46,7 +47,6 @@ router.get("/patient/:patientId", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 /* ----------------------------------------
  📌 GET ALL APPOINTMENTS FOR A DOCTOR
@@ -98,7 +98,7 @@ router.get("/doctor/:doctorId/today", async (req, res) => {
 /* ----------------------------------------
  📌 GET APPOINTMENTS FOR SPECIFIC DATE
 ---------------------------------------- */
-router.get("/", async (req, res) => {
+router.get("/search", async (req, res) => {
   try {
     const { doctorId, date } = req.query;
 
@@ -128,9 +128,9 @@ router.get("/doctor/:doctorId/waiting", async (req, res) => {
     const { doctorId } = req.params;
 
     const appointments = await Appointment.find({
-    doctorId,
-    status: "Pending"
-  })
+      doctorId,
+      status: "Pending",
+    })
       .sort({ date: 1, time: 1 })
       .populate("patientId", "name");
 
@@ -152,7 +152,7 @@ router.put("/:appointmentId/status", authMiddleware, async (req, res) => {
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       appointmentId,
       { status },
-      { new: true } // return updated document
+      { new: true }, // return updated document
     )
       .populate("patientId", "name age gender")
       .populate("doctorId", "name department");
@@ -207,7 +207,11 @@ router.post("/book", authMiddleware, async (req, res) => {
     }
 
     // Patient slot conflict
-    const patientConflict = await Appointment.findOne({ patientId, date, time });
+    const patientConflict = await Appointment.findOne({
+      patientId,
+      date,
+      time,
+    });
     if (patientConflict) {
       return res.status(400).json({ error: "You already booked this slot" });
     }
@@ -238,10 +242,9 @@ router.post("/book", authMiddleware, async (req, res) => {
     // Generate PDF
     const pdfPath = await generateAppointmentPDF(populatedAppointment);
 
-      // save pdf path
-      appointment.pdf = pdfPath;
-      await appointment.save();
-
+    // save pdf path
+    appointment.pdf = pdfPath;
+    await appointment.save();
 
     // Final response
     res.status(201).json({

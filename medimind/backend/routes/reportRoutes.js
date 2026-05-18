@@ -7,38 +7,75 @@ const axios = require("axios");
 const FormData = require("form-data");
 const PDFDocument = require("pdfkit");
 const { v4: uuidv4 } = require("uuid");
+const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
 const Doctor = require("../models/Doctor");
 const Report = require("../models/Report");
-const { notifyPatientReport, notifyDoctorReport } = require("../utils/notificationService");
+const {
+  notifyPatientReport,
+  notifyDoctorReport,
+} = require("../utils/notificationService");
 
 const tmpUploadDir = path.join(__dirname, "..", "tmp_uploads");
 if (!fs.existsSync(tmpUploadDir)) fs.mkdirSync(tmpUploadDir);
 
-const upload = multer({ dest: tmpUploadDir, limits: { fileSize: 30 * 1024 * 1024 } });
+const upload = multer({
+  dest: tmpUploadDir,
+  limits: { fileSize: 30 * 1024 * 1024 },
+});
+
+const verifyAdminToken = (req, res, next) => {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  if (!token)
+    return res.status(401).json({ error: "Access denied. No token provided." });
+
+  try {
+    jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch (err) {
+    res.status(400).json({ error: "Invalid token." });
+  }
+};
 
 router.post("/create", upload.single("image"), async (req, res) => {
   try {
     const { mrNo, doctorPno } = req.body;
-    if (!req.file) return res.status(400).json({ success: false, message: "Image is required" });
-    if (!mrNo || !doctorPno) return res.status(400).json({ success: false, message: "mrNo and doctorPno required" });
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Image is required" });
+    if (!mrNo || !doctorPno)
+      return res
+        .status(400)
+        .json({ success: false, message: "mrNo and doctorPno required" });
 
     const patient = await User.findOne({ mrNo: Number(mrNo) });
-    if (!patient) return res.status(404).json({ success: false, message: "Patient not found" });
+    if (!patient)
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found" });
 
     const doctor = await Doctor.findOne({ pno: Number(doctorPno) });
-    if (!doctor) return res.status(404).json({ success: false, message: "Doctor not found" });
+    if (!doctor)
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found" });
 
     // ---------- CALL FLASK ----------
-    const flaskUrl = process.env.FLASK_PREDICT_URL || "http://127.0.0.1:5000/predict-stroke";
+    const flaskUrl =
+      process.env.FLASK_PREDICT_URL || "http://127.0.0.1:5000/predict-stroke";
     const form = new FormData();
-    form.append("image", fs.createReadStream(req.file.path), req.file.originalname);
+    form.append(
+      "image",
+      fs.createReadStream(req.file.path),
+      req.file.originalname,
+    );
 
     const flaskRes = await axios.post(flaskUrl, form, {
       headers: form.getHeaders(),
       maxContentLength: Infinity,
-      maxBodyLength: Infinity
+      maxBodyLength: Infinity,
     });
 
     const { prediction, confidence } = flaskRes.data;
@@ -63,7 +100,7 @@ router.post("/create", upload.single("image"), async (req, res) => {
       doctor,
       imagePath: mriPath,
       label: prediction,
-      confidence
+      confidence,
     });
 
     // ---------- SAVE DB ----------
@@ -75,7 +112,7 @@ router.post("/create", upload.single("image"), async (req, res) => {
       doctorPno: doctor.pno,
       images: [path.join("reports", caseId, mriName)],
       prediction: { label: prediction, confidence },
-      pdfPath: path.join("reports", caseId, `${caseId}.pdf`)
+      pdfPath: path.join("reports", caseId, `${caseId}.pdf`),
     });
 
     await report.save();
@@ -84,12 +121,12 @@ router.post("/create", upload.single("image"), async (req, res) => {
     await notifyPatientReport(patient, doctor, {
       _id: report._id,
       type: "Stroke Prediction Report",
-      date: new Date()
+      date: new Date(),
     });
     await notifyDoctorReport(doctor, patient, {
       _id: report._id,
       type: "Stroke Prediction Report",
-      date: new Date()
+      date: new Date(),
     });
 
     res.json({
@@ -99,10 +136,9 @@ router.post("/create", upload.single("image"), async (req, res) => {
         caseId,
         images: report.images,
         prediction: report.prediction,
-        pdfPath: report.pdfPath
-      }
+        pdfPath: report.pdfPath,
+      },
     });
-
   } catch (err) {
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
     res.status(500).json({ success: false, message: err.message });
@@ -111,10 +147,29 @@ router.post("/create", upload.single("image"), async (req, res) => {
 router.get("/patient/:mrNo", async (req, res) => {
   try {
     const mrNo = Number(req.params.mrNo);
-    const reports = await Report.find({ patientMrNo: mrNo }).populate("doctor", "name").populate("patient", "name").sort({ createdAt: -1 });
+    const reports = await Report.find({ patientMrNo: mrNo })
+      .populate("doctor", "name")
+      .populate("patient", "name")
+      .sort({ createdAt: -1 });
     res.json({ success: true, reports });
   } catch {
     res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Admin route to fetch all reports for dashboard summaries
+router.get("/all", verifyAdminToken, async (req, res) => {
+  try {
+    const reports = await Report.find({})
+      .populate("doctor", "name")
+      .populate("patient", "name mrNo")
+      .sort({ createdAt: -1 });
+    res.json(reports);
+  } catch (err) {
+    console.error("❌ Error fetching reports:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch reports" });
   }
 });
 
@@ -128,7 +183,7 @@ async function generatePdf({
   imagePath,
   label,
   confidence,
-  doctorFeedback // NEW
+  doctorFeedback, // NEW
 }) {
   return new Promise((resolve, reject) => {
     try {
@@ -142,15 +197,25 @@ async function generatePdf({
       const logoPath = path.join(__dirname, "..", "uploads", "logo.png");
       if (fs.existsSync(logoPath)) doc.image(logoPath, 50, 40, { width: 60 });
 
-      doc.fontSize(22).text("KRL HOSPITAL ISLAMABAD", 120, 50, { align: "left" });
-      doc.fontSize(12).text("Diagnostic Imaging Center\nTel: 051-1234567\n\n", 120, 78);
+      doc
+        .fontSize(22)
+        .text("KRL HOSPITAL ISLAMABAD", 120, 50, { align: "left" });
+      doc
+        .fontSize(12)
+        .text("Diagnostic Imaging Center\nTel: 051-1234567\n\n", 120, 78);
 
       doc.fontSize(12).text(`Case ID: ${caseId}`, 50, doc.y);
 
       // Patient & Scan info
-      const leftX = 50, rightX = 300, startY = doc.y + 20;
-      doc.fontSize(14).text("Patient Details", leftX, startY, { underline: true });
-      doc.fontSize(14).text("Scan Information", rightX, startY, { underline: true });
+      const leftX = 50,
+        rightX = 300,
+        startY = doc.y + 20;
+      doc
+        .fontSize(14)
+        .text("Patient Details", leftX, startY, { underline: true });
+      doc
+        .fontSize(14)
+        .text("Scan Information", rightX, startY, { underline: true });
 
       const y2 = doc.y + 5;
       doc.fontSize(12).text(`Name: ${patient.name}`, leftX, y2);
@@ -163,39 +228,44 @@ async function generatePdf({
       doc.text(`Uploaded By: Dr. ${doctor.name}`, rightX);
 
       // AI Analysis Table
-  doc.moveDown(6);
-doc.fontSize(14).text("AI Analysis Result", 50, doc.y, { underline: true });
-doc.moveDown(0.8);
+      doc.moveDown(6);
+      doc
+        .fontSize(14)
+        .text("AI Analysis Result", 50, doc.y, { underline: true });
+      doc.moveDown(0.8);
 
-// ---- Table Headers ----
-const tableTop = doc.y;
-doc.fontSize(12).text("Scan Name", 50, tableTop);
-doc.text("Result", 250, tableTop); // adjusted X
-doc.text("Date", 400, tableTop);   // adjusted X
+      // ---- Table Headers ----
+      const tableTop = doc.y;
+      doc.fontSize(12).text("Scan Name", 50, tableTop);
+      doc.text("Result", 250, tableTop); // adjusted X
+      doc.text("Date", 400, tableTop); // adjusted X
 
-doc.moveDown(0.5);
+      doc.moveDown(0.5);
 
-// ---- Divider line ----
-doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-doc.moveDown(0.5);
+      // ---- Divider line ----
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+      doc.moveDown(0.5);
 
-// ---- Table row ----
-const rowY = doc.y;
-doc.fontSize(12).text("Brain MRI", 50, rowY);
-doc.text(label, 250, rowY);
-doc.text(new Date().toLocaleDateString(), 400, rowY);
+      // ---- Table row ----
+      const rowY = doc.y;
+      doc.fontSize(12).text("Brain MRI", 50, rowY);
+      doc.text(label, 250, rowY);
+      doc.text(new Date().toLocaleDateString(), 400, rowY);
 
-doc.moveDown(2);
+      doc.moveDown(2);
       doc.fontSize(14).text("Doctor Feedback", 50, doc.y, { underline: true });
       doc.moveDown(0.5);
-      doc.fontSize(12).text(
-        doctorFeedback ? doctorFeedback : "Not submitted yet",
-        { align: "left" }
-      );
+      doc
+        .fontSize(12)
+        .text(doctorFeedback ? doctorFeedback : "Not submitted yet", {
+          align: "left",
+        });
 
       // PAGE 2: MRI
       doc.addPage();
-      doc.fontSize(16).text("Original MRI Image", { align: "center", underline: true });
+      doc
+        .fontSize(16)
+        .text("Original MRI Image", { align: "center", underline: true });
       doc.moveDown(1);
       if (fs.existsSync(imagePath)) {
         doc.image(imagePath, { fit: [480, 480], align: "center" });
@@ -204,7 +274,6 @@ doc.moveDown(2);
       doc.end();
       stream.on("finish", resolve);
       stream.on("error", reject);
-
     } catch (err) {
       reject(err);
     }
