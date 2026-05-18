@@ -22,49 +22,51 @@ export default function AdminLogin() {
         password: password,
       });
 
-      // 🔥 DEBUG: show backend response
       console.log("LOGIN RESPONSE:", res.data);
 
-      // ❌ SAFETY CHECK (prevents silent null token issues)
       if (!res.data || !res.data.token) {
-        console.error("NO TOKEN RETURNED FROM BACKEND:", res.data);
-        setError("Login failed: no token received from server");
+        setError("Login failed: no token received");
         return;
       }
 
-      // ✅ STORE TOKEN CORRECTLY FOR BOTH API AND ADMIN ROUTES
-      localStorage.setItem("token", res.data.token);
+      // ✅ CLEAN STORAGE (ONLY ONE STANDARD)
       localStorage.setItem("adminToken", res.data.token);
-      localStorage.setItem("role", res.data.role);
-      localStorage.setItem("name", res.data.name);
+      localStorage.setItem("adminRole", res.data.role);
+      localStorage.setItem("adminName", res.data.name || "");
 
-      console.log("TOKEN SAVED:", localStorage.getItem("token"));
-      console.log("ADMIN TOKEN SAVED:", localStorage.getItem("adminToken"));
+      console.log("ROLE SAVED:", localStorage.getItem("adminRole"));
 
-      // ✅ Role-based redirection
-      if (res.data.role === "doctorAdmin") navigate("/doctor-admin");
-      else if (res.data.role === "patientAdmin") navigate("/patient-admin");
-      //else if (res.data.role === "departmentAdmin") navigate("/dept-admin");
-      else if (res.data.role === "departmentAdmin") navigate("/department"); 
-      else if (res.data.role === "superAdmin") navigate("/super");
-      else navigate("/adminLogin");
+      // ✅ ROLE REDIRECT
+      switch (res.data.role) {
+        case "doctorAdmin":
+          navigate("/doctor-admin");
+          break;
 
+        case "patientAdmin":
+          navigate("/patient-admin");
+          break;
+
+        case "departmentAdmin":
+          navigate("/department-admin");
+          break;
+
+        case "superAdmin":
+          navigate("/super");
+          break;
+
+        default:
+          navigate("/adminLogin");
+      }
     } catch (err) {
-      console.error("Login error FULL:", err);
-      console.error("Backend response:", err.response?.data);
-
-      setError(
-        err.response?.data?.message ||
-        "Login failed. Please try again."
-      );
+      console.error(err);
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
     <div className="login-page d-flex align-items-center justify-content-center">
       <div className="login-container shadow-lg row w-100">
-
-        {/* Left Image Section */}
+        {/* LEFT IMAGE */}
         <div className="col-md-6 image-section">
           <a href="/dash">
             <img
@@ -76,30 +78,26 @@ export default function AdminLogin() {
           </a>
         </div>
 
-        {/* Right Form Section */}
+        {/* RIGHT FORM */}
         <div className="col-md-6 form-section p-5">
           <h2 className="text-teal mb-4 text-center">Admin Login</h2>
 
           {error && <div className="alert alert-danger">{error}</div>}
 
           <form onSubmit={handleLogin}>
-
-            {/* Admin ID */}
             <div className="mb-3">
-              <label className="form-label">Admin ID</label>
+              <label>Admin ID</label>
               <input
                 type="number"
                 className="form-control"
                 value={id}
                 onChange={(e) => setId(e.target.value)}
-                placeholder="Enter Admin ID"
                 required
               />
             </div>
 
-            {/* Password */}
             <div className="mb-3">
-              <label className="form-label">Password</label>
+              <label>Password</label>
 
               <div className="password-wrapper">
                 <input
@@ -107,7 +105,6 @@ export default function AdminLogin() {
                   className="form-control"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter Password"
                   required
                 />
 
@@ -121,16 +118,13 @@ export default function AdminLogin() {
               </div>
             </div>
 
-            {/* Submit */}
-            <button type="submit" className="btn btn-teal w-100 mt-3">
+            <button type="submit" className="btn btn-teal w-100">
               Login
             </button>
-            <div className="text-center mt-3">
-              <Link to="/admin-forgot-password" className="text-decoration-none">
-                Forgot Password?
-              </Link>
-            </div>
 
+            <div className="text-center mt-3">
+              <Link to="/admin-forgot-password">Forgot Password?</Link>
+            </div>
           </form>
         </div>
       </div>
