@@ -35,7 +35,7 @@ function Appointment() {
 
         // ✅ FILTER: only active & verified doctors
         const filteredDoctors = doctorsList.filter(
-          (doc) => doc.active === true && doc.isVerified === true
+          (doc) => doc.active === true && doc.isVerified === true,
         );
 
         setDoctors(filteredDoctors);
@@ -54,9 +54,9 @@ function Appointment() {
 
       try {
         const res = await fetch(
-          `http://localhost:5000/api/appointments?doctorId=${
+          `http://localhost:5000/api/appointments/search?doctorId=${
             formData.doctorId
-          }&date=${format(formData.date, "yyyy-MM-dd")}`
+          }&date=${format(formData.date, "yyyy-MM-dd")}`,
         );
         const data = await res.json();
         console.log("Appointments API response:", data);
@@ -93,7 +93,7 @@ function Appointment() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       const result = await response.json();
@@ -125,7 +125,7 @@ function Appointment() {
 
     const formattedDate = format(date, "yyyy-MM-dd");
     return !selectedDoctor.leaveDays.some(
-      (leave) => leave.date === formattedDate
+      (leave) => leave.date === formattedDate,
     );
   };
 
@@ -201,7 +201,7 @@ function Appointment() {
                       selectedDoctor &&
                       Array.isArray(selectedDoctor.leaveDays) &&
                       selectedDoctor.leaveDays.some(
-                        (leave) => leave.date === format(date, "yyyy-MM-dd")
+                        (leave) => leave.date === format(date, "yyyy-MM-dd"),
                       )
                     ) {
                       return "leave-day";
@@ -226,7 +226,7 @@ function Appointment() {
                   <option value="">-- Choose Time --</option>
                   {generateTimeSlots(
                     selectedDoctor?.workingHours?.start || "08:00",
-                    selectedDoctor?.workingHours?.end || "14:00"
+                    selectedDoctor?.workingHours?.end || "14:00",
                   ).map((t, idx) => {
                     const isBooked = bookedSlots.includes(t);
                     return (

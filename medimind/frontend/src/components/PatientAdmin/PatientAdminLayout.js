@@ -131,12 +131,6 @@ function PatientAdminLayout() {
           {/* NAV LINKS */}
           <ul className="nav flex-column">
             <li className="nav-item">
-              <Link to="/patient-admin" className="nav-link">
-                Dashboard
-              </Link>
-            </li>
-
-            <li className="nav-item">
               <Link to="/patient-admin/patients" className="nav-link">
                 Manage Patients
               </Link>
