@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import coverimage from "../images/cover.png";
 import maleProfile from "../images/male.png";
@@ -56,6 +57,27 @@ useEffect(() => {
   fetchData();
 }, []);
 
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.hash) return;
+
+    const sectionId = location.hash.replace("#", "");
+    let attempts = 0;
+    const scrollToSection = () => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      attempts += 1;
+      if (attempts < 12) {
+        setTimeout(scrollToSection, 150);
+      }
+    };
+
+    scrollToSection();
+  }, [location.hash]);
 
 
   const pieData = resourceSummary
@@ -67,19 +89,18 @@ useEffect(() => {
       ]
     : [];
 
+  const verifiedDoctors = doctors.filter((doc) => doc.isVerified);
+
   const barData = departments.map((dept) => {
-    const count = doctors.filter((d) => d.department === dept.name).length;
+    const count = verifiedDoctors.filter((d) => d.department === dept.name).length;
     return { name: dept.name, doctors: count };
   });
 
   const stats = {
-    doctors: doctors.length,
+    doctors: verifiedDoctors.length,
     departments: departments.length,
-    patients: 5000,
-    years: 25,
-    rooms: 40,
-    staff: 120,
-    ambulances: 5,
+    patients: 200,
+    years: 50,
   };
 
   const PIE_COLORS = [
@@ -143,7 +164,7 @@ useEffect(() => {
             </div>
             <div className="stat-card">
               <div className="stat-value">{stats.years}+</div>
-              <div className="stat-label">Years Experience</div>
+              <div className="stat-label">Years Of Excellence</div>
             </div>
           </div>
         </div>
@@ -216,7 +237,7 @@ useEffect(() => {
           <h2 className="section-title">Our Departments</h2>
           <div className="cards-grid">
             {departments.map((dept) => {
-              const doctorCount = doctors.filter((d) => d.department === dept.name).length;
+              const doctorCount = verifiedDoctors.filter((d) => d.department === dept.name).length;
               return (
                 <div key={dept._id || dept.name} className="info-card">
                   <div className="info-icon">{dept.name.charAt(0)}</div>
@@ -247,7 +268,7 @@ useEffect(() => {
             <p className="text-center text-gray-600">Loading doctors...</p>
           ) : (
             <div className="cards-grid">
-              {doctors.map((doc) => (
+              {verifiedDoctors.map((doc) => (
   <div key={doc._id || doc.email || doc.name} className="doctor-card">
     <img
       src={doc.gender === "female" ? femaleProfile : maleProfile}
@@ -267,24 +288,7 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="py-12 md:py-16 bg-teal-50">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="section-title">What Our Patients Say</h2>
-          <div className="testimonial-list">
-            <blockquote className="testimonial">
-              “Amazing care and quick response! Highly recommend.” —{" "}
-              <strong>Fatima S.</strong>
-            </blockquote>
-            <blockquote className="testimonial">
-              “The doctors are professional and kind. Great experience.” —{" "}
-              <strong>Ahmed R.</strong>
-            </blockquote>
-          </div>
-        </div>
-      </section>
-
-      {/* CONTACT */}
+               {/* CONTACT */}
       <section id="contact" className="py-12 md:py-16 bg-white text-center">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="section-title">Contact Us</h2>

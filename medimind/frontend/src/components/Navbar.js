@@ -61,11 +61,15 @@ function Navbar() {
     if (userType === "patient") return "/PatientDashboard";
 
     if (userType === "admin") {
-      const adminRole = localStorage.getItem("adminRole");
+      const adminRole =
+        localStorage.getItem("adminRole") ||
+        localStorage.getItem("role") ||
+        user?.role ||
+        "";
 
       if (adminRole === "doctorAdmin") return "/doctor-admin";
       if (adminRole === "patientAdmin") return "/patient-admin";
-      if (adminRole === "departmentAdmin") return "/dept-admin";
+      if (adminRole === "departmentAdmin" || adminRole === "deptAdmin") return "/dept-admin";
       if (adminRole === "superAdmin") return "/super";
 
       return "/";
@@ -76,19 +80,13 @@ function Navbar() {
 
   // ✅ FIXED SCROLL LOGIC (THIS IS THE IMPORTANT PART)
   const goToSection = (id) => {
-    if (location.pathname !== "/dash") {
-      // go home first, then scroll
-      navigate("/dash");
+    const target = { pathname: "/dash", hash: `#${id}` };
 
-      setTimeout(() => {
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: "smooth" });
-      }, 300);
-
+    if (location.pathname !== "/dash" || location.hash !== `#${id}`) {
+      navigate(target);
       return;
     }
 
-    // already on homepage
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
