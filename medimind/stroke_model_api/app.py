@@ -8,7 +8,6 @@ import cv2
 import numpy as np
 import uuid
 import os
-from PIL import Image
 
 app = Flask(__name__)
 CORS(app)
@@ -19,32 +18,43 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 IMG_SIZE = 224
 CLASS_NAMES = ["Haemorrhagic", "Ischemic", "Normal"]
 CLASS_MAP = {0: "Haemorrhagic", 1: "Ischemic", 2: "Normal"}
+IMAGENET_MEAN = [0.485, 0.456, 0.406]
+IMAGENET_STD = [0.229, 0.224, 0.225]
+
+best_hp = {
+    "lr": 0.0002998372247193154,
+    "dropout_1": 0.546470458309974,
+    "dropout_2": 0.34044600469728353,
+    "weight_decay": 0.03540654816402432,
+    "label_smoothing": 0.004116898859160489,
+    "n_unfreeze": 5
+}
+
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "best_model (2).pth")
 
 # ============ BUILD MODEL ARCHITECTURE (matches training) ============
 def build_inference_model(num_classes=3):
     """
     Reconstructs the exact model architecture used in training:
-    - GhostNet backbone (frozen)
-    - Classifier head with dropout
+    - GhostNet backbone
+    - Classifier head with the same dropout hyperparameters
     """
     ghost = timm.create_model('ghostnet_100', pretrained=False, num_classes=0)
     
-    # Detect feature size dynamically
     ghost.eval()
     with torch.no_grad():
         dummy = torch.zeros(1, 3, IMG_SIZE, IMG_SIZE).to(device)
-        out_f = ghost(dummy).shape[1]  # Should be 960
+        out_f = ghost(dummy).shape[1]
     
-    # Build classifier head
     classifier = nn.Sequential(
         nn.Linear(out_f, 512),
         nn.BatchNorm1d(512),
         nn.SiLU(),
-        nn.Dropout(p=0.4),
+        nn.Dropout(p=best_hp["dropout_1"]),
         nn.Linear(512, 256),
         nn.BatchNorm1d(256),
         nn.SiLU(),
-        nn.Dropout(p=0.3),
+        nn.Dropout(p=best_hp["dropout_2"]),
         nn.Linear(256, num_classes)
     )
     
@@ -63,49 +73,42 @@ def build_inference_model(num_classes=3):
 # Load the trained model
 print("📦 Loading trained model...")
 model = build_inference_model(num_classes=3)
-model.load_state_dict(torch.load("model.pth", map_location=device))
+model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.to(device).eval()
 print("✅ Model loaded successfully")
 
 # ============ PREPROCESSING TRANSFORMS ============
 val_transform = T.Compose([
-    T.ToPILImage(),
-    T.Resize((IMG_SIZE, IMG_SIZE)),
     T.ToTensor(),
-    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    T.Normalize(IMAGENET_MEAN, IMAGENET_STD)
 ])
 
 # ============ UTILITY FUNCTIONS ============
 def gaussian_bilateral(img):
     """
     Gaussian-Bilateral filter for noise reduction + edge preservation
-    (same as used in training)
     """
     blurred = cv2.GaussianBlur(img, (5, 5), sigmaX=1.0)
     filtered = cv2.bilateralFilter(blurred, d=9, sigmaColor=75, sigmaSpace=75)
     return filtered
 
+
 def load_and_preprocess_image(image_path):
     """
-    Load and preprocess image using same pipeline as training
+    Load and preprocess image using the same pipeline from the test script.
     """
     img = cv2.imread(image_path)
-    
     if img is None:
         raise ValueError(f"Could not read image: {image_path}")
-    
-    # Convert to RGB
+
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    
-    # Resize to IMG_SIZE
     img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
-    
-    # Apply Gaussian-Bilateral filter (same as training)
     img = gaussian_bilateral(img)
-    
-    # Apply validation transform
+
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    img = np.stack([clahe.apply(img[:, :, c]) for c in range(3)], axis=2)
+
     img_tensor = val_transform(img).unsqueeze(0).to(device)
-    
     return img_tensor
 
 # ============ API ENDPOINT ============
@@ -179,7 +182,7 @@ if __name__ == "__main__":
     print("🚀 Stroke Detection API")
     print(f"   Device: {device}")
     print(f"   Classes: {CLASS_NAMES}")
-    print(f"   Model: model.pth")
+    print(f"   Model: {MODEL_PATH}")
     print("\n✅ Server starting on http://0.0.0.0:5000")
     print("   Endpoint: POST /predict-stroke")
     app.run(host="0.0.0.0", port=5000, debug=False)
