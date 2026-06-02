@@ -11,7 +11,7 @@ yarn-error.log*
 # dotenv environment files
 .env
 .env.*
-!.env.example  # keep a template for env variables
+!.env.example
 
 # Test coverage
 /coverage/
@@ -26,6 +26,14 @@ __pycache__/
 
 # TensorFlow / Keras models
 *.h5
+
+# PyTorch / Deep Learning models
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.pb
+*.weights
 
 # OS / Misc files
 .DS_Store
